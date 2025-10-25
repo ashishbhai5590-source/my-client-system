@@ -5,14 +5,6 @@
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
         :root{--primary-color:#0d6efd;--success-color:#198754;--danger-color:#dc3545} body{font-family:-apple-system,sans-serif;margin:0;background-color:#e9ebee}
-        /* ▼▼▼ Skeleton Loader CSS ▼▼▼ */
-        .skeleton { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        .skeleton-image { width: 100%; height: 350px; background-color: #e0e0e0; }
-        .skeleton-text { height: 20px; width: 80%; background-color: #e0e0e0; border-radius: 4px; margin-bottom: 10px; }
-        .skeleton-price { height: 28px; width: 40%; background-color: #e0e0e0; border-radius: 4px; }
-        .skeleton-box { height: 50px; background-color: #e0e0e0; border-radius: 8px; margin-top: 15px; }
-        /* ▲▲▲ Skeleton Loader CSS ▲▲▲ */
         .announcement-bar{background:#212529;color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:700}
         .container{background:#fff;margin:10px;border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,.1);overflow:hidden}
         .product-gallery{position:relative} .swiper-container{width:100%;height:350px} .swiper-slide img{width:100%;height:100%;object-fit:cover} .swiper-pagination-bullet-active{background:var(--primary-color)!important}
@@ -27,22 +19,7 @@
     </style>
 </head>
 <body>
-    <!-- ▼▼▼ Skeleton Loader HTML ▼▼▼ -->
-    <div id="loading">
-        <div class="announcement-bar skeleton" style="height: 40px;"></div>
-        <div class="container">
-            <div class="skeleton-image skeleton"></div>
-            <div class="product-details">
-                <div class="skeleton-text skeleton"></div>
-                <div class="skeleton-text skeleton" style="width: 60%;"></div>
-                <div class="skeleton-price skeleton"></div>
-                <div class="skeleton-box skeleton"></div>
-                <div class="skeleton-box skeleton"></div>
-            </div>
-        </div>
-    </div>
-    <!-- ▲▲▲ Skeleton Loader HTML ▲▲▲ -->
-    
+    <div id="loading" style="text-align:center;padding:50px;font-size:20px;">स्टोर लोड हो रहा है...</div>
     <div id="content" style="display:none;">
         <div id="announcement-bar" class="announcement-bar"></div><div class="container"><div class="product-gallery"><div class="swiper-container"><div class="swiper-wrapper" id="image-slider"></div><div class="swiper-pagination"></div></div></div><div class="product-details">
         <h1 class="product-title" id="product-name"></h1><p id="product-reviews"></p><div class="price-box"><span class="price" id="current-price"></span> <span class="old-price" id="old-price"></span><span class="discount" id="discount"></span></div>
@@ -53,7 +30,7 @@
     <div id="notification" class="notification"></div>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script><script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script><script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        const firebaseConfig = {
+          const firebaseConfig = {
     apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
     authDomain: "my-client-stores.firebaseapp.com",
     databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
@@ -63,27 +40,33 @@
     appId: "1:658459339073:web:37fa1b05e06c09c14119c0",
     measurementId: "G-N8MVEE3B19"
   };
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const params = new URLSearchParams(window.location.search);
         const clientId = params.get('clientId'); const productId = params.get('productId');
         let productData;
 
-        function showNotification(message, isSuccess = true) { /* ... (पहले जैसा) ... */ }
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--danger-color)';
+            notification.style.display = 'block';
+            setTimeout(() => { notification.style.display = 'none'; }, 3000);
+        }
 
-        if(clientId&&productId){database.ref('clients/'+clientId).once('value',clientSnapshot=>{const client=clientSnapshot.val();if(!client||client.status==='blocked'){document.getElementById('loading').innerHTML='<h1 style="text-align:center;padding:50px;">यह स्टोर अस्थायी रूप से बंद है।</h1>';return}
-        database.ref(`products/${clientId}/${productId}`).once('value').then((snapshot)=>{if(!snapshot.exists()){document.getElementById('loading').innerHTML='<h1 style="text-align:center;padding:50px;">प्रोडक्ट नहीं मिला।</h1>';return}
-        productData=snapshot.val();if(productData.expiryDate&&new Date(productData.expiryDate)<new Date()){document.getElementById('loading').innerHTML='<h1 style="text-align:center;padding:50px;">यह ऑफर समाप्त हो चुका है।</h1>';return}
+        if(clientId&&productId){database.ref('clients/'+clientId).once('value',clientSnapshot=>{const client=clientSnapshot.val();if(!client||client.status==='blocked'){document.getElementById('loading').innerText='यह स्टोर अस्थायी रूप से बंद है।';return}
+        database.ref(`products/${clientId}/${productId}`).once('value').then((snapshot)=>{if(!snapshot.exists()){document.getElementById('loading').innerText='प्रोडक्ट नहीं मिला।';return}
+        productData=snapshot.val();if(productData.expiryDate&&new Date(productData.expiryDate)<new Date()){document.getElementById('loading').innerText='यह ऑफर समाप्त हो चुका है।';return}
         document.title=productData.name;document.getElementById('product-name').innerText=productData.name;document.getElementById('product-reviews').innerText=productData.reviewText;document.getElementById('current-price').innerText=`₹${productData.price}`;document.getElementById('old-price').innerText=`₹${productData.oldPrice}`;
-        const discount=Math.round(((productData.oldPrice-productData.price)/productData.oldPrice)*100);if(discount>0)document.getElementById('discount').innerText=`${discount}% OFF`;
+        const discount = Math.round(((productData.oldPrice - productData.price) / productData.oldPrice) * 100);
+        if(discount > 0) document.getElementById('discount').innerText = `${discount}% OFF`;
         document.getElementById('image-slider').innerHTML=productData.images.map(url=>`<div class="swiper-slide"><img src="${url}"></div>`).join('');document.getElementById('features-list').innerHTML=productData.features.map(f=>`<p>✅ ${f}</p>`).join('');document.getElementById('announcement-bar').innerText=productData.freeDelivery?'🚚 आज सभी ऑर्डर्स पर शिपिंग बिल्कुल मुफ़्त!':'एक विश्वसनीय स्टोर';
         const footer=document.getElementById('footer-links');if(productData.privacyPolicy)footer.innerHTML+=`<a href="#" onclick="showPolicy('Privacy Policy','privacyPolicy')">Privacy Policy</a>`;if(productData.refundPolicy)footer.innerHTML+=`<a href="#" onclick="showPolicy('Refund Policy','refundPolicy')">Refund Policy</a>`;if(productData.aboutUs)footer.innerHTML+=`<a href="#" onclick="showPolicy('About Us','aboutUs')">About Us</a>`;if(productData.contactUs)footer.innerHTML+=`<a href="#" onclick="showPolicy('Contact Us','contactUs')">Contact Us</a>`;
         new Swiper('.swiper-container',{loop:true,pagination:{el:'.swiper-pagination',clickable:true}});
         if(client.razorpayKeyId==='COD'){document.getElementById('online-payment-section').style.display='none'}else{const rzp=new Razorpay({key:client.razorpayKeyId,amount:productData.price*100,currency:"INR",name:productData.name,handler:(res)=>{const phone=prompt("पेमेंट सफल! कृपया अपना मोबाइल नंबर कन्फर्म करें:","");if(phone)saveOrder(phone,'Online Paid',res.razorpay_payment_id)}});document.getElementById('online-pay-btn').onclick=(e)=>{rzp.open();e.preventDefault()}};
         const offerEndDate=new Date().getTime()+(24*60*60*1000);setInterval(()=>{const d=offerEndDate-new Date().getTime();document.getElementById('hours').innerText=Math.floor((d%(1000*60*60*24))/(1000*60*60)).toString().padStart(2,'0');document.getElementById('mins').innerText=Math.floor((d%(1000*60*60))/(1000*60)).toString().padStart(2,'0');document.getElementById('secs').innerText=Math.floor((d%(1000*60))/1000).toString().padStart(2,'0')},1000);
-        document.getElementById('loading').style.display='none';document.getElementById('content').style.display='block'})})}else{document.getElementById('loading').innerHTML='<h1 style="text-align:center;padding:50px;">गलत लिंक।</h1>'}
-        
-        // बाकी के सभी फंक्शन (showNotification, saveOrder, showPolicy, closeModal) पहले जैसे ही रहेंगे।
-        function showNotification(message, isSuccess = true) { const notification = document.getElementById('notification'); notification.textContent = message; notification.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--danger-color)'; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 3000); }
+        document.getElementById('loading').style.display='none';document.getElementById('content').style.display='block'})})}else{document.getElementById('loading').innerText='गलत लिंक।'}
+        document.getElementById('codForm').addEventListener('submit',(e)=>{e.preventDefault();saveOrder(document.getElementById('phone').value,'COD')});
         function saveOrder(phone,type,paymentId=null){const orderData={customer_name:document.getElementById('name').value,customer_address:document.getElementById('address').value,customer_phone:phone,type:type,paymentId:paymentId};database.ref(`orders/${clientId}/${productId}/${Date.now()}`).set(orderData);database.ref(`tracking/${phone}`).set({status:'Processing'});showNotification('🎉 धन्यवाद! आपका ऑर्डर सफलतापूर्वक प्लेस हो गया है।');if(type==='COD')document.getElementById('codForm').reset()}
         function showPolicy(title,key){document.getElementById('policy-title').innerText=title;document.getElementById('policy-text').innerText=productData[key];document.getElementById('policyModal').style.display='block'}
         function closeModal(){document.getElementById('policyModal').style.display='none'}
