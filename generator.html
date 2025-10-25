@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>स्टोर जेनरेटर</title>
+    <style>body{font-family:-apple-system,sans-serif;background-color:#f0f2f5;padding:20px} .container{max-width:800px;margin:auto;background:#fff;padding:30px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,.1)} h1,h2,h3{text-align:center} input,textarea,button,select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;font-size:16px;margin-bottom:10px} .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px} textarea{grid-column:1/-1} #links-output{margin-top:25px;background:#e9ecef;padding:20px;border-radius:8px;display:none} #links-output input{background:#fff;cursor:pointer;margin-top:5px}</style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="client-name-header">🚀 नया स्टोर जेनरेट करें</h1>
+        <form id="product-form">
+            <h3>प्रोडक्ट की जानकारी</h3><div class="form-grid"><input type="text" id="product-name" placeholder="प्रोडक्ट का नाम" required><input type="text" id="review-text" placeholder="रिव्यू टेक्स्ट" required><input type="number" id="current-price" placeholder="अभी की कीमत" required><input type="number" id="old-price" placeholder="पुरानी कीमत" required></div>
+            <textarea id="image-urls" placeholder="हर लाइन में एक इमेज URL" rows="3" required></textarea><textarea id="features" placeholder="हर लाइन में एक फीचर" rows="3" required></textarea>
+            <h3>सेटिंग्स और ऑफर्स</h3><div class="form-grid"><label>लिंक Expiry Date: <input type="date" id="expiry-date"></label><label>फ्री डिलीवरी ऑफर: <select id="free-delivery"><option value="true">On</option><option value="false">Off</option></select></label></div>
+            <h3>कानूनी पेज (Policies)</h3>
+            <textarea id="privacy-policy" placeholder="Privacy Policy का पूरा टेक्स्ट यहाँ डालें" rows="4"></textarea><textarea id="refund-policy" placeholder="Refund Policy का पूरा टेक्स्ट यहाँ डालें" rows="4"></textarea>
+            <textarea id="about-us" placeholder="About Us का पूरा टेक्स्ट यहाँ डालें" rows="4"></textarea><textarea id="contact-us" placeholder="Contact Us का पूरा टेक्स्ट यहाँ डालें (जैसे - Email: abc@xyz.com)" rows="4"></textarea>
+            <button type="submit" style="background:#007bff;color:#fff;border:none">लिंक्स बनाओ</button>
+        </form>
+        <div id="links-output"><h3>✅ लिंक्स तैयार हैं!</h3><label><b>ग्राहक के लिए स्टोर लिंक:</b></label><input type="text" id="store-link" readonly onclick="this.select()"><br><br><label><b>क्लाइंट के लिए एडमिन लिंक:</b></label><input type="text" id="admin-link" readonly onclick="this.select()"></div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+    apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
+    authDomain: "my-client-stores.firebaseapp.com",
+    databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
+    projectId: "my-client-stores",
+    storageBucket: "my-client-stores.firebasestorage.app",
+    messagingSenderId: "658459339073",
+    appId: "1:658459339073:web:37fa1b05e06c09c14119c0",
+    measurementId: "G-N8MVEE3B19"
+  };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const clientId = new URLSearchParams(window.location.search).get('clientId');
+        if(!clientId){document.body.innerHTML='<h1>गलत रास्ता! कृपया सुपर-एडमिन पैनल से आएं।</h1>'}else{database.ref('clients/'+clientId+'/name').once('value',s=>{document.getElementById('client-name-header').innerText=`🚀 ${s.val()} के लिए नया स्टोर`})}
+        document.getElementById('product-form').addEventListener('submit',(e)=>{e.preventDefault();const productRef=database.ref(`products/${clientId}`).push();productRef.set({name:document.getElementById('product-name').value,reviewText:document.getElementById('review-text').value,price:document.getElementById('current-price').value,oldPrice:document.getElementById('old-price').value,images:document.getElementById('image-urls').value.split('\n').filter(u=>u.trim()),features:document.getElementById('features').value.split('\n').filter(f=>f.trim()),expiryDate:document.getElementById('expiry-date').value,freeDelivery:document.getElementById('free-delivery').value==='true',privacyPolicy:document.getElementById('privacy-policy').value,refundPolicy:document.getElementById('refund-policy').value,aboutUs:document.getElementById('about-us').value,contactUs:document.getElementById('contact-us').value,});const baseUrl=window.location.href.replace(/[^/]*$/,'');document.getElementById('store-link').value=`${baseUrl}store.html?clientId=${clientId}&productId=${productRef.key}`;document.getElementById('admin-link').value=`${baseUrl}admin.html?clientId=${clientId}&productId=${productRef.key}`;document.getElementById('links-output').style.display='block'});
+    </script>
+</body>
+</html>

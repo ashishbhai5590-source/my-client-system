@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>सुपर एडमिन पैनल</title>
+    <style>body{font-family:-apple-system,sans-serif;background:#f0f2f5;margin:0;padding:20px} .container{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1)} h1,h2{text-align:center} #login-form,#main-content{display:none} .client-item{display:flex;justify-content:space-between;align-items:center;padding:15px;border-bottom:1px solid #eee;gap:10px} .client-info{flex-grow:1} .client-info span{font-weight:bold;display:block} .client-info small{color:#6c757d} .actions button{margin-left:5px} input,select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;margin-bottom:15px;box-sizing:border-box} button{padding:12px 18px;border:none;border-radius:8px;cursor:pointer;color:#fff} .add-btn{background:#007bff;width:100%} .delete-btn{background:#dc3545} .logout-btn{background:#6c757d;display:block;margin:20px auto}</style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 सुपर एडमिन लॉगिन</h1>
+        <div id="login-form"><input type="email" id="email" placeholder="ईमेल"><input type="password" id="password" placeholder="पासवर्ड"><button class="add-btn" onclick="login()">लॉगिन करें</button></div>
+        <div id="main-content">
+            <h2>👤 क्लाइंट्स मैनेज करें</h2><div id="clients-list"></div><hr>
+            <h2>➕ नया क्लाइंट जोड़ें</h2>
+            <input type="text" id="client-name" placeholder="क्लाइंट का नाम" required>
+            <input type="text" id="client-razorpay-key" placeholder="क्लाइंट की Razorpay Key ID" required>
+            <button class="add-btn" onclick="addClient()">क्लाइंट जोड़ें</button>
+            <button class="logout-btn" onclick="logout()">लॉगआउट</button>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+    apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
+    authDomain: "my-client-stores.firebaseapp.com",
+    databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
+    projectId: "my-client-stores",
+    storageBucket: "my-client-stores.firebasestorage.app",
+    messagingSenderId: "658459339073",
+    appId: "1:658459339073:web:37fa1b05e06c09c14119c0",
+    measurementId: "G-N8MVEE3B19"
+  };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(); const database = firebase.database();
+        auth.onAuthStateChanged(user=>{if(user){document.getElementById('login-form').style.display='none';document.getElementById('main-content').style.display='block';loadClients()}else{document.getElementById('login-form').style.display='block';document.getElementById('main-content').style.display='none'}});
+        function login(){auth.signInWithEmailAndPassword(document.getElementById('email').value,document.getElementById('password').value).catch(e=>alert(e.message))}
+        function logout(){auth.signOut()}
+        function addClient(){const name=document.getElementById('client-name').value;const razorpayKey=document.getElementById('client-razorpay-key').value;if(name&&razorpayKey){database.ref('clients').push({name:name,razorpayKeyId:razorpayKey,status:'active'});document.getElementById('client-name').value='';document.getElementById('client-razorpay-key').value=''}else{alert('कृपया सभी जानकारी भरें।')}}
+        function deleteClient(id){if(confirm('चेतावनी! क्या आप वाकई इस क्लाइंट और उसके सभी स्टोर्स/ऑर्डर्स को हमेशा के लिए हटाना चाहते हैं?')){database.ref('clients/'+id).remove();database.ref('products/'+id).remove();database.ref('orders/'+id).remove()}}
+        function toggleClientStatus(id,currentStatus){const newStatus=currentStatus==='active'?'blocked':'active';database.ref('clients/'+id+'/status').set(newStatus)}
+        function loadClients(){database.ref('clients').on('value',snapshot=>{const list=document.getElementById('clients-list');list.innerHTML='';snapshot.forEach(child=>{const client=child.val();const status=client.status||'active';list.innerHTML+=`<div class="client-item"><div class="client-info"><span>${client.name}</span><small>Status: ${status.toUpperCase()}</small></div><div class="actions"><a href="generator.html?clientId=${child.key}"><button style="background:#28a745">स्टोर बनाएं</button></a><button style="background:${status==='active'?'#ffc107':'#17a2b8'}" onclick="toggleClientStatus('${child.key}','${status}')">${status==='active'?'Block':'Unblock'}</button><button class="delete-btn" onclick="deleteClient('${child.key}')">हटाएं</button></div></div>`})})}
+    </script>
+</body>
+</html>

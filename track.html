@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ऑर्डर ट्रैक करें</title>
+    <style>body{font-family:-apple-system,sans-serif;background-color:#f0f2f5;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:15px;box-sizing:border-box} .track-container{background:#fff;padding:25px;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,.1);text-align:center;width:100%;max-width:500px} h1{font-size:24px} input{width:100%;padding:14px;border:1px solid #ccc;border-radius:8px;font-size:16px;box-sizing:border-box;margin-bottom:15px} button{width:100%;padding:14px;border:none;border-radius:8px;background-color:#007bff;color:#fff;font-size:18px;font-weight:700} #result{margin-top:25px;text-align:left;padding:20px;border-radius:8px;display:none;word-wrap:break-word}</style>
+</head>
+<body>
+    <div class="track-container">
+        <h1>🚚 अपना ऑर्डर ट्रैक करें</h1><input type="tel" id="phoneInput" placeholder="अपना 10 अंकों का मोबाइल नंबर डालें"><button id="trackBtn">ट्रैक करें</button><div id="result"></div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+    apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
+    authDomain: "my-client-stores.firebaseapp.com",
+    databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
+    projectId: "my-client-stores",
+    storageBucket: "my-client-stores.firebasestorage.app",
+    messagingSenderId: "658459339073",
+    appId: "1:658459339073:web:37fa1b05e06c09c14119c0",
+    measurementId: "G-N8MVEE3B19"
+  };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        document.getElementById('trackBtn').onclick=()=>{const phone=document.getElementById('phoneInput').value;if(phone.length<10){alert('सही मोबाइल नंबर डालें।');return}
+        const trackingRef=database.ref(`tracking/${phone}`);trackingRef.once('value',(snapshot)=>{const resultDiv=document.getElementById('result');resultDiv.style.display='block';if(!snapshot.exists()){resultDiv.innerHTML=`<p>😥 इस मोबाइल नंबर से कोई ऑर्डर नहीं मिला।</p>`;return}
+        const data=snapshot.val();if(data.status==='Shipped'){resultDiv.innerHTML=`<p><strong>स्टेटस:</strong> शिप हो गया! 🎉</p><p><strong>कूरियर:</strong> ${data.courier}</p><p><strong>ट्रैकिंग ID:</strong> ${data.trackingId}</p><p><a href="https://www.google.com/search?q=${data.courier}+tracking+${data.trackingId}" target="_blank">यहाँ ट्रैक करें</a></p>`}else{resultDiv.innerHTML=`<p><strong>स्टेटस:</strong> ✅ ऑर्डर कन्फर्म है, जल्द शिप होगा।</p>`}})}
+    </script>
+</body>
+</html>
