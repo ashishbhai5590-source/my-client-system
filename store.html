@@ -5,57 +5,53 @@
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
         :root{--primary-color:#0d6efd;--success-color:#198754;--danger-color:#dc3545} body{font-family:-apple-system,sans-serif;margin:0;background-color:#fff}
-        .skeleton{animation:pulse 1.5s cubic-bezier(0.4,0,0.6,1) infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}} .skeleton-image{width:100%;height:350px;background-color:#e0e0e0} .skeleton-text{height:20px;width:80%;background-color:#e0e0e0;border-radius:4px;margin:15px} .skeleton-price{height:28px;width:40%;background-color:#e0e0e0;border-radius:4px;margin:15px} .skeleton-box{height:50px;background-color:#e0e0e0;border-radius:8px;margin:15px}
+        .skeleton{animation:pulse 1.5s cubic-bezier(0.4,0,0.6,1) infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}} .skeleton-image{width:100%;height:350px;background-color:#e0e0e0} .skeleton-text{height:20px;width:80%;background-color:#e0e0e0;border-radius:4px;margin:15px}
         .announcement-bar{background:#212529;color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:700}
         .container{padding:0 15px}
         .product-gallery{position:relative;margin:10px -15px 0} .swiper-container{width:100%;height:350px} .swiper-slide img{width:100%;height:100%;object-fit:cover} .swiper-pagination{position:absolute!important;bottom:10px!important} .swiper-pagination-bullet-active{background:var(--primary-color)!important}
         .product-details{padding:15px 0} .product-title{font-size:24px;font-weight:700;margin:0} .review-text{color:#6c757d;margin:5px 0 15px}
         .price-box{display:flex;align-items:center;gap:10px;margin-bottom:15px} .price{font-size:28px;color:var(--success-color);font-weight:700} .old-price{text-decoration:line-through;color:#6c757d} .discount{background-color:#ffe0e0;color:var(--danger-color);padding:3px 8px;border-radius:5px;font-weight:700;font-size:14px}
-        .offer-timer{background:#fff3cd;border-radius:8px;padding:15px;text-align:center;margin:20px 0} .countdown{display:flex;justify-content:space-around}
+        .offer-timer{background:#fff3cd;border-radius:12px;padding:20px;text-align:center;margin:20px 0} .offer-timer h4{margin:0 0 15px;font-size:18px} .countdown{display:flex;justify-content:center;gap:10px;text-align:center} .time-box{background:var(--primary-color);color:#fff;padding:15px;border-radius:10px;min-width:70px} .time-box span{display:block;font-size:32px;font-weight:700} .time-box small{font-size:12px}
         .features-list p{display:flex;align-items:center;gap:8px;margin:8px 0} .features-list i{color:var(--success-color)}
-        .order-box{background:#f8f9fa;padding:20px;border-radius:10px;margin-top:20px}
-        .button{width:100%;padding:15px;border:none;border-radius:8px;color:#fff;font-size:18px;font-weight:700;cursor:pointer} .cod-button{background-color:var(--primary-color);margin-bottom:10px} .online-button{background-color:var(--success-color)}
-        .checkout-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:100;animation:fadeIn .3s}
-        .checkout-content{position:absolute;bottom:0;left:0;width:100%;background:#fff;border-radius:15px 15px 0 0;padding:20px;animation:slideUp .3s}
-        .checkout-step{display:none} .checkout-step.active{display:block}
-        .checkout-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px}
-        .progress-bar{display:flex;align-items:center;gap:5px} .progress-step{width:25px;height:25px;border-radius:50%;background:#eee;color:#888;display:flex;align-items:center;justify-content:center;font-weight:700}
-        .progress-step.active{background:var(--primary-color);color:#fff}
+        .buy-now-sticky{position:sticky;bottom:0;background:#fff;padding:15px;box-shadow:0 -4px 15px rgba(0,0,0,.1);z-index:99}
+        .button{width:100%;padding:15px;border:none;border-radius:8px;color:#fff;font-size:18px;font-weight:700;cursor:pointer} .buy-now-btn{background:var(--primary-color)}
+        .checkout-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:100;animation:fadeIn .3s}
+        .checkout-content{height:100%;display:flex;flex-direction:column}
+        .checkout-header{padding:15px;display:flex;align-items:center;border-bottom:1px solid #eee} .progress-bar{display:flex;align-items:center;gap:5px;flex-grow:1} .progress-step{width:25px;height:25px;border-radius:50%;background:#eee;color:#888;display:flex;align-items:center;justify-content:center;font-weight:700} .progress-step.active{background:var(--primary-color);color:#fff}
+        .checkout-body{padding:20px;flex-grow:1} .checkout-step{display:none} .checkout-step.active{display:block}
         input{width:100%;padding:14px;border:1px solid #ced4da;border-radius:8px;font-size:16px;margin-bottom:15px}
-        .footer{text-align:center;padding:20px 15px;font-size:14px;background:#f1f3f5;margin:20px -15px 0} .footer a{color:var(--primary-color);text-decoration:none;margin:0 10px}
-        @keyframes slideUp{from{transform:translateY(100%)}} @keyframes fadeIn{from{opacity:0}}
+        .footer{text-align:center;padding:20px 15px;font-size:14px;background:#f8f9fa;margin-top:20px} .footer a{color:var(--primary-color);text-decoration:none;margin:0 10px}
+        @keyframes fadeIn{from{opacity:0}}
     </style>
 </head>
 <body>
-    <div id="loading"><div class="announcement-bar skeleton" style="height:40px"></div><div style="margin:10px"><div class="skeleton-image skeleton"></div><div style="padding:15px"><div class="skeleton-text skeleton"></div><div class="skeleton-text skeleton" style="width:60%"></div><div class="skeleton-price skeleton"></div><div class="skeleton-box skeleton"></div></div></div></div>
+    <div id="loading"><div class="announcement-bar skeleton" style="height:40px"></div><div style="margin:10px"><div class="skeleton-image skeleton"></div></div></div>
     <div id="content" style="display:none;">
         <div id="announcement-bar" class="announcement-bar"></div><div class="container">
             <div class="product-gallery"><div class="swiper-container"><div class="swiper-wrapper" id="image-slider"></div></div><div class="swiper-pagination"></div></div>
             <div class="product-details">
                 <h1 class="product-title" id="product-name"></h1><p class="review-text" id="product-reviews"></p>
                 <div class="price-box"><span class="price" id="current-price"></span> <span class="old-price" id="old-price"></span><span class="discount" id="discount"></span></div>
-                <div class="offer-timer"><h4>🔥 ऑफर सीमित समय के लिए!</h4><div class="countdown"><div><span id="hours">00</span><small>घंटे</small></div><div><span id="mins">00</span><small>मिनट</small></div><div><span id="secs">00</span><small>सेकंड</small></div></div></div>
+                <div class="offer-timer"><h4>🔥 ऑफर सीमित समय के लिए! जल्दी करें!</h4><div class="countdown"><div class="time-box"><span id="days">00</span><small>दिन</small></div><div class="time-box"><span id="hours">00</span><small>घंटे</small></div><div class="time-box"><span id="mins">00</span><small>मिनट</small></div><div class="time-box"><span id="secs">00</span><small>सेकंड</small></div></div></div>
                 <div id="features-list" class="features-list"></div>
-                <div class="order-box">
-                    <p style="text-align:center;font-weight:bold;font-size:18px;margin-top:0">अभी ऑर्डर करने के लिए क्लिक करें</p>
-                    <button class="button cod-button" onclick="openCheckout('COD')">🛒 कैश ऑन डिलीवरी (COD)</button>
-                    <div id="online-payment-section" style="text-align:center"><div style="margin:10px 0;font-weight:700;color:#888">या</div><button type="button" class="button online-button" onclick="openCheckout('ONLINE')">💳 ऑनलाइन पेमेंट करें</button></div>
-                </div>
             </div>
         </div>
         <div class="footer" id="footer-links"></div>
+        <div class="buy-now-sticky" id="buy-now-container"><button class="button buy-now-btn" onclick="openCheckout()">🛒 अभी खरीदें</button></div>
     </div>
     <div class="checkout-modal" id="checkout-modal">
         <div class="checkout-content">
-            <div class="checkout-header"><div class="progress-bar"><div id="step-dot-1" class="progress-step active">1</div><div id="step-dot-2" class="progress-step">2</div><div id="step-dot-3" class="progress-step">3</div></div><h3 id="checkout-title">मोबाइल नंबर</h3><button onclick="closeCheckout()" style="background:none;border:none;font-size:24px;cursor:pointer">&times;</button></div>
-            <div id="step1" class="checkout-step active"><input type="tel" id="phone" placeholder="अपना 10 अंकों का मोबाइल नंबर डालें" required><button class="button" style="background:var(--primary-color)" onclick="goToStep(2)">आगे बढ़ें</button></div>
-            <div id="step2" class="checkout-step"><input type="text" id="name" placeholder="पूरा नाम" required><input type="text" id="address" placeholder="पूरा पता (मकान, गली, शहर)" required><input type="text" id="pincode" placeholder="पिनकोड" required><button class="button" style="background:var(--primary-color)" onclick="goToStep(3)">आगे बढ़ें</button></div>
-            <div id="step3" class="checkout-step"><h3 style="text-align:center">पेमेंट कन्फर्म करें</h3><button class="button" id="final-submit-btn" style="background:var(--success-color)">ऑर्डर प्लेस करें</button></div>
+            <div class="checkout-header"><button onclick="closeCheckout()" style="background:none;border:none;font-size:24px;cursor:pointer;margin-right:15px;">&larr;</button><div class="progress-bar"><div id="step-dot-1" class="progress-step active">1</div><div id="step-dot-2" class="progress-step">2</div><div id="step-dot-3" class="progress-step">3</div></div></div>
+            <div class="checkout-body">
+                <div id="step1" class="checkout-step active"><h2> अपना मोबाइल नंबर बताएं</h2><input type="tel" id="phone" placeholder="10 अंकों का मोबाइल नंबर डालें" required><button class="button buy-now-btn" onclick="goToStep(2)">आगे बढ़ें</button></div>
+                <div id="step2" class="checkout-step"><h2> डिलिवरी एड्रेस</h2><input type="text" id="name" placeholder="पूरा नाम" required><input type="text" id="address" placeholder="पूरा पता (मकान, गली, शहर)" required><input type="text" id="pincode" placeholder="पिनकोड" required><button class="button buy-now-btn" onclick="goToStep(3)">आगे बढ़ें</button></div>
+                <div id="step3" class="checkout-step"><h2> पेमेंट करें</h2><button class="button" style="background:var(--primary-color);margin-bottom:10px" onclick="submitOrder('COD')">कैश ऑन डिलीवरी (COD)</button><div id="online-payment-section" style="text-align:center"><div style="margin:10px 0;font-weight:700;color:#888">या</div><button class="button" style="background:var(--success-color)" id="online-pay-btn">ऑनलाइन पेमेंट करें</button></div></div>
+            </div>
         </div>
     </div>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script><script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script><script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-    const firebaseConfig = {
+   const firebaseConfig = {
     apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
     authDomain: "my-client-stores.firebaseapp.com",
     databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
@@ -69,21 +65,13 @@
         const database = firebase.database();
         const params = new URLSearchParams(window.location.search);
         const clientId = params.get('clientId'); const productId = params.get('productId');
-        let productData, clientData, rzp, checkoutMethod;
+        let productData, clientData, rzp;
 
-        function openCheckout(method){ checkoutMethod = method; document.getElementById('checkout-modal').style.display='block'; }
+        function openCheckout(){ document.getElementById('checkout-modal').style.display='block'; }
         function closeCheckout(){ document.getElementById('checkout-modal').style.display='none'; }
-        function goToStep(stepNum){
-            if(stepNum === 2 && document.getElementById('phone').value.length < 10) { alert('सही मोबाइल नंबर डालें।'); return; }
-            if(stepNum === 3 && (document.getElementById('name').value === '' || document.getElementById('address').value === '' || document.getElementById('pincode').value === '')) { alert('पूरी एड्रेस जानकारी भरें।'); return; }
-            document.querySelectorAll('.checkout-step').forEach(s => s.classList.remove('active'));
-            document.getElementById(`step${stepNum}`).classList.add('active');
-            for(let i=1; i<=3; i++) document.getElementById(`step-dot-${i}`).classList.toggle('active', i <= stepNum);
-            if(stepNum === 2) document.getElementById('checkout-title').innerText = 'डिलिवरी एड्रेस';
-            if(stepNum === 3) document.getElementById('checkout-title').innerText = 'पेमेंट';
-        }
+        function goToStep(stepNum){ if(stepNum === 2 && document.getElementById('phone').value.length < 10) { alert('सही मोबाइल नंबर डालें।'); return; } if(stepNum === 3 && (document.getElementById('name').value === '' || document.getElementById('address').value === '' || document.getElementById('pincode').value === '')) { alert('पूरी एड्रेस जानकारी भरें।'); return; } document.querySelectorAll('.checkout-step').forEach(s => s.classList.remove('active')); document.getElementById(`step${stepNum}`).classList.add('active'); for(let i=1; i<=3; i++) document.getElementById(`step-dot-${i}`).classList.toggle('active', i <= stepNum); }
 
-        if(clientId&&productId){database.ref('clients/'+clientId).once('value',clientSnapshot=>{clientData=clientSnapshot.val();if(!clientData||clientData.status==='blocked'){document.getElementById('loading').innerHTML='<h1>यह स्टोर अस्थायी रूप से बंद है।</h1>';return}
+        if(clientId&&productId){database.ref('clients/'+clientId).once('value',clientSnapshot=>{clientData=clientSnapshot.val();if(!clientData||clientData.status==='blocked'){document.getElementById('loading').innerHTML='<h1>यह स्टोर बंद है।</h1>';return}
         database.ref(`products/${clientId}/${productId}`).once('value').then((snapshot)=>{if(!snapshot.exists()){document.getElementById('loading').innerHTML='<h1>प्रोडक्ट नहीं मिला।</h1>';return}
         productData=snapshot.val();if(productData.expiryDate&&new Date(productData.expiryDate)<new Date()){document.getElementById('loading').innerHTML='<h1>यह ऑफर समाप्त हो चुका है।</h1>';return}
         document.title=productData.name;document.getElementById('product-name').innerText=productData.name;document.getElementById('product-reviews').innerText=productData.reviewText;document.getElementById('current-price').innerText=`₹${productData.price}`;document.getElementById('old-price').innerText=`₹${productData.oldPrice}`;
@@ -91,26 +79,12 @@
         document.getElementById('image-slider').innerHTML=productData.images.map(url=>`<div class="swiper-slide"><img src="${url}"></div>`).join('');document.getElementById('features-list').innerHTML=productData.features.map(f=>`<p><i class="fa-solid fa-circle-check"></i> ${f}</p>`).join('');document.getElementById('announcement-bar').innerText=productData.freeDelivery?'🚚 फ्री डिलीवरी!':'एक विश्वसनीय स्टोर';
         const footer=document.getElementById('footer-links');if(productData.privacyPolicy)footer.innerHTML+=`<a href="#">Privacy Policy</a>`;footer.innerHTML+=`<a href="track.html" style="font-weight:bold;">अपना ऑर्डर ट्रैक करें</a>`;
         new Swiper('.swiper-container',{loop:true,pagination:{el:'.swiper-pagination',clickable:true}});
-        if(clientData.razorpayKeyId==='COD'){document.getElementById('online-payment-section').style.display='none'}else{rzp=new Razorpay({key:clientData.razorpayKeyId,amount:productData.price*100,currency:"INR",name:productData.name,handler:function(res){saveOrder('Online Paid',res.razorpay_payment_id)}})};
-        const offerEndDate=new Date().getTime()+(24*60*60*1000);setInterval(()=>{const d=offerEndDate-new Date().getTime();document.getElementById('hours').innerText=Math.floor((d%(1000*60*60*24))/(1000*60*60)).toString().padStart(2,'0');document.getElementById('mins').innerText=Math.floor((d%(1000*60*60))/(1000*60)).toString().padStart(2,'0');document.getElementById('secs').innerText=Math.floor((d%(1000*60))/1000).toString().padStart(2,'0')},1000);
-        document.getElementById('loading').style.display='none';document.getElementById('content').style.display='block'})})}else{document.getElementById('loading').innerHTML='<h1>गलत लिंक।'}
+        if(clientData.razorpayKeyId==='COD'){document.getElementById('online-payment-section').style.display='none'}else{rzp=new Razorpay({key:clientData.razorpayKeyId,amount:productData.price*100,currency:"INR",name:productData.name,handler:function(res){submitOrder('Online Paid',res.razoray_payment_id)}})};
+        const offerEndDate = new Date().getTime() + (35 * 24 * 60 * 60 * 1000) + (15 * 60 * 60 * 1000); /* Dummy Time */ setInterval(()=>{const d=offerEndDate-new Date().getTime();document.getElementById('days').innerText=Math.floor(d/(1000*60*60*24));document.getElementById('hours').innerText=Math.floor((d%(1000*60*60*24))/(1000*60*60));document.getElementById('mins').innerText=Math.floor((d%(1000*60*60))/(1000*60));document.getElementById('secs').innerText=Math.floor((d%(1000*60))/1000)},1000);
+        document.getElementById('loading').style.display='none';document.getElementById('content').style.display='block'})})}else{document.getElementById('loading').innerHTML='<h1>गलत लिंक।</h1>'}
         
-        document.getElementById('final-submit-btn').addEventListener('click', () => {
-            if (checkoutMethod === 'COD') {
-                saveOrder('COD');
-            } else if (checkoutMethod === 'ONLINE') {
-                rzp.open();
-            }
-        });
-
-        function saveOrder(type, paymentId = null){
-            const phone = document.getElementById('phone').value;
-            const fullAddress = `${document.getElementById('address').value}, ${document.getElementById('pincode').value}`;
-            const orderData = { customer_name: document.getElementById('name').value, customer_address: fullAddress, customer_phone: phone, type, paymentId };
-            database.ref(`orders/${clientId}/${productId}/${Date.now()}`).set(orderData);
-            database.ref(`tracking/${phone}`).set({status:'Processing'});
-            window.location.href = `success.html`;
-        }
+        document.getElementById('online-pay-btn').addEventListener('click', () => { rzp.open(); });
+        function submitOrder(type, paymentId = null){ const phone = document.getElementById('phone').value; const fullAddress = `${document.getElementById('address').value}, ${document.getElementById('pincode').value}`; const orderData = { customer_name: document.getElementById('name').value, customer_address: fullAddress, customer_phone: phone, type, paymentId }; database.ref(`orders/${clientId}/${productId}/${Date.now()}`).set(orderData); database.ref(`tracking/${phone}`).set({status:'Processing'}); window.location.href = `success.html`; }
     </script>
 </body>
 </html>

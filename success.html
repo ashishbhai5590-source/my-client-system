@@ -1,26 +1,117 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ऑर्डर कन्फर्म!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed</title>
     <style>
-        body{font-family:-apple-system,sans-serif;background-color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;padding:20px}
-        .success-checkmark{width:100px;height:100px;border-radius:50%;display:flex;margin:0 auto;background:#e8f5e9;align-items:center;justify-content:center}
-        .checkmark-stem{width:4px;height:25px;background-color:#198754;transform:rotate(45deg);position:absolute;margin-top:10px;margin-left:5px}
-        .checkmark-kick{width:4px;height:50px;background-color:#198754;transform:rotate(-45deg);position:absolute;margin-top:-10px}
-        .checkmark-circle{width:100px;height:100px;border-radius:50%;border:4px solid rgba(25,135,84,.2);animation:circle-pulse 2s infinite}
-        .checkmark-icon{position:relative;width:50px;height:50px;transform:scale(0);animation:icon-pop .5s .2s ease-out forwards}
-        h1{color:#198754;margin-top:25px} p{color:#6c757d;font-size:16px;line-height:1.6}
-        a{display:inline-block;margin-top:20px;padding:14px 25px;background:#0d6efd;color:#fff;text-decoration:none;border-radius:8px;font-weight:700}
-        @keyframes circle-pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-        @keyframes icon-pop{0%{transform:scale(0)}80%{transform:scale(1.2)}100%{transform:scale(1)}}
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* स्क्रीनशॉट वाला हरा रंग */
+            background-color: #4CAF50; 
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 400px;
+        }
+
+        /* --- SVG Checkmark एनीमेशन --- */
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 5;
+            stroke: #ffffff;
+            stroke-miterlimit: 10;
+            margin: 0 auto 30px auto;
+            /* एनीमेशन */
+            animation: scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke: #ffffff;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke { 
+            100% { stroke-dashoffset: 0; } 
+        }
+        @keyframes scale { 
+            0%, 100% { transform: none; } 
+            50% { transform: scale3d(1.1, 1.1, 1); } 
+        }
+
+        /* --- टेक्स्ट और बटन स्टाइल --- */
+        h1 {
+            font-weight: 700;
+            font-size: 2.8em; /* 45px */
+            margin: 0 0 15px 0;
+        }
+
+        p {
+            font-size: 1.1em; /* 18px */
+            margin: 0 0 40px 0;
+            opacity: 0.9;
+        }
+
+        .track-button {
+            background-color: #007BFF; /* स्क्रीनशॉट वाला नीला रंग */
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 16px 32px;
+            font-size: 1.1em; /* 18px */
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            text-decoration: none; /* अगर <a> टैग इस्तेमाल करें */
+            display: inline-block;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .track-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
     </style>
 </head>
 <body>
-    <div>
-        <div class="success-checkmark"><div class="checkmark-circle"></div><div class="checkmark-icon"><div class="checkmark-stem"></div><div class="checkmark-kick"></div></div></div>
-        <h1>ऑर्डर कन्फर्म हो गया!</h1>
-        <p>धन्यवाद! आपका ऑर्डर सफलतापूर्वक प्लेस हो गया है। आपको जल्द ही एक कन्फर्मेशन SMS मिलेगा।</p>
-        <a href="track.html">अपना ऑर्डर ट्रैक करें</a>
+
+    <div class="container">
+        <!-- एनिमेटेड Checkmark -->
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+
+        <h1>Order Confirmed!</h1>
+        <p>Thank you for your purchase. Your order is being processed.</p>
+        
+        <!-- ट्रैकिंग बटन -->
+        <a href="track.html" class="track-button">Track Your Order</a>
     </div>
+
 </body>
 </html>
