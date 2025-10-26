@@ -21,7 +21,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <script>
-        const firebaseConfig = {
+        // ============== अपनी Firebase Keys यहाँ पेस्ट करें ==============
+  const firebaseConfig = {
     apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
     authDomain: "my-client-stores.firebaseapp.com",
     databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
@@ -31,39 +32,67 @@
     appId: "1:658459339073:web:37fa1b05e06c09c14119c0",
     measurementId: "G-N8MVEE3B19"
   };
+        // ==============================================================
+
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const clientId = new URLSearchParams(window.location.search).get('clientId');
-        if(!clientId){document.body.innerHTML='<h1>गलत रास्ता! कृपया सुपर-एडमिन पैनल से आएं।</h1>'}else{database.ref('clients/'+clientId+'/name').once('value',s=>{document.getElementById('client-name-header').innerText=`🚀 ${s.val()} के लिए नया स्टोर`})}
-document.getElementById('generator-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // यह URL से क्लाइंट का नाम और प्रोडक्ट का ID लेगा (यह आपको बनाना होगा)
-    const clientId = 'beerendra'; // उदाहरण
-    const productId = 'mobile-cover-xyz'; // उदाहरण
 
-    // 1. ग्राहक के लिए स्टोर का लिंक बनाएं (यह आप पहले से कर रहे हैं)
-    const storeParams = new URLSearchParams({
-        clientId: clientId,
-        productId: productId
-        // ... बाकी प्रोडक्ट की जानकारी
-    });
-    const storeUrl = `.../store.html?${storeParams.toString()}`;
+        const params = new URLSearchParams(window.location.search);
+        const clientId = params.get('clientId');
 
+        if (!clientId) {
+            document.body.innerHTML = '<h1 style="text-align:center; padding: 50px;">गलत रास्ता! कृपया सुपर-एडमिन पैनल से आएं।</h1>';
+        } else {
+            database.ref('clients/' + clientId + '/name').once('value', s => {
+                if (s.exists()) {
+                    document.getElementById('client-name-header').innerText = `🚀 ${s.val()} के लिए नया स्टोर`;
+                }
+            });
+        }
 
-    // 2. क्लाइंट के लिए नए डैशबोर्ड का लिंक बनाएं (यह नया बदलाव है)
-    const adminParams = new URLSearchParams({
-        clientId: clientId,
-        productId: productId
-    });
-    const adminUrl = `.../client-admin.html?${adminParams.toString()}`;
+        document.getElementById('product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 1. हम प्रोडक्ट के नाम से एक यूनिक ID बनाएंगे
+            const productName = document.getElementById('product-name').value;
+            const productId = productName.toLowerCase().replace(/\s+/g, '-').slice(0, 20) + '-' + Date.now().toString().slice(-5);
+            
+            // 2. फॉर्म से सारा डेटा इकठ्ठा करें
+            const productData = {
+                name: productName,
+                reviewText: document.getElementById('review-text').value,
+                price: parseFloat(document.getElementById('current-price').value),
+                oldPrice: parseFloat(document.getElementById('old-price').value),
+                images: document.getElementById('image-urls').value.split('\n').filter(url => url.trim() !== ''),
+                features: document.getElementById('features').value.split('\n').filter(f => f.trim() !== ''),
+                expiryDate: document.getElementById('expiry-date').value,
+                freeDelivery: document.getElementById('free-delivery').value === 'true',
+                privacyPolicy: document.getElementById('privacy-policy').value,
+                refundPolicy: document.getElementById('refund-policy').value,
+                aboutUs: document.getElementById('about-us').value,
+                contactUs: document.getElementById('contact-us').value,
+                announcementText: document.getElementById('free-delivery').value === 'true' ? '🚚 आज ऑर्डर करने पर डिलीवरी बिल्कुल मुफ़्त!' : ''
+            };
+            
+            // 3. Firebase में प्रोडक्ट का डेटा सेव करें
+            database.ref(`products/${clientId}/${productId}`).set(productData).then(() => {
+                alert('प्रोडक्ट सफलतापूर्वक सेव हो गया!');
+                
+                // 4. लिंक्स बनाएं
+                const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+                const storeUrl = `${baseUrl}store.html?clientId=${clientId}&productId=${productId}`;
+                const adminUrl = `${baseUrl}client-admin.html?clientId=${clientId}&productId=${productId}`;
 
-    // अब आप अपने क्लाइंट को 'adminUrl' वाला लिंक देंगे
-    console.log("ग्राहक का लिंक:", storeUrl);
-    console.log("क्लाइंट का एडमिन लिंक:", adminUrl);
-    
-    // आप इन लिंक्स को पॉप-अप में दिखा सकते हैं
-});
+                // 5. लिंक्स को आउटपुट बॉक्स में दिखाएं
+                document.getElementById('store-link').value = storeUrl;
+                document.getElementById('admin-link').value = adminUrl;
+                document.getElementById('links-output').style.display = 'block';
+
+            }).catch(error => {
+                console.error("Firebase Error:", error);
+                alert('कुछ गड़बड़ हुई, प्रोडक्ट सेव नहीं हो सका।');
+            });
+        });
     </script>
 </body>
 </html>
