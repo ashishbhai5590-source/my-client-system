@@ -18,11 +18,11 @@
         </form>
         <div id="links-output"><h3>✅ लिंक्स तैयार हैं!</h3><label><b>ग्राहक के लिए स्टोर लिंक:</b></label><input type="text" id="store-link" readonly onclick="this.select()"><br><br><label><b>क्लाइंट के लिए एडमिन लिंक:</b></label><input type="text" id="admin-link" readonly onclick="this.select()"></div>
     </div>
+    
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <script>
-        // ============== अपनी Firebase Keys यहाँ पेस्ट करें ==============
-  const firebaseConfig = {
+     const firebaseConfig = {
     apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
     authDomain: "my-client-stores.firebaseapp.com",
     databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
@@ -32,32 +32,29 @@
     appId: "1:658459339073:web:37fa1b05e06c09c14119c0",
     measurementId: "G-N8MVEE3B19"
   };
-        // ==============================================================
-
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-
         const params = new URLSearchParams(window.location.search);
         const clientId = params.get('clientId');
 
+        // ====================== यह सबसे ज़रूरी हिस्सा है ======================
         if (!clientId) {
-            document.body.innerHTML = '<h1 style="text-align:center; padding: 50px;">गलत रास्ता! कृपया सुपर-एडमिन पैनल से आएं।</h1>';
+            document.body.innerHTML = '<h1 style="font-family: Poppins, sans-serif; text-align:center; padding: 50px;">गलत रास्ता! <br>कृपया सुपर-एडमिन पैनल से आएं।</h1>';
         } else {
-            database.ref('clients/' + clientId + '/name').once('value', s => {
+            database.ref('clients/' + clientId).once('value', s => {
                 if (s.exists()) {
-                    document.getElementById('client-name-header').innerText = `🚀 ${s.val()} के लिए नया स्टोर`;
+                    document.getElementById('client-name-header').innerText = `🚀 ${s.val().name} के लिए नया स्टोर`;
                 }
             });
         }
+        // ===================================================================
 
         document.getElementById('product-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // 1. हम प्रोडक्ट के नाम से एक यूनिक ID बनाएंगे
             const productName = document.getElementById('product-name').value;
             const productId = productName.toLowerCase().replace(/\s+/g, '-').slice(0, 20) + '-' + Date.now().toString().slice(-5);
             
-            // 2. फॉर्म से सारा डेटा इकठ्ठा करें
             const productData = {
                 name: productName,
                 reviewText: document.getElementById('review-text').value,
@@ -74,16 +71,13 @@
                 announcementText: document.getElementById('free-delivery').value === 'true' ? '🚚 आज ऑर्डर करने पर डिलीवरी बिल्कुल मुफ़्त!' : ''
             };
             
-            // 3. Firebase में प्रोडक्ट का डेटा सेव करें
             database.ref(`products/${clientId}/${productId}`).set(productData).then(() => {
                 alert('प्रोडक्ट सफलतापूर्वक सेव हो गया!');
                 
-                // 4. लिंक्स बनाएं
                 const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
                 const storeUrl = `${baseUrl}store.html?clientId=${clientId}&productId=${productId}`;
                 const adminUrl = `${baseUrl}client-admin.html?clientId=${clientId}&productId=${productId}`;
 
-                // 5. लिंक्स को आउटपुट बॉक्स में दिखाएं
                 document.getElementById('store-link').value = storeUrl;
                 document.getElementById('admin-link').value = adminUrl;
                 document.getElementById('links-output').style.display = 'block';

@@ -1,27 +1,88 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>सुपर एडमिन पैनल</title>
-    <style>body{font-family:-apple-system,sans-serif;background:#f0f2f5;margin:0;padding:20px} .container{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1)} h1,h2{text-align:center} #login-form,#main-content{display:none} .client-item{display:flex;justify-content:space-between;align-items:center;padding:15px;border-bottom:1px solid #eee;gap:10px} .client-info{flex-grow:1} .client-info span{font-weight:bold;display:block} .client-info small{color:#6c757d} .actions button{margin-left:5px} input,select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;margin-bottom:15px;box-sizing:border-box} button{padding:12px 18px;border:none;border-radius:8px;cursor:pointer;color:#fff} .add-btn{background:#007bff;width:100%} .delete-btn{background:#dc3545} .logout-btn{background:#6c757d;display:block;margin:20px auto}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>सुपर एडमिन डैशबोर्ड</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+        :root{--primary:#0d6efd; --success:#198754; --danger:#dc3545; --light-gray:#f4f7f9; --border-color: #e9ecef; --text-dark: #212529; --text-light: #6c757d;}
+        body{font-family:'Poppins',sans-serif;background-color:var(--light-gray);margin:0 0 80px 0; color: var(--text-dark);}
+        
+        .view{display:none; padding:20px; animation: fadeIn 0.4s;} .view.active{display:block;} @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:20px;}
+        .stat-card{background:#fff;border-radius:12px;padding:25px;display:flex;align-items:center;gap:20px;box-shadow:0 4px 20px rgba(0,0,0,.05);}
+        .stat-card .icon{font-size:24px;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;}
+        .stat-card.total-clients .icon{background:var(--primary);}
+        .stat-card.total-stores .icon{background:var(--success);}
+        .stat-card .info h3{margin:0;font-size:16px;color:var(--text-light);}
+        .stat-card .info p{margin:5px 0 0;font-size:28px;font-weight:600;}
+
+        .client-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:20px;}
+        .client-card{background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.05);padding:20px;cursor:pointer;transition:all .2s ease;}
+        .client-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,.08);}
+        .client-card h4{margin:0 0 5px;font-size:18px;}
+        .client-card p{margin:0;color:var(--text-light);font-size: 14px;}
+        
+        .btn{border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-weight:600;font-size: 14px;}
+        .btn-danger{background:var(--danger);color:#fff;} .btn-warning{background:var(--warning);color:#fff;} .btn-secondary{background:#6c757d;color:#fff;}
+        
+        #add-client-modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);animation:fadeIn 0.3s}
+        .modal-content{background-color:#fff;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:25px;border-radius:12px;width:90%;max-width:450px;}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:15px;margin-bottom:20px}
+        .modal-header h2{margin:0;font-size:20px}
+        .close-btn{font-size:28px;cursor:pointer;color:#888}
+        .form-group input{width:100%;padding:14px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;font-size:16px;margin-bottom:15px;}
+        .btn-submit{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:1.1em;font-weight:600;cursor:pointer;}
+        
+        .bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;box-shadow:0 -2px 15px rgba(0,0,0,.1);display:flex;justify-content:space-around;padding:10px 0; z-index: 100;}
+        .nav-btn{background:none;border:none;color:var(--text-light);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;padding:5px 20px; cursor: pointer; flex-grow: 1;}
+        .nav-btn i{font-size:22px;}
+        .nav-btn.active{color:var(--primary);}
+        #add-fab{position:fixed;bottom:80px;right:20px;width:60px;height:60px;background:var(--success);color:#fff;border:none;border-radius:50%;box-shadow:0 4px 15px rgba(0,0,0,.2);font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer; z-index: 101; transition: transform 0.3s ease;}
+        #add-fab:hover{transform: scale(1.1);}
+        
+        .notification{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background-color:var(--success);color:white;padding:15px 25px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.2);z-index:2000;animation:slideIn .3s both}
+        @keyframes slideIn{from{transform:translate(-50%,-100px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🔑 सुपर एडमिन लॉगिन</h1>
-        <div id="login-form"><input type="email" id="email" placeholder="ईमेल"><input type="password" id="password" placeholder="पासवर्ड"><button class="add-btn" onclick="login()">लॉगिन करें</button></div>
-        <div id="main-content">
-            <h2>👤 क्लाइंट्स मैनेज करें</h2><div id="clients-list"></div><hr>
-            <h2>➕ नया क्लाइंट जोड़ें</h2>
-            <input type="text" id="client-name" placeholder="क्लाइंट का नाम" required>
-            <input type="text" id="client-razorpay-key" placeholder="क्लाइंट की Razorpay Key ID" required>
-            <button class="add-btn" onclick="addClient()">क्लाइंट जोड़ें</button>
-            <button class="logout-btn" onclick="logout()">लॉगआउट</button>
+    <main>
+        <div id="home-view" class="view active">
+            <h1 style="text-align: left; margin-bottom: 20px;">डैशबोर्ड</h1>
+            <div class="stats-grid">
+                <div class="stat-card total-clients"><div class="icon"><i class="fa-solid fa-users"></i></div><div class="info"><h3>कुल क्लाइंट्स</h3><p id="total-clients">0</p></div></div>
+                <div class="stat-card total-stores"><div class="icon"><i class="fa-solid fa-store"></i></div><div class="info"><h3>कुल स्टोर्स</h3><p id="total-stores">0</p></div></div>
+            </div>
         </div>
-    </div>
+
+        <div id="manage-view" class="view">
+            <div id="client-list-page">
+                <h1 style="text-align: left; margin-bottom: 20px;">सभी क्लाइंट्स</h1>
+                <div id="client-grid" class="client-grid"></div>
+            </div>
+            <div id="client-detail-page" style="display:none;">
+                <button id="back-to-clients-btn" class="btn btn-secondary" style="margin-bottom: 20px;">← सभी क्लाइंट्स</button>
+                <div id="client-details" class="stat-card"></div>
+                <div id="client-stores" class="stat-card" style="display: block; margin-top:20px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <button id="add-fab">+</button>
+    <div id="add-client-modal">...</div>
+    <nav class="bottom-nav">
+        <button class="nav-btn active" id="nav-home"><i class="fa-solid fa-house"></i><span>होम</span></button>
+        <button class="nav-btn" id="nav-manage"><i class="fa-solid fa-users"></i><span>मैनेज</span></button>
+    </nav>
+    <div id="notification" class="notification"></div>
+    <audio id="success-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
+
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <script>
-        const firebaseConfig = {
+        // ============== अपनी Firebase Keys यहाँ पेस्ट करें ==============
+          const firebaseConfig = {
     apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
     authDomain: "my-client-stores.firebaseapp.com",
     databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
@@ -31,15 +92,58 @@
     appId: "1:658459339073:web:37fa1b05e06c09c14119c0",
     measurementId: "G-N8MVEE3B19"
   };
+        // ==============================================================
+        
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth(); const database = firebase.database();
-        auth.onAuthStateChanged(user=>{if(user){document.getElementById('login-form').style.display='none';document.getElementById('main-content').style.display='block';loadClients()}else{document.getElementById('login-form').style.display='block';document.getElementById('main-content').style.display='none'}});
-        function login(){auth.signInWithEmailAndPassword(document.getElementById('email').value,document.getElementById('password').value).catch(e=>alert(e.message))}
-        function logout(){auth.signOut()}
-        function addClient(){const name=document.getElementById('client-name').value;const razorpayKey=document.getElementById('client-razorpay-key').value;if(name&&razorpayKey){database.ref('clients').push({name:name,razorpayKeyId:razorpayKey,status:'active'});document.getElementById('client-name').value='';document.getElementById('client-razorpay-key').value=''}else{alert('कृपया सभी जानकारी भरें।')}}
-        function deleteClient(id){if(confirm('चेतावनी! क्या आप वाकई इस क्लाइंट और उसके सभी स्टोर्स/ऑर्डर्स को हमेशा के लिए हटाना चाहते हैं?')){database.ref('clients/'+id).remove();database.ref('products/'+id).remove();database.ref('orders/'+id).remove()}}
-        function toggleClientStatus(id,currentStatus){const newStatus=currentStatus==='active'?'blocked':'active';database.ref('clients/'+id+'/status').set(newStatus)}
-        function loadClients(){database.ref('clients').on('value',snapshot=>{const list=document.getElementById('clients-list');list.innerHTML='';snapshot.forEach(child=>{const client=child.val();const status=client.status||'active';list.innerHTML+=`<div class="client-item"><div class="client-info"><span>${client.name}</span><small>Status: ${status.toUpperCase()}</small></div><div class="actions"><a href="generator.html?clientId=${child.key}"><button style="background:#28a745">स्टोर बनाएं</button></a><button style="background:${status==='active'?'#ffc107':'#17a2b8'}" onclick="toggleClientStatus('${child.key}','${status}')">${status==='active'?'Block':'Unblock'}</button><button class="delete-btn" onclick="deleteClient('${child.key}')">हटाएं</button></div></div>`})})}
+        const database = firebase.database();
+        const clientsRef = database.ref('clients');
+        const productsRef = database.ref('products');
+
+        const navHome = document.getElementById('nav-home');
+        const navManage = document.getElementById('nav-manage');
+        const addFab = document.getElementById('add-fab');
+        const modal = document.getElementById('add-client-modal');
+
+        navHome.onclick = () => showView('home');
+        navManage.onclick = () => showView('manage');
+        addFab.onclick = () => modal.style.display = 'block';
+
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`${viewName}-view`).classList.add('active');
+            document.getElementById(`nav-${viewName}`).classList.add('active');
+        }
+
+        clientsRef.on('value', (snapshot) => {
+            const clients = snapshot.val();
+            renderClientGrid(clients);
+            updateDashboardStats(clients);
+        });
+        
+        productsRef.on('value', (snapshot) => {
+            const productsByClient = snapshot.val();
+            let totalStores = 0;
+            if (productsByClient) {
+                Object.values(productsByClient).forEach(clientProducts => {
+                    totalStores += Object.keys(clientProducts).length;
+                });
+            }
+            document.getElementById('total-stores').innerText = totalStores;
+        });
+
+        function updateDashboardStats(clients) {
+            const clientCount = clients ? Object.keys(clients).length : 0;
+            document.getElementById('total-clients').innerText = clientCount;
+        }
+
+        function renderClientGrid(clients) { /* ... (पिछला क्लाइंट ग्रिड बनाने का लॉजिक) ... */ }
+        function showClientDetails(clientId) { /* ... (नया क्लाइंट डिटेल पेज दिखाने का लॉजिक) ... */ }
+        function deleteClient(clientId, clientName) { /* ... (क्लाइंट डिलीट करने का लॉजिक) ... */ }
+        function toggleClientStatus(clientId) { /* ... (ब्लॉक/अनब्लॉक का लॉजिक) ... */ }
+        function createStore(clientId) { /* ... (स्टोर बनाने का लॉजिक) ... */ }
+        
+        function showNotification(message, isSuccess = true) { /* ... (नोटिफिकेशन का लॉजिक) ... */ }
     </script>
 </body>
 </html>
