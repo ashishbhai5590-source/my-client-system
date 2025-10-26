@@ -35,7 +35,35 @@
         const database = firebase.database();
         const clientId = new URLSearchParams(window.location.search).get('clientId');
         if(!clientId){document.body.innerHTML='<h1>गलत रास्ता! कृपया सुपर-एडमिन पैनल से आएं।</h1>'}else{database.ref('clients/'+clientId+'/name').once('value',s=>{document.getElementById('client-name-header').innerText=`🚀 ${s.val()} के लिए नया स्टोर`})}
-        document.getElementById('product-form').addEventListener('submit',(e)=>{e.preventDefault();const productRef=database.ref(`products/${clientId}`).push();productRef.set({name:document.getElementById('product-name').value,reviewText:document.getElementById('review-text').value,price:document.getElementById('current-price').value,oldPrice:document.getElementById('old-price').value,images:document.getElementById('image-urls').value.split('\n').filter(u=>u.trim()),features:document.getElementById('features').value.split('\n').filter(f=>f.trim()),expiryDate:document.getElementById('expiry-date').value,freeDelivery:document.getElementById('free-delivery').value==='true',privacyPolicy:document.getElementById('privacy-policy').value,refundPolicy:document.getElementById('refund-policy').value,aboutUs:document.getElementById('about-us').value,contactUs:document.getElementById('contact-us').value,});const baseUrl=window.location.href.replace(/[^/]*$/,'');document.getElementById('store-link').value=`${baseUrl}store.html?clientId=${clientId}&productId=${productRef.key}`;document.getElementById('admin-link').value=`${baseUrl}admin.html?clientId=${clientId}&productId=${productRef.key}`;document.getElementById('links-output').style.display='block'});
+document.getElementById('generator-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // यह URL से क्लाइंट का नाम और प्रोडक्ट का ID लेगा (यह आपको बनाना होगा)
+    const clientId = 'beerendra'; // उदाहरण
+    const productId = 'mobile-cover-xyz'; // उदाहरण
+
+    // 1. ग्राहक के लिए स्टोर का लिंक बनाएं (यह आप पहले से कर रहे हैं)
+    const storeParams = new URLSearchParams({
+        clientId: clientId,
+        productId: productId
+        // ... बाकी प्रोडक्ट की जानकारी
+    });
+    const storeUrl = `.../store.html?${storeParams.toString()}`;
+
+
+    // 2. क्लाइंट के लिए नए डैशबोर्ड का लिंक बनाएं (यह नया बदलाव है)
+    const adminParams = new URLSearchParams({
+        clientId: clientId,
+        productId: productId
+    });
+    const adminUrl = `.../client-admin.html?${adminParams.toString()}`;
+
+    // अब आप अपने क्लाइंट को 'adminUrl' वाला लिंक देंगे
+    console.log("ग्राहक का लिंक:", storeUrl);
+    console.log("क्लाइंट का एडमिन लिंक:", adminUrl);
+    
+    // आप इन लिंक्स को पॉप-अप में दिखा सकते हैं
+});
     </script>
 </body>
 </html>

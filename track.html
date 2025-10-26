@@ -6,32 +6,26 @@
     <title>ऑर्डर ट्रैक करें</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        :root { --primary: #28a745; --primary-dark: #218838; --light-gray: #f4f7f9; --text-dark: #333; --text-light: #6c757d; --border-color: #dee2e6; }
+        :root { --primary: #28a745; --light-gray: #f4f7f9; --text-dark: #333; --border-color: #dee2e6; }
         body { font-family: 'Poppins', sans-serif; background-color: var(--light-gray); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         .track-container { background: #fff; padding: 35px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0, 0, 0, .07); text-align: center; width: 100%; max-width: 550px; }
         h1 { font-size: 26px; font-weight: 700; color: var(--text-dark); margin-top: 0; margin-bottom: 30px; }
         .input-group { position: relative; margin-bottom: 20px; }
         .input-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: 20px; }
-        input { width: 100%; padding: 16px 16px 16px 60px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; box-sizing: border-box; transition: all .3s ease; }
-        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.15); }
-        button { width: 100%; padding: 16px; border: none; border-radius: 10px; background-color: var(--primary); color: #fff; font-size: 18px; font-weight: 600; cursor: pointer; transition: all .3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        button:hover:not(:disabled) { background-color: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2); }
+        input { width: 100%; padding: 16px 16px 16px 60px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 16px; border: none; border-radius: 10px; background-color: var(--primary); color: #fff; font-size: 18px; font-weight: 600; cursor: pointer; }
         
-        /* --- बदला हुआ: ट्रैकर का डिस्प्ले --- */
         .tracker { display: none; list-style: none; padding: 0; justify-content: space-between; position: relative; margin-top: 30px; }
         .tracker::before { content: ''; position: absolute; top: 20px; left: 0; right: 0; height: 4px; background-color: var(--border-color); }
         .tracker .line { position: absolute; top: 20px; left: 0; height: 4px; background-color: var(--primary); width: 0; transition: width 0.5s ease; }
         .step { text-align: center; width: 80px; position: relative; }
-        .step .icon { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 4px solid var(--border-color); color: var(--text-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px; transition: all .4s ease; }
-        .step .text { font-size: 13px; font-weight: 500; color: var(--text-light); }
+        .step .icon { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 4px solid var(--border-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px; }
+        .step .text { font-size: 13px; font-weight: 500; }
         .step.completed .icon { border-color: var(--primary); background-color: var(--primary); color: #fff; }
-        .step.active .icon { border-color: var(--primary); color: var(--primary); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); } }
         
-        #result-message { font-size: 1.1em; font-weight: 600; text-align: center; padding: 20px; display: none; }
-        #result-message.not-found { color: #dc3545; }
-        .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .notification-box { text-align: left; background: #e7f3ff; border-left: 5px solid #0d6efd; padding: 15px 20px; border-radius: 8px; margin-top: 25px; display: none; }
+        .notification-box p { margin: 5px 0; color: var(--text-dark); }
+        #result-message { font-weight: 600; text-align: center; padding: 20px; color: #dc3545;}
     </style>
 </head>
 <body>
@@ -39,13 +33,7 @@
         <h1>🚚 अपना ऑर्डर ट्रैक करें</h1>
         <div class="input-group"><span class="input-icon">📱</span><input type="tel" id="phoneInput" placeholder="अपना 10 अंकों का मोबाइल नंबर डालें" maxlength="10"></div>
         <button id="trackBtn">ट्रैक करें</button>
-        <ul class="tracker" id="tracker-ui">
-            <div class="line" id="tracker-line"></div>
-            <li class="step" id="step-placed"><div class="icon">✓</div><div class="text">Placed</div></li>
-            <li class="step" id="step-dispatched"><div class="icon">🚚</div><div class="text">Shipped</div></li>
-            <li class="step" id="step-delivered"><div class="icon">📦</div><div class="text">Delivered</div></li>
-        </ul>
-        <p id="result-message"></p>
+        <div id="results-container"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
@@ -64,40 +52,54 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const trackBtn = document.getElementById('trackBtn');
-        const trackerUI = document.getElementById('tracker-ui');
-        const resultMessage = document.getElementById('result-message');
-
+        
         trackBtn.onclick = () => {
             const phone = document.getElementById('phoneInput').value;
             if (!/^\d{10}$/.test(phone)) { alert('कृपया 10 अंकों का सही मोबाइल नंबर डालें।'); return; }
 
-            trackBtn.disabled = true;
-            trackBtn.innerHTML = '<span class="spinner"></span> ट्रैकिंग...';
-            // ====================== यहाँ बग था, अब ठीक है ======================
-            trackerUI.style.display = 'none'; // पहले टाइमलाइन छिपाएं
-            resultMessage.style.display = 'none';
-            // =================================================================
-
-            database.ref(`tracking/${phone}`).once('value', (snapshot) => {
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.innerHTML = '<h4>लोड हो रहा है...</h4>';
+            
+            database.ref('tracking').orderByChild('customer_phone').equalTo(phone).once('value', (snapshot) => {
                 if (!snapshot.exists()) {
-                    resultMessage.innerText = '😥 इस मोबाइल नंबर से कोई ऑर्डर नहीं मिला।';
-                    resultMessage.className = 'not-found';
-                    resultMessage.style.display = 'block';
-                } else {
-                    trackerUI.style.display = 'flex'; // सिर्फ ऑर्डर मिलने पर दिखाएं
-                    resultMessage.style.display = 'none';
-                    updateTrackerUI(snapshot.val());
+                    resultsContainer.innerHTML = '<p id="result-message">😥 इस मोबाइल नंबर से कोई ऑर्डर नहीं मिला।</p>';
+                    return;
                 }
-            }).catch(error => {
-                resultMessage.innerText = '❌ कुछ गड़बड़ हुई, कृपया फिर से प्रयास करें।';
-                resultMessage.className = 'not-found';
-                resultMessage.style.display = 'block';
-            }).finally(() => {
-                trackBtn.disabled = false;
-                trackBtn.innerHTML = 'ट्रैक करें';
+                
+                resultsContainer.innerHTML = '';
+                snapshot.forEach(childSnapshot => {
+                    const orderId = childSnapshot.key;
+                    const data = childSnapshot.val();
+                    resultsContainer.innerHTML += createOrderCard(orderId, data);
+                    updateTrackerUI(orderId, data);
+                });
             });
         };
-        function updateTrackerUI(data) { /* ... */ } // (UI Update logic from previous code)
+
+        function createOrderCard(orderId, data) {
+            let notificationHTML = '';
+            if (data.customMessage && data.customMessage.trim() !== '') {
+                notificationHTML = `<div class="notification-box"><p><strong>📢 सेलर का मैसेज:</strong> ${data.customMessage}</p></div>`;
+            }
+            return `<div class="order-result-card"><h4>ऑर्डर ID: ...${orderId.slice(-6)}</h4><ul class="tracker" style="display:flex" id="tracker-ui-${orderId}"><div class="line" id="tracker-line-${orderId}"></div><li class="step" id="step-placed-${orderId}"><div class="icon">✓</div><div class="text">Placed</div></li><li class="step" id="step-dispatched-${orderId}"><div class="icon">🚚</div><div class="text">Shipped</div></li><li class="step" id="step-delivered-${orderId}"><div class="icon">📦</div><div class="text">Delivered</div></li></ul>${notificationHTML}</div>`;
+        }
+
+        function updateTrackerUI(orderId, data) {
+            const line = document.getElementById(`tracker-line-${orderId}`);
+            const placed = document.getElementById(`step-placed-${orderId}`);
+            const dispatched = document.getElementById(`step-dispatched-${orderId}`);
+            const delivered = document.getElementById(`step-delivered-${orderId}`);
+            
+            placed.classList.add('completed');
+            if (data.status === 'Shipped' || data.status === 'Delivered') {
+                line.style.width = '50%';
+                dispatched.classList.add('completed');
+            }
+            if (data.status === 'Delivered') {
+                line.style.width = '100%';
+                delivered.classList.add('completed');
+            }
+        }
     </script>
 </body>
 </html>
