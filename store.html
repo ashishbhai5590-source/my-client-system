@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
         :root{--primary-color:#0d6efd;--success-color:#198754;--danger-color:#dc3545} body{font-family:-apple-system, sans-serif;margin:0;background-color:#f8f9fa}
-        /* --- सारा CSS कोड यहाँ है (कोई बदलाव नहीं) --- */
         .skeleton{animation:pulse 1.5s cubic-bezier(0.4,0,0.6,1) infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}} .skeleton-image{width:100%;height:350px;background-color:#e0e0e0} .skeleton-text{height:20px;width:80%;background-color:#e0e0e0;border-radius:4px;margin:15px} .skeleton-price{height:28px;width:40%;background-color:#e0e0e0;border-radius:4px;margin:15px} .skeleton-box{height:50px;background-color:#e0e0e0;border-radius:8px;margin:15px} .announcement-bar{background:#212529;color:#fff;text-align:center;padding:12px;font-size:15px;font-weight:700} .container{background:#fff;max-width:600px;margin:10px auto;border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,.1);overflow:hidden} .product-gallery{position:relative} .swiper-container{width:100%;height:350px} .swiper-slide img{width:100%;height:100%;object-fit:cover} .swiper-pagination{position:absolute!important;bottom:10px!important} .swiper-pagination-bullet-active{background:var(--primary-color)!important} .product-details{padding:20px} .product-title{font-size:24px;font-weight:700;margin-top:0} .review-text{color:#6c757d;margin:5px 0 15px} .price-box{display:flex;align-items:center;gap:10px;margin-bottom:15px} .price{font-size:28px;color:var(--success-color);font-weight:700} .old-price{text-decoration:line-through;color:#6c757d} .discount{background-color:#ffe0e0;color:var(--danger-color);padding:3px 8px;border-radius:5px;font-weight:700;font-size:14px} .features-list p{display:flex;align-items:center;gap:8px;margin:8px 0} .features-list i{color:var(--success-color)} .order-box{background:#f8f9fa;padding:20px;border-radius:10px;margin-top:20px} .button{width:100%;padding:15px;border:none;border-radius:8px;color:#fff;font-size:18px;font-weight:700;cursor:pointer} .buy-now-btn{background-color:var(--primary-color);} .footer{text-align:center;padding:20px;font-size:14px} .footer a{color:var(--primary-color);text-decoration:none;margin:0 10px;display:inline-block;margin-bottom:10px} .policy-modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.5);animation:fadeIn .3s} .policy-modal-content{background-color:#fefefe;margin:auto;padding:25px;border-radius:10px;width:90%;max-width:500px;position:relative;top:50%;transform:translateY(-50%)} .policy-close-btn{color:#aaa;float:right;font-size:28px;font-weight:700;cursor:pointer} .notification{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background-color:var(--success-color);color:white;padding:15px 25px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.2);z-index:2000;animation:slideIn .3s both} @keyframes slideIn{from{transform:translate(-50%,-100px);opacity:0}to{transform:translate(-50%,0);opacity:1}} @keyframes fadeIn{from{opacity:0}}
         .offer-timer{background:#fff3cd;border-radius:12px;padding:20px;text-align:center;margin:20px 0} .offer-timer h4{margin:0 0 15px;font-size:18px} .countdown{display:flex;justify-content:space-around;gap:8px;text-align:center} .time-box{background:var(--primary-color);color:#fff;padding:10px 5px;border-radius:10px;width:100%} .time-box span{display:block;font-size:28px;font-weight:700} .time-box small{font-size:12px}
         .cod-info { text-align: center; font-weight: 600; color: var(--success-color); background: #eafaf1; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
@@ -52,7 +51,7 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         // ============== अपनी Firebase Keys यहाँ पेस्ट करें ==============
-    const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyCZAoe1zoWGZk7A1WLFxdR4T67ntvmFIfY",
     authDomain: "my-client-stores.firebaseapp.com",
     databaseURL: "https://my-client-stores-default-rtdb.firebaseio.com",
@@ -103,7 +102,8 @@
             if (client.razorpayKeyId && client.razorpayKeyId.toLowerCase() !== 'cod') {
                 rzp = new Razorpay({ key: client.razorpayKeyId, amount: product.price * 100, currency: "INR", name: product.name, handler: function(res){ saveOrder('Online', res.razorpay_payment_id) } });
             } else {
-                document.getElementById('online-final-btn') && (document.getElementById('online-final-btn').style.display = 'none');
+                const onlineBtn = document.getElementById('online-final-btn');
+                if(onlineBtn) onlineBtn.style.display = 'none';
             }
             const offerEndDate=new Date().getTime()+(2*24*60*60*1000 + 23*60*60*1000); const timerInterval = setInterval(()=>{const d=offerEndDate-new Date().getTime();if(d<0){clearInterval(timerInterval);return;}document.getElementById('days').innerText=Math.floor(d/(1000*60*60*24));document.getElementById('hours').innerText=Math.floor((d%(1000*60*60*24))/(1000*60*60));document.getElementById('mins').innerText=Math.floor((d%(1000*60*60))/(1000*60));document.getElementById('secs').innerText=Math.floor((d%(1000*60))/1000)},1000);
             document.getElementById('loading').style.display='none';document.getElementById('product-page').style.display='block';
@@ -115,15 +115,26 @@
 
         // --- फुल-पेज चेकआउट का JS ---
         const checkoutPage = document.getElementById('checkout-page');
-        checkoutPage.innerHTML = `<div class="checkout-container">...</div>`; // (HTML for checkout page)
+        checkoutPage.innerHTML = `<div class="checkout-container"><div class="checkout-header"><h2 id="modal-title"></h2><span class="checkout-close-btn">&times;</span></div><div class="progress-bar"><div class="progress-line"><div class="progress-line-fill" id="progress-line-fill"></div></div><div class="progress-step active" id="p-step-1">1</div><div class="progress-step" id="p-step-2">2</div><div class="progress-step" id="p-step-3">3</div></div><div class="modal-body"><div class="step-content active" id="step-1"><input type="text" id="modal-name" placeholder="👤 अपना नाम" required><input type="tel" id="modal-phone" placeholder="📱 अपना मोबाइल नंबर" required></div><div class="step-content" id="step-2"><input type="text" id="modal-address" placeholder="🏠 पूरा पता (मकान, गली, शहर)" required><input type="number" id="modal-pincode" placeholder="📍 पिनकोड" required></div><div class="step-content payment-options" id="step-3"><h3 style="text-align:center; margin: 0 0 15px 0;">पेमेंट का तरीका चुनें</h3><button type="button" class="button cod-final" id="cod-final-btn">कैश ऑन डिलीवरी 💵</button><button type="button" class="button online-final" id="online-final-btn">ऑनलाइन पेमेंट करें 💳</button></div></div></div><div class="checkout-footer"><div class="button-group"><button type="button" class="button back-btn" id="backBtn" style="display:none;">वापस</button><button type="button" class="button buy-now-btn" id="nextBtn">आगे बढ़ें</button></div></div>`;
+        
         const buyNowBtn=document.getElementById('buy-now-btn');const closeBtn=document.querySelector('.checkout-close-btn');const nextBtn=document.getElementById('nextBtn');const backBtn=document.getElementById('backBtn');const codFinalBtn=document.getElementById('cod-final-btn');const onlineFinalBtn=document.getElementById('online-final-btn');
         let currentStep=1;
         const stepTitles=["स्टेप 1: संपर्क जानकारी","स्टेप 2: डिलिवरी एड्रेस","स्टेप 3: पेमेंट का तरीका"];
+        
         buyNowBtn.addEventListener('click',openCheckout);closeBtn.addEventListener('click',closeCheckout);nextBtn.addEventListener('click',nextStep);backBtn.addEventListener('click',prevStep);codFinalBtn.addEventListener('click',()=>saveOrder('COD'));onlineFinalBtn.addEventListener('click',()=> { if(rzp) rzp.open(); else showNotification('ऑनलाइन पेमेंट अभी उपलब्ध नहीं है।', false); });
+        
         function openCheckout(){currentStep=1;updateStepUI();checkoutPage.style.display='block';window.scrollTo(0,0);}
         function closeCheckout(){checkoutPage.style.display='none';}
-        function updateStepUI(){/* ... */ } // (UI Update logic from previous code)
-        function validateCurrentStep(){/* ... */ } // (Validation logic from previous code)
+        
+        function updateStepUI(){
+            document.getElementById('modal-title').innerText = stepTitles[currentStep-1];
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));document.getElementById(`step-${currentStep}`).classList.add('active');
+            document.querySelectorAll('.progress-step').forEach((el,index)=>{el.classList.toggle('active',index+1<=currentStep)});
+            document.getElementById('progress-line-fill').style.width = `${(currentStep-1)*50}%`;
+            backBtn.style.display=currentStep>1?'block':'none';nextBtn.style.display=currentStep<3?'block':'none';
+        }
+
+        function validateCurrentStep(){if(currentStep===1){if(document.getElementById('modal-name').value.trim()===''||document.getElementById('modal-phone').value.length<10){showNotification('कृपया नाम और सही मोबाइल नंबर भरें।',false);return false}}else if(currentStep===2){if(document.getElementById('modal-address').value.trim()===''||document.getElementById('modal-pincode').value.length<6){showNotification('कृपया पूरा पता और सही पिनकोड भरें।',false);return false}}return true}
         function nextStep(){if(!validateCurrentStep())return;if(currentStep<3){currentStep++;updateStepUI()}}
         function prevStep(){if(currentStep>1){currentStep--;updateStepUI()} else {closeCheckout();}}
         
