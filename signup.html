@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ज्वाइन करें</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        :root{--primary:#0d6efd; --success:#198754; --danger:#dc3545; --light-gray:#f4f7f9; --text-dark:#212529;}
+        body{font-family:'Poppins',sans-serif;background-color:var(--light-gray);margin:0; color: var(--text-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;}
+        .step-container{display:none; max-width: 500px; width: 100%; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.1); animation: fadeIn 0.5s;}
+        .step-container.active{display:block;}
+        @keyframes fadeIn{from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);}}
+        h1, h2{text-align:center; margin-top: 0;}
+        input, select{width:100%;padding:14px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;font-size:16px;margin-bottom:15px;}
+        .btn{width:100%;padding:14px;border:none;border-radius:8px;color:#fff;font-size:1.1em;font-weight:600;cursor:pointer;}
+        .btn-primary{background:var(--primary);} .btn-success{background:var(--success);}
+        .offer-card{background:#e7f3ff; border: 1px dashed var(--primary); border-radius: 10px; padding: 20px; margin-top: 10px; text-align: center;}
+        .offer-card .price-highlight{color:var(--success); font-weight: 700; font-size: 1.2em;}
+        #payment-step .qr-code{max-width:250px;width:100%;margin:15px 0; border: 1px solid #eee;}
+        #payment-step #upi-id{font-weight:600;background:#e9ecef;padding:10px;border-radius:8px; display: inline-block; cursor: pointer;}
+        .important-note{background:#fffbe6; color:#92400e; padding: 15px; border-radius:8px; font-size: 14px; margin-top: 20px; text-align: left;}
+        
+        #success-page{position:fixed; top:0; left:0; width:100%; height:100%; background:#4CAF50; color:#fff; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:100; animation: fadeIn 0.5s;}
+        .checkmark{width:100px;height:100px;border-radius:50%;display:block;stroke-width:4;stroke:#fff;stroke-miterlimit:10;margin:0 auto 30px auto;animation:scale .3s ease-in-out .9s both;}
+        .checkmark__circle{stroke-dasharray:166;stroke-dashoffset:166;stroke-width:4;stroke:#fff;fill:none;animation:stroke 0.6s cubic-bezier(0.65,0,0.45,1) forwards;}
+        .checkmark__check{transform-origin:50% 50%;stroke-dasharray:48;stroke-dashoffset:48;animation:stroke 0.3s cubic-bezier(0.65,0,0.45,1) 0.8s forwards;}
+        @keyframes stroke{100%{stroke-dashoffset:0;}} @keyframes scale{0%,100%{transform:none;}50%{transform:scale3d(1.1,1.1,1);}}
+        
+        #send-receipt-btn { background: transparent; color: #fff; border: 2px solid #fff; display:inline-flex; align-items: center; gap: 10px; width: auto; padding: 14px 30px; }
+        .spinner { width: 20px; height: 20px; border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 1s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .notification{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background-color:var(--success);color:white;padding:15px 25px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.2);z-index:2000;animation:slideIn .3s both}
+        @keyframes slideIn{from{transform:translate(-50%,-100px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+        #invoice-container { position: absolute; left: -9999px; top: auto; width: 800px; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div id="info-step" class="step-container active">
+        <h1>अपने बिजनेस को ऑनलाइन ले जाएं!</h1>
+        <p style="text-align: center; color: #666;">हमें चुनने के लिए धन्यवाद। कृपया अपनी जानकारी भरें।</p>
+        <form id="info-form">
+            <input type="text" id="name" placeholder="आपका पूरा नाम" required>
+            <input type="tel" id="phone" placeholder="आपका मोबाइल नंबर" required>
+            <input type="email" id="email" placeholder="आपका ईमेल" required>
+            <select id="plan-select" required>
+                <option value="">-- एक प्लान चुनें --</option>
+                <option value="monthly">मासिक प्लान (₹399)</option>
+                <option value="yearly">सालाना प्लान (₹4500)</option>
+                <option value="onetime">वन-टाइम (₹30)</option>
+            </select>
+            <div class="offer-card" id="monthly-offer">
+                <h4>🎉 शानदार लॉन्च ऑफर! 🎉</h4>
+                <p>आज ही ज्वाइन करें और मासिक प्लान सिर्फ <span class="price-highlight">₹399</span> में पाएं! (असली कीमत ₹500)</p>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Payment के लिए आगे बढ़ें</button>
+        </form>
+    </div>
+
+    <div id="payment-step" class="step-container">
+        <h2>पेमेंट करें</h2>
+        <p>आपको <b id="total-amount" style="font-size: 2em; font-weight: 700; color: var(--primary);">₹0</b> का पेमेंट करना है।</p>
+        <img class="qr-code" id="qr-code-img" src="" alt="QR Code">
+        <p>या इस UPI ID पर: <b id="upi-id" onclick="copyUPI()"></b></p>
+        <form id="payment-form">
+            <input type="text" id="utr" placeholder="UTR/ट्रांजैक्शन ID यहाँ पेस्ट करें" required>
+            <div class="important-note"><strong>ज़रूरी नोट:</strong> पेमेंट करने के बाद, कृपया सही UTR ID यहाँ ज़रूर डालें। इसी से आपकी पेमेंट कन्फर्म होगी।</div>
+            <button type="submit" class="btn btn-success">पेमेंट कन्फर्म करें</button>
+        </form>
+    </div>
+    
+    <div id="invoice-container">
+        <div id="invoice-content" style="padding: 40px; font-family: sans-serif; border: 1px solid #eee; background: #fff;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                <div><h1 style="font-size: 28px; margin: 0; color: #333;">INVOICE / रसीद</h1><p style="margin: 5px 0 0;"><strong>Invoice ID:</strong> INV-12345</p></div>
+                <div style="text-align: right;"><p style="margin: 0;"><strong>Store Help Guru</strong></p><p style="margin: 5px 0 0;">ashishroy5221@gmail.com</p></div>
+            </div>
+            <div style="margin-top: 30px;"><p><strong>Billed To:</strong></p><p style="margin:0;" id="pdf-name"></p><p style="margin:5px 0;" id="pdf-email"></p><p style="margin:5px 0;" id="pdf-phone"></p></div>
+            <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
+                <thead style="background: #f8f9fa;"><tr><th style="padding: 12px; text-align: left; border: 1px solid #ddd;">विवरण</th><th style="padding: 12px; text-align: right; border: 1px solid #ddd;">राशि</th></tr></thead>
+                <tbody><tr><td style="padding: 12px; border: 1px solid #ddd;" id="pdf-plan"></td><td style="padding: 12px; text-align: right; border: 1px solid #ddd;" id="pdf-amount"></td></tr></tbody>
+                <tfoot><tr><td style="padding: 12px; text-align: right; font-weight: bold; border: 1px solid #ddd;">Total</td><td style="padding: 12px; text-align: right; font-weight: bold; border: 1px solid #ddd;" id="pdf-total-amount"></td></tr></tfoot>
+            </table>
+            <div style="margin-top: 30px;"><p><strong>Payment Details:</strong></p><p style="margin:5px 0;"><strong>UTR/Transaction ID:</strong> <span id="pdf-utr"></span></p><p style="margin:5px 0;"><strong>Payment Date:</strong> <span id="pdf-date"></span></p></div>
+            <div style="margin-top: 40px; text-align: center;"><p>धन्यवाद!</p></div>
+        </div>
+    </div>
+    <div id="notification" class="notification"></div>
+    <audio id="success-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
+
+    <div id="success-page">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
+        <h1 style="color:#fff;">पेमेंट सफल!</h1>
+        <p style="color:#fff; max-width: 400px; padding: 0 20px; text-align: center;">अपनी रसीद Telegram पर भेजने के लिए नीचे दिए गए बटन पर क्लिक करें।</p>
+        <button id="send-receipt-btn" class="btn">
+            <i class="fa-brands fa-telegram"></i>
+            <span>Telegram पर रसीद भेजें</span>
+        </button>
+    </div>
+    
+    <script>
+        // ============== अपनी जानकारी यहाँ भरें ==============
+        const paymentDetails = {
+            monthly: { amount: 399, qr_link: "[https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgc6xNwDpp7cWKLYovQNN0DEAeP0uWVZtdbsedOa-Mnyx_oeM8toekIjrKeGGVWRapt4UriglfBBnZSdlqaMYOb88QbfhVu-ZZ0ralxgu2gBX20rZfWH1f6p3mEJedLIZdkLlGgng6Yqd72BNLCSNtnmaE-sqzmb7lILyA_Q8OUAUu8VUZzcniNoNHT/s564/1000031074.png]", upi_id: "[Only Qr]" },
+            yearly: { amount: 4500, qr_link: "[https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiODcBH1S1iPAIaCI0jbTqvSGHQNeaksrKoTcptrK-2Vnw59MTS8yX9NhX_qaQZMEfkFGTqbZp7Li97b1alJiX8BxaYafGGG_FmKlnlB6n0KLh3GaOde11q-LcKsjIjlowh_Qr00SDZO8mKazy7xKKqmZUUeEXuZlI0U3KkxEedVO2pdqKsSI0jseDz/s575/1000031075.png]", upi_id: "[Only Qr]" },
+            onetime: { amount: 30, qr_link: "[https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhM-73VQdPyXU0H5M3-Kj5zw0gsp4YlUpPyID9okU_qC_u7QXZ92rGp6hXz69gmk_M5_MsQJXJFKPAcbhnEq_9Eu8dbxAnEZOTTsi16wYOWarGrlXDPAKAlMyt3j8XeGAJEW1nsodrtrgNX7YZ5O_YtBmqU6wLvVaBQYDeKgQBz_Sr07jGldzBosfdT/s570/1000031073.png]", upi_id: "[Only Qr]" }
+        };
+        const telegramBotToken = '7978691086:AAGB8030R6DBhADBnVcSN-2zd75aVl4OEwA';
+        const telegramChatId = '7197184333';
+        // ===================================================
+
+        const infoStep = document.getElementById('info-step');
+        const paymentStep = document.getElementById('payment-step');
+        const successPage = document.getElementById('success-page');
+        const planSelect = document.getElementById('plan-select');
+        const monthlyOffer = document.getElementById('monthly-offer');
+        let formData = {};
+
+        planSelect.addEventListener('change', () => { monthlyOffer.style.display = planSelect.value === 'monthly' ? 'block' : 'none'; });
+
+        document.getElementById('info-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const plan = planSelect.value;
+            if (!plan) { showNotification('कृपया एक प्लान चुनें।', false); return; }
+            formData.name = document.getElementById('name').value;
+            formData.phone = document.getElementById('phone').value;
+            formData.email = document.getElementById('email').value;
+            formData.plan = planSelect.options[planSelect.selectedIndex].text;
+            formData.amount = `₹${paymentDetails[plan].amount}`;
+            document.getElementById('total-amount').innerText = `₹${paymentDetails[plan].amount}`;
+            document.getElementById('qr-code-img').src = paymentDetails[plan].qr_link;
+            document.getElementById('upi-id').innerText = paymentDetails[plan].upi_id;
+            infoStep.classList.remove('active');
+            paymentStep.classList.add('active');
+        });
+
+        document.getElementById('payment-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const utr = document.getElementById('utr').value;
+            if (!utr.trim()) { showNotification('कृपया UTR/ट्रांजैक्शन ID भरें।', false); return; }
+            formData.utr = utr;
+            document.querySelector('.step-container.active').style.display = 'none';
+            successPage.style.display = 'flex';
+            document.getElementById('success-sound').play();
+        });
+        
+        document.getElementById('send-receipt-btn').addEventListener('click', () => {
+            const btn = document.getElementById('send-receipt-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> <span>रसीद बन रही है...</span>';
+            generateAndSendPDF();
+        });
+
+        function generateAndSendPDF() {
+            document.getElementById('pdf-name').innerText = formData.name;
+            document.getElementById('pdf-phone').innerText = formData.phone;
+            document.getElementById('pdf-email').innerText = formData.email;
+            document.getElementById('pdf-plan').innerText = formData.plan;
+            document.getElementById('pdf-amount').innerText = formData.amount;
+            document.getElementById('pdf-total-amount').innerText = formData.amount;
+            document.getElementById('pdf-utr').innerText = formData.utr;
+            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('hi-IN');
+            
+            const element = document.getElementById('invoice-content');
+            const opt = { margin: 0.5, filename: `Payment_Receipt.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+            
+            html2pdf().from(element).set(opt).output('blob').then(function (pdfBlob) {
+                const telegramFormData = new FormData();
+                telegramFormData.append('chat_id', telegramChatId);
+                telegramFormData.append('caption', `नया रजिस्ट्रेशन!\n\nनाम: ${formData.name}\nफोन: ${formData.phone}\nप्लान: ${formData.plan}\nUTR: ${formData.utr}`);
+                telegramFormData.append('document', pdfBlob, `Receipt_${formData.name}.pdf`);
+
+                fetch(`https://api.telegram.org/bot${telegramBotToken}/sendDocument`, { method: 'POST', body: telegramFormData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        showNotification('✅ रसीद सफलतापूर्वक भेज दी गई!', true);
+                        document.getElementById('send-receipt-btn').innerHTML = '<span>✔️ भेज दी गई!</span>';
+                    } else { throw new Error('Telegram API error'); }
+                })
+                .catch(error => {
+                    showNotification('❌ कुछ गड़बड़ हुई! कृपया फिर से प्रयास करें।', false);
+                    const btn = document.getElementById('send-receipt-btn');
+                    btn.disabled = false; btn.innerHTML = '<i class="fa-brands fa-telegram"></i><span>Telegram पर रसीद भेजें</span>';
+                });
+            });
+        }
+        
+        function showNotification(message, isSuccess=true) {
+            const n = document.getElementById('notification');
+            n.textContent = message; n.style.backgroundColor = isSuccess ? 'var(--success)' : 'var(--danger)'; n.style.display = 'block';
+            setTimeout(()=> n.style.display = 'none', 4000);
+        }
+        function copyUPI() {
+            const upiId = document.getElementById('upi-id').innerText;
+            navigator.clipboard.writeText(upiId).then(() => { showNotification('UPI ID कॉपी हो गई!', true); });
+        }
+    </script>
+</body>
+</html>
