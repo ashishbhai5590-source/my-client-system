@@ -47,7 +47,7 @@
                 <option value="">-- एक प्लान चुनें --</option>
                 <option value="monthly">मासिक प्लान (₹399)</option>
                 <option value="yearly">सालाना प्लान (₹4500)</option>
-                <option value="onetime">वन-टाइम (₹30)</option>
+                <option value="onetime">वन-टाइम (₹3000)</option>
             </select>
             <div class="offer-card" id="monthly-offer">
                 <h4>🎉 शानदार लॉन्च ऑफर! 🎉</h4>
@@ -73,7 +73,7 @@
         <div id="invoice-content" style="padding: 40px; font-family: sans-serif; border: 1px solid #eee; background: #fff;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 10px;">
                 <div><h1 style="font-size: 28px; margin: 0; color: #333;">INVOICE / रसीद</h1><p style="margin: 5px 0 0;"><strong>Invoice ID:</strong> INV-12345</p></div>
-                <div style="text-align: right;"><p style="margin: 0;"><strong>Apna Online Store</strong></p><p style="margin: 5px 0 0;">ashishroy5221@gmail.com</p></div>
+                <div style="text-align: right;"><p style="margin: 0;"><strong>Dream Store</strong></p><p style="margin: 5px 0 0;">ashishroy@gmail.com</p></div>
             </div>
             <div style="margin-top: 30px;"><p><strong>Billed To:</strong></p><p style="margin:0;" id="pdf-name"></p><p style="margin:5px 0;" id="pdf-email"></p><p style="margin:5px 0;" id="pdf-phone"></p></div>
             <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
@@ -101,9 +101,9 @@
     <script>
         // ============== अपनी जानकारी यहाँ भरें ==============
         const paymentDetails = {
-            monthly: { amount: 399, qr_link: "[https://ashishbhai5590-source.github.io/my-client-system/30image.png]", upi_id: "[Only Qr]" },
-            yearly: { amount: 4500, qr_link: "[https://ashishbhai5590-source.github.io/my-client-system/4500image.png]", upi_id: "[Only Qr]" },
-            onetime: { amount: 30, qr_link: "[https://ashishbhai5590-source.github.io/my-client-system/30image.png]", upi_id: "[Only Qr]" }
+            monthly: { amount: 399, qr_link: "[https://ashishbhai5590-source.github.io/my-client-system/399image.png]", upi_id: "[मासिक UPI ID]" },
+            yearly: { amount: 4500, qr_link: "[https://ashishbhai5590-source.github.io/my-client-system/4500image.png]", upi_id: "[सालाना UPI ID]" },
+            onetime: { amount: 3000, qr_link: "[https://ashishbhai5590-source.github.io/my-client-system/30image.png]", upi_id: "[वन-टाइम UPI ID]" }
         };
         const telegramBotToken = '7978691086:AAGB8030R6DBhADBnVcSN-2zd75aVl4OEwA';
         const telegramChatId = '7197184333';
@@ -116,7 +116,14 @@
         const monthlyOffer = document.getElementById('monthly-offer');
         let formData = {};
 
-        planSelect.addEventListener('change', () => { monthlyOffer.style.display = planSelect.value === 'monthly' ? 'block' : 'none'; });
+        // पेज लोड होते ही यह सुनिश्चित करें कि ऑफर सही से दिखे या छिपे
+        document.addEventListener('DOMContentLoaded', () => {
+            monthlyOffer.style.display = planSelect.value === 'monthly' ? 'block' : 'none';
+        });
+        
+        planSelect.addEventListener('change', () => {
+            monthlyOffer.style.display = planSelect.value === 'monthly' ? 'block' : 'none';
+        });
 
         document.getElementById('info-form').addEventListener('submit', (e) => {
             e.preventDefault();
