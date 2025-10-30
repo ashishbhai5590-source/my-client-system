@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyan Sthali Academy - Leave App</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6610f2;
+            --slider-color-1: #13547a; 
+            --slider-color-2: #80d0c7;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #343a40;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; }
+        .container { width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
+        main { padding: 25px; flex-grow: 1; overflow-y: auto; text-align: center; }
+        
+        .info-card {
+            background: var(--card-background); padding: 25px; border-radius: 15px;
+            box-shadow: var(--shadow); margin-top: 25px; text-align: center;
+        }
+        .info-card i { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 10px; }
+        .info-card h2 { font-weight: 700; font-size: 1.8rem; margin: 0 0 5px 0; }
+        .info-card p { color: #6c757d; margin: 0; font-size: 0.9rem; }
+        .credit { font-weight: 600 !important; color: #333 !important; }
+
+        .slider-container { width: 100%; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        .slider { display: flex; transition: transform 0.5s ease-in-out; }
+        .slide {
+            min-width: 100%; background: linear-gradient(135deg, var(--slider-color-1), var(--slider-color-2));
+            color: white; padding: 40px 25px; text-align: center; box-sizing: border-box;
+        }
+        .slide h3 { margin: 0; font-size: 1.3rem; font-weight: 600; line-height: 1.4; }
+        .slider-dots { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s; }
+        .dot.active { background-color: white; }
+
+        .quick-actions { margin-top: 25px; text-align: left; }
+        .quick-actions h3 { font-size: 1.2rem; font-weight: 600; color: #495057; margin-bottom: 15px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .action-btn {
+            background: var(--card-background); border: none; border-radius: 12px; padding: 20px;
+            font-size: 1rem; font-weight: 600; color: var(--text-color); box-shadow: var(--shadow);
+            text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .action-btn:active { transform: scale(0.97); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .action-btn i { font-size: 1.8rem; margin-bottom: 10px; display: block; color: var(--primary-color); }
+
+        #leave-form-view h2 { text-align: center; font-size: 1.5rem; margin-bottom: 25px; }
+        .form-group { text-align: left; margin-bottom: 20px; } .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; background: #fdfdff; }
+        .submit-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #007bff, #6610f2); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        nav { display: flex; background-color: #fff; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); position: sticky; bottom: 0; z-index: 100; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+        .nav-btn { flex: 1; padding: 15px 10px; border: none; background-color: transparent; cursor: pointer; font-size: 1rem; font-weight: 600; color: #888; border-top: 4px solid transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-btn i { font-size: 1.2rem; }
+        .nav-btn.active { color: var(--primary-color); border-top: 4px solid var(--primary-color); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <main>
+            <div id="dashboard-view">
+                <div class="slider-container">
+                    <div class="slider">
+                        <div class="slide"><h3>"आगे बढ़ने का रहस्य बस शुरुआत करना है।"</h3></div>
+                        <div class="slide"><h3>"विश्वास करो कि तुम कर सकते हो, और तुम आधा रास्ता तय कर चुके हो।"</h3></div>
+                        <div class="slide"><h3>"भविष्य उनका है जो अपने सपनों की सुंदरता में विश्वास करते हैं।"</h3></div>
+                        <div class="slide"><h3>"प्रगति के लिए प्रयास करें, पूर्णता के लिए नहीं।"</h3></div>
+                    </div>
+                    <div class="slider-dots"></div>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-school"></i>
+                    <h2>Gyan Sthali Academy</h2>
+                    <p>Leave Application Portal</p>
+                    <p class="credit">A project by Beerendra Kumar</p>
+                </div>
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn" id="quick-apply-btn"><i class="fas fa-edit"></i>Apply for Leave</button>
+                        <button class="action-btn"><i class="fas fa-history"></i>View Past Leaves</button>
+                    </div>
+                </div>
+            </div>
+            <div id="leave-form-view" class="hidden">
+                <h2>Leave Application Form</h2>
+                <form id="leaveForm">
+                    <div class="form-group"><label for="studentName">Full Name:</label><input type="text" id="studentName" placeholder="e.g., Beerendra Kumar" required></div>
+                    <div class="form-group"><label for="studentClass">Class:</label><select id="studentClass" required><option value="">-- Select Class --</option><option value="11(A)">11 (A)</option><option value="11(B)">11 (B)</option><option value="12(A)">12 (A)</option><option value="12(B)">12 (B)</option></select></div>
+                    <div class="form-group"><label for="leaveDate">Date of Leave:</label><input type="date" id="leaveDate" required></div>
+                    <div class="form-group"><label for="leaveReason">Reason for Leave:</label><select id="leaveReason" required><option value="">-- Select Reason --</option><option value="fever">Fever</option><option value="homework">Urgent Work</option></select></div>
+                    <div class="form-group"><label for="salutation">Salutation:</label><select id="salutation" required><option value="Sir">Sir</option><option value="Madam">Madam</option></select></div>
+                    <button type="submit" class="submit-btn">Download Application PDF</button>
+                </form>
+            </div>
+        </main>
+        <nav>
+            <button id="nav-dashboard" class="nav-btn active"><i class="fas fa-home"></i> Dashboard</button>
+            <button id="nav-leave" class="nav-btn"><i class="fas fa-edit"></i> Apply</button>
+        </nav>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // DOM Elements
+        const navDashboard = document.getElementById('nav-dashboard'); const navLeave = document.getElementById('nav-leave');
+        const dashboardView = document.getElementById('dashboard-view'); const leaveFormView = document.getElementById('leave-form-view');
+        const leaveForm = document.getElementById('leaveForm'); const quickApplyBtn = document.getElementById('quick-apply-btn');
+        
+        function showApplyForm() {
+            leaveFormView.classList.remove('hidden'); dashboardView.classList.add('hidden');
+            navLeave.classList.add('active'); navDashboard.classList.remove('active');
+        }
+        function showDashboard() {
+            dashboardView.classList.remove('hidden'); leaveFormView.classList.add('hidden');
+            navDashboard.classList.add('active'); navLeave.classList.remove('active');
+        }
+        navDashboard.addEventListener('click', showDashboard); navLeave.addEventListener('click', showApplyForm); quickApplyBtn.addEventListener('click', showApplyForm);
+
+        const slider = document.querySelector('.slider'); const slides = document.querySelectorAll('.slide'); const dotsContainer = document.querySelector('.slider-dots');
+        let currentSlide = 0;
+        slides.forEach((_, i) => { const dot = document.createElement('div'); dot.classList.add('dot'); if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => { currentSlide = i; updateSlider(); }); dotsContainer.appendChild(dot);
+        });
+        const dots = document.querySelectorAll('.dot');
+        function updateSlider() { slider.style.transform = `translateX(-${currentSlide * 100}%)`; dots.forEach(dot => dot.classList.remove('active')); dots[currentSlide].classList.add('active'); }
+        setInterval(() => { currentSlide = (currentSlide + 1) % slides.length; updateSlider(); }, 5000);
+
+        const { jsPDF } = window.jspdf;
+        leaveForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const studentName = document.getElementById('studentName').value; const studentClass = document.getElementById('studentClass').value; const leaveDate = document.getElementById('leaveDate').value;
+            const leaveReason = document.getElementById('leaveReason').value; const salutation = document.getElementById('salutation').value;
+            const dateObj = new Date(leaveDate); const day = dateObj.getDate(); const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const month = monthNames[dateObj.getMonth()]; const year = dateObj.getFullYear(); const formattedDate = `${day} ${month} ${year}`;
+            const simpleDate = `${day}/${String(dateObj.getMonth()+1).padStart(2, '0')}/${year}`;
+            
+            const recipient = `To,\nThe Principal,\nGyan Sthali Academy\nLakhimpur (Kheri)`; 
+            const subject = `Subject: Application for one day's leave.`;
+            const salutationLine = `Respected ${salutation},`;
+            let mainParagraph;
+            if (leaveReason === 'fever') {
+                mainParagraph = `I beg to state that I am suffering from fever today, so I am unable to attend school. Therefore, kindly grant me leave for one day on ${formattedDate}.`;
+            } else { 
+                mainParagraph = `I beg to state that I have some important work at home today, so I am unable to attend school. Therefore, kindly grant me leave for one day on ${formattedDate}.`;
+            }
+            const closingLine = `I shall be highly obliged to you.`;
+            const regards = `Yours obediently,\n${studentName}\nClass – ${studentClass}\nDate – ${simpleDate}`;
+            
+            generatePDF(recipient, subject, salutationLine, mainParagraph, closingLine, regards);
+        });
+
+        function generatePDF(recipient, subject, salutationLine, mainParagraph, closingLine, regards) {
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            const startX = 20;
+            const maxWidth = 170;
+            
+            doc.setFont('times', 'normal');
+            doc.setFontSize(12);
+
+            // हर ब्लॉक को एक फिक्स Y पोजीशन दी गई है
+            doc.text(recipient, startX, 30, { lineHeightFactor: 1.4 });
+            
+            // Subject की Y पोजीशन को एडजस्ट किया गया
+            doc.setFont('times', 'bold');
+            doc.text(subject, startX, 60); // गैप बढ़ाया गया
+            
+            doc.setFont('times', 'normal');
+            doc.text(salutationLine, startX, 72); // गैप कम किया गया
+            
+            let splitParagraph = doc.splitTextToSize(mainParagraph, maxWidth);
+            doc.text(splitParagraph, startX, 82, { lineHeightFactor: 1.5 });
+            
+            doc.text(closingLine, startX, 102);
+            
+            doc.text(regards, startX, 117, { lineHeightFactor: 1.4 });
+
+            const fileName = `${document.getElementById('studentName').value.replace(/ /g,"_")}_leave_application.pdf`;
+            doc.save(fileName);
+        }
+    </script>
+
+</body>
+</html>
