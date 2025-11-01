@@ -70,140 +70,165 @@
     </div>
 
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let ringtoneTimeout;
+        // Wait for the entire page to load before running any script
+        window.addEventListener('DOMContentLoaded', () => {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let ringtoneTimeout;
 
-        function playSound(type, duration = 0.1, volume = 0.5) {
-            if (audioCtx.state === 'suspended') return;
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            g.gain.setValueAtTime(volume, audioCtx.currentTime);
-            if (type === 'alert') { o.frequency.setValueAtTime(900, audioCtx.currentTime); o.type = 'square'; }
-            if (type === 'typing') { o.frequency.setValueAtTime(1500, audioCtx.currentTime); o.type = 'triangle'; g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration); }
-            o.connect(g);
-            g.connect(audioCtx.destination);
-            o.start();
-            o.stop(audioCtx.currentTime + duration);
-        }
+            function playSound(type, duration = 0.1, volume = 0.5) {
+                if (audioCtx.state === 'suspended') return;
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                g.gain.setValueAtTime(volume, audioCtx.currentTime);
+                if (type === 'alert') { o.frequency.setValueAtTime(900, audioCtx.currentTime); o.type = 'square'; }
+                if (type === 'typing') { o.frequency.setValueAtTime(1500, audioCtx.currentTime); o.type = 'triangle'; g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration); }
+                o.connect(g);
+                g.connect(audioCtx.destination);
+                o.start();
+                o.stop(audioCtx.currentTime + duration);
+            }
 
-        // --- iPhone Ringtone Player ---
-        const iphoneMelody = [
-            { f: 987.77, d: 0.1 }, { f: 1108.73, d: 0.1 }, { f: 1318.51, d: 0.1 }, 
-            { f: 987.77, d: 0.1 }, { f: 1108.73, d: 0.1 }, { f: 1318.51, d: 0.1 },
-            { f: 1108.73, d: 0.1 }, { f: 1318.51, d: 0.1 }, { f: 1479.98, d: 0.1 }
-        ];
-        let noteIndex = 0;
-        let isRinging = false;
-        
-        function playRingtone() {
-            if (!isRinging || noteIndex >= iphoneMelody.length) noteIndex = 0;
-            const note = iphoneMelody[noteIndex];
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.frequency.setValueAtTime(note.f, audioCtx.currentTime);
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + note.d);
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + note.d);
-            noteIndex++;
-            if (isRinging) ringtoneTimeout = setTimeout(playRingtone, note.d * 1000 + 50);
-        }
-
-        function startRingtone() { isRinging = true; playRingtone(); }
-        function stopRingtone() { isRinging = false; clearTimeout(ringtoneTimeout); }
-
-        // --- Main Prank Logic ---
-        const matrixCanvas = document.getElementById('matrix');
-        const ctx = matrixCanvas.getContext('2d');
-        matrixCanvas.width = window.innerWidth; matrixCanvas.height = window.innerHeight;
-        const letters = '01'; const fontSize = 16; const columns = matrixCanvas.width / fontSize; const drops = Array(Math.floor(columns)).fill(1);
-        function drawMatrix() { ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height); ctx.fillStyle = '#0f0'; ctx.font = fontSize + 'px monospace'; for (let i = 0; i < drops.length; i++) { const text = letters[Math.floor(Math.random() * letters.length)]; ctx.fillText(text, i * fontSize, drops[i] * fontSize); if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; } }
-        setInterval(drawMatrix, 40);
-
-        const activateContainer = document.getElementById('activate-container');
-        const activateBtn = document.getElementById('activate-btn');
-        const targetContainer = document.getElementById('target-locked-container');
-        const hackingContainer = document.getElementById('hacking-container');
-        const friendName = 'Somil Mourya';
-
-        activateBtn.addEventListener('click', () => {
-            audioCtx.resume();
-            activateContainer.style.display = 'none';
-            targetContainer.style.display = 'block';
-            playSound('alert', 0.4, 0.6);
-            setTimeout(() => {
-                targetContainer.style.display = 'none';
-                hackingContainer.style.display = 'block';
-                startHackingSequence();
-            }, 4000);
-        });
-        
-        function startHackingSequence() {
-            const statusEl = document.getElementById('status');
-            const progressEl = document.getElementById('progress');
-            const actions = [
-                { delay: 1500, text: `लक्ष्य की पुष्टि: ${friendName}...` },
-                { delay: 3000, text: 'सिस्टम कमजोरियों का विश्लेषण...' },
-                { delay: 4500, text: 'पेलोड इंजेक्ट किया जा रहा है...' },
-                { delay: 6000, text: 'डायवर्सन रणनीति शुरू की जा रही है...' },
-                { delay: 7500, text: 'कॉल फ्लड अटैक को सक्रिय करना...\nTARGET: +91-9120XXXX11' }
+            const iphoneMelody = [
+                { f: 987.77, d: 0.1 }, { f: 1108.73, d: 0.1 }, { f: 1318.51, d: 0.1 }, 
+                { f: 987.77, d: 0.1 }, { f: 1108.73, d: 0.1 }, { f: 1318.51, d: 0.1 },
+                { f: 1108.73, d: 0.1 }, { f: 1318.51, d: 0.1 }, { f: 1479.98, d: 0.1 }
             ];
-            actions.forEach((action, index) => {
-                setTimeout(() => {
-                    statusEl.innerHTML = action.text;
-                    let progress = ((index + 1) / actions.length) * 100;
-                    progressEl.style.width = progress + '%';
-                    playSound('typing');
-                    if (index === actions.length - 1) setTimeout(startCallAttack, 2000);
-                }, action.delay);
+            let noteIndex = 0;
+            let isRinging = false;
+            
+            function playRingtone() {
+                if (!isRinging || noteIndex >= iphoneMelody.length) noteIndex = 0;
+                const note = iphoneMelody[noteIndex];
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.frequency.setValueAtTime(note.f, audioCtx.currentTime);
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + note.d);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + note.d);
+                noteIndex++;
+                if (isRinging) ringtoneTimeout = setTimeout(playRingtone, note.d * 1000 + 50);
+            }
+
+            function startRingtone() { isRinging = true; playRingtone(); }
+            function stopRingtone() { isRinging = false; clearTimeout(ringtoneTimeout); }
+
+            const matrixCanvas = document.getElementById('matrix');
+            const ctx = matrixCanvas.getContext('2d');
+            let letters = '01'; let fontSize = 16;
+            let columns, drops, matrixInterval;
+
+            function setupMatrix() {
+                matrixCanvas.width = window.innerWidth;
+                matrixCanvas.height = window.innerHeight;
+                columns = matrixCanvas.width / fontSize;
+                drops = Array(Math.floor(columns)).fill(1);
+            }
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+                ctx.fillStyle = '#0f0';
+                ctx.font = fontSize + 'px monospace';
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            
+            setupMatrix();
+            matrixInterval = setInterval(drawMatrix, 40);
+            window.addEventListener('resize', () => {
+                setupMatrix();
             });
-        }
 
-        function startCallAttack() {
-            hackingContainer.style.display = 'none';
-            startRingtone();
-            const callers = ['UNKNOWN', 'PRIVATE', 'Spam', 'CIA Office', 'Error 404'];
-            let callCount = 0;
-            const attackInterval = setInterval(() => {
-                if (callCount >= 25) {
-                    clearInterval(attackInterval);
-                    document.querySelectorAll('.incoming-call').forEach(call => call.remove());
-                    stopRingtone();
-                    showFinalMessage();
-                    return;
-                }
-                const callDiv = document.createElement('div');
-                callDiv.className = 'incoming-call';
-                const callerName = callers[Math.floor(Math.random() * callers.length)];
-                callDiv.innerHTML = `<div class="caller-info">${callerName}<br><span>calling...</span></div><div class="call-buttons"><button class="call-btn accept">📞</button><button class="call-btn decline">📞</button></div>`;
-                document.body.appendChild(callDiv);
-                callDiv.style.top = Math.random() * (window.innerHeight - 120) + 'px';
-                callDiv.style.left = Math.random() * (window.innerWidth - 270) + 'px';
-                callDiv.style.display = 'block';
-                callCount++;
-            }, 350);
-        }
+            const activateContainer = document.getElementById('activate-container');
+            const activateBtn = document.getElementById('activate-btn');
+            const targetContainer = document.getElementById('target-locked-container');
+            const hackingContainer = document.getElementById('hacking-container');
+            const friendName = 'Somil Mourya';
 
-        function showFinalMessage() {
-            const finalReveal = document.getElementById('final-reveal');
-            const finalTextEl = document.getElementById('final-text');
-            finalReveal.style.display = 'block';
-            const message = `Chill Bro ${friendName}! Call नहीं, दोस्त का प्यार बरस रहा है! 😂`;
-            let i = 0;
-            const typingInterval = setInterval(() => {
-                if (i < message.length) {
-                    finalTextEl.innerHTML += message.charAt(i);
-                    playSound('typing', 0.05);
-                    i++;
-                } else {
-                    finalTextEl.innerHTML += '<span class="cursor"></span>';
-                    clearInterval(typingInterval);
-                }
-            }, 80);
-        }
+            activateBtn.addEventListener('click', () => {
+                audioCtx.resume();
+                activateContainer.style.display = 'none';
+                targetContainer.style.display = 'block';
+                playSound('alert', 0.4, 0.6);
+                setTimeout(() => {
+                    targetContainer.style.display = 'none';
+                    hackingContainer.style.display = 'block';
+                    startHackingSequence();
+                }, 4000);
+            });
+            
+            function startHackingSequence() {
+                const statusEl = document.getElementById('status');
+                const progressEl = document.getElementById('progress');
+                const actions = [
+                    { delay: 1500, text: `लक्ष्य की पुष्टि: ${friendName}...` },
+                    { delay: 3000, text: 'सिस्टम कमजोरियों का विश्लेषण...' },
+                    { delay: 4500, text: 'पेलोड इंजेक्ट किया जा रहा है...' },
+                    { delay: 6000, text: 'डायवर्सन रणनीति शुरू की जा रही है...' },
+                    { delay: 7500, text: 'कॉल फ्लड अटैक को सक्रिय करना...\nTARGET: +91-9120XXXX11' }
+                ];
+                actions.forEach((action, index) => {
+                    setTimeout(() => {
+                        statusEl.innerHTML = action.text;
+                        let progress = ((index + 1) / actions.length) * 100;
+                        progressEl.style.width = progress + '%';
+                        playSound('typing');
+                        if (index === actions.length - 1) setTimeout(startCallAttack, 2000);
+                    }, action.delay);
+                });
+            }
+
+            function startCallAttack() {
+                hackingContainer.style.display = 'none';
+                startRingtone();
+                const callers = ['UNKNOWN', 'PRIVATE', 'Spam', 'CIA Office', 'Error 404'];
+                let callCount = 0;
+                const attackInterval = setInterval(() => {
+                    if (callCount >= 25) {
+                        clearInterval(attackInterval);
+                        document.querySelectorAll('.incoming-call').forEach(call => call.remove());
+                        stopRingtone();
+                        showFinalMessage();
+                        return;
+                    }
+                    const callDiv = document.createElement('div');
+                    callDiv.className = 'incoming-call';
+                    const callerName = callers[Math.floor(Math.random() * callers.length)];
+                    callDiv.innerHTML = `<div class="caller-info">${callerName}<br><span>calling...</span></div><div class="call-buttons"><button class="call-btn accept">📞</button><button class="call-btn decline">📞</button></div>`;
+                    document.body.appendChild(callDiv);
+                    callDiv.style.top = Math.random() * (window.innerHeight - 120) + 'px';
+                    callDiv.style.left = Math.random() * (window.innerWidth - 270) + 'px';
+                    callDiv.style.display = 'block';
+                    callCount++;
+                }, 350);
+            }
+
+            function showFinalMessage() {
+                const finalReveal = document.getElementById('final-reveal');
+                const finalTextEl = document.getElementById('final-text');
+                finalReveal.style.display = 'block';
+                const message = `Chill Bro ${friendName}! Call नहीं, दोस्त का प्यार बरस रहा है! 😂`;
+                let i = 0;
+                const typingInterval = setInterval(() => {
+                    if (i < message.length) {
+                        finalTextEl.innerHTML += message.charAt(i);
+                        playSound('typing', 0.05);
+                        i++;
+                    } else {
+                        finalTextEl.innerHTML += '<span class="cursor"></span>';
+                        clearInterval(typingInterval);
+                    }
+                }, 80);
+            }
+        });
     </script>
 </body>
 </html>
