@@ -68,12 +68,7 @@
             const matrixCanvas = document.getElementById('matrix'); const ctx = matrixCanvas.getContext('2d'); let letters = '01'; let fontSize = 16; let columns, drops; function setupMatrix() { matrixCanvas.width = window.innerWidth; matrixCanvas.height = window.innerHeight; columns = matrixCanvas.width / fontSize; drops = Array(Math.floor(columns)).fill(1); } function drawMatrix() { ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height); ctx.fillStyle = '#0f0'; ctx.font = fontSize + 'px monospace'; for (let i = 0; i < drops.length; i++) { const text = letters[Math.floor(Math.random() * letters.length)]; ctx.fillText(text, i * fontSize, drops[i] * fontSize); if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; } } setupMatrix(); setInterval(drawMatrix, 40); window.addEventListener('resize', setupMatrix);
             const generateBtn = document.getElementById('generate-btn'); const linkOutputContainer = document.getElementById('link-output-container');
             let shortLink = '';
-            async function shortenUrl(longUrl) {
-                try {
-                    const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
-                    if (response.ok) { return await response.text(); } else { return longUrl; }
-                } catch (error) { return longUrl; }
-            }
+            async function shortenUrl(longUrl) { try { const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`); if (response.ok) { return await response.text(); } else { return longUrl; } } catch (error) { return longUrl; } }
             generateBtn.addEventListener('click', async () => {
                 const nameInput = document.getElementById('target-name-input').value; const messageInput = document.getElementById('custom-message-input').value; const first4 = document.getElementById('phone-first-4').value; const last2 = document.getElementById('phone-last-2').value; if (!nameInput || !messageInput || !first4 || !last2) { alert("कृपया सभी जानकारी भरें!"); return; } if (first4.length !== 4 || last2.length !== 2) { alert("कृपया फ़ोन नंबर सही से भरें!"); return; }
                 generateBtn.textContent = 'LINK बन रहा है...'; generateBtn.disabled = true;
