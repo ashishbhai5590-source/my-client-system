@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Prank Control Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #000; color: #0f0; font-family: 'monospace', 'Courier New'; overflow-y: auto; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        canvas#matrix { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .container { 
+            position: relative; z-index: 2; text-align: center; background: rgba(0, 0, 0, 0.85); 
+            padding: 30px; border: 2px solid #0f0; box-shadow: 0 0 35px rgba(0, 255, 0, 0.5); 
+            width: 90%; max-width: 650px; border-radius: 5px;
+        }
+        h1 { color: #0f0; text-shadow: 0 0 10px #0f0; margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-size: 1.1em; }
+        .input-group input, .input-group textarea { width: 100%; background: #111; border: 1px solid #0f0; color: #fff; padding: 10px; font-size: 1.1em; border-radius: 3px; font-family: 'monospace', 'Courier New'; }
+        textarea { resize: vertical; }
+        .phone-inputs { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+        .phone-inputs input { flex-grow: 1; text-align: center; min-width: 60px; }
+        .phone-inputs span { font-size: 1.2em; color: #555; padding: 0 5px; }
+        #generate-btn { background-color: #f00; color: #fff; border: none; padding: 15px 30px; font-size: 1.2em; cursor: pointer; text-transform: uppercase; font-weight: bold; animation: pulse 1.2s infinite; border-radius: 5px; margin-top: 10px; width: 100%; }
+        #generate-btn:disabled { background-color: #555; animation: none; }
+        #link-output-container { display: none; margin-top: 25px; }
+        #link-output-container p { margin-bottom: 10px; }
+        .share-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .share-btn { color: #fff; text-decoration: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; }
+        .whatsapp { background-color: #25D366; } .telegram { background-color: #0088cc; } .facebook { background-color: #1877F2; } .copy { background-color: #6c757d; }
+        @keyframes pulse { 0% { box-shadow: 0 0 15px #f00; } 50% { box-shadow: 0 0 30px #f00; } 100% { box-shadow: 0 0 15px #f00;} }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+    <div class="container" id="dashboard-container">
+        <h1>PRANK CONTROL PANEL</h1>
+        <div class="input-group">
+            <label for="target-name-input">दोस्त का नाम:</label>
+            <input type="text" id="target-name-input" placeholder="जैसे: Somil Mourya">
+        </div>
+        <div class="input-group">
+            <label for="phone-first-4">टारगेट का फ़ोन नंबर:</label>
+            <div class="phone-inputs">
+                <span>+91</span>
+                <input type="tel" id="phone-first-4" maxlength="4" placeholder="4 अंक">
+                <span>XXXX</span>
+                <input type="tel" id="phone-last-2" maxlength="2" placeholder="2 अंक">
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="custom-message-input">आखिरी मैसेज:</label>
+            <textarea id="custom-message-input" rows="3" placeholder="जैसे: Chill Bro! Call नहीं, दोस्त का प्यार बरस रहा है! 😂"></textarea>
+        </div>
+        <button id="generate-btn">Generate Prank Link</button>
+        <div id="link-output-container">
+            <p>नीचे दिए गए बटन से छोटी लिंक भेजें:</p>
+            <div class="share-buttons">
+                <a href="#" id="whatsapp-share" class="share-btn whatsapp" target="_blank">WhatsApp</a>
+                <a href="#" id="telegram-share" class="share-btn telegram" target="_blank">Telegram</a>
+                <a href="#" id="facebook-share" class="share-btn facebook" target="_blank">Facebook</a>
+                <a href="#" id="copy-link" class="share-btn copy">Copy Link</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const matrixCanvas = document.getElementById('matrix'); const ctx = matrixCanvas.getContext('2d'); let letters = '01'; let fontSize = 16; let columns, drops; function setupMatrix() { matrixCanvas.width = window.innerWidth; matrixCanvas.height = window.innerHeight; columns = matrixCanvas.width / fontSize; drops = Array(Math.floor(columns)).fill(1); } function drawMatrix() { ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height); ctx.fillStyle = '#0f0'; ctx.font = fontSize + 'px monospace'; for (let i = 0; i < drops.length; i++) { const text = letters[Math.floor(Math.random() * letters.length)]; ctx.fillText(text, i * fontSize, drops[i] * fontSize); if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; } } setupMatrix(); setInterval(drawMatrix, 40); window.addEventListener('resize', setupMatrix);
+            const generateBtn = document.getElementById('generate-btn'); const linkOutputContainer = document.getElementById('link-output-container');
+            let shortLink = '';
+            async function shortenUrl(longUrl) {
+                try {
+                    const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+                    if (response.ok) { return await response.text(); } else { return longUrl; }
+                } catch (error) { return longUrl; }
+            }
+            generateBtn.addEventListener('click', async () => {
+                const nameInput = document.getElementById('target-name-input').value; const messageInput = document.getElementById('custom-message-input').value; const first4 = document.getElementById('phone-first-4').value; const last2 = document.getElementById('phone-last-2').value; if (!nameInput || !messageInput || !first4 || !last2) { alert("कृपया सभी जानकारी भरें!"); return; } if (first4.length !== 4 || last2.length !== 2) { alert("कृपया फ़ोन नंबर सही से भरें!"); return; }
+                generateBtn.textContent = 'LINK बन रहा है...'; generateBtn.disabled = true;
+                const phoneNum = `+91-${first4}XXXX${last2}`; const baseUrl = window.location.href.replace('prank-maker.html', 'start-prank.html').split('?')[0]; const encodedName = encodeURIComponent(nameInput); const encodedMessage = encodeURIComponent(messageInput); const encodedNum = encodeURIComponent(phoneNum); const longLink = `${baseUrl}?name=${encodedName}&msg=${encodedMessage}&num=${encodedNum}`;
+                shortLink = await shortenUrl(longLink);
+                const shareMessage = encodeURIComponent(`भाई, ये देख क्या मिला! 😱\n${shortLink}`);
+                document.getElementById('whatsapp-share').href = `https://api.whatsapp.com/send?text=${shareMessage}`;
+                document.getElementById('telegram-share').href = `https://t.me/share/url?url=${shortLink}&text=${shareMessage}`;
+                document.getElementById('facebook-share').href = `https://www.facebook.com/sharer/sharer.php?u=${shortLink}`;
+                linkOutputContainer.style.display = 'block';
+                generateBtn.textContent = 'Generate Prank Link'; generateBtn.disabled = false;
+            });
+            document.getElementById('copy-link').addEventListener('click', (e) => { e.preventDefault(); navigator.clipboard.writeText(shortLink).then(() => { alert("छोटी लिंक कॉपी हो गई!"); }); });
+        });
+    </script>
+</body>
+</html>

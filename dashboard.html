@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Prank Counter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #000; color: #0f0; font-family: 'monospace', 'Courier New'; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; }
+        canvas#matrix { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .container { background: rgba(0, 0, 0, 0.85); padding: 40px; border: 2px solid #0f0; box-shadow: 0 0 35px rgba(0, 255, 0, 0.5); border-radius: 10px; }
+        h1 { font-size: 2em; margin-bottom: 30px; text-shadow: 0 0 10px #0f0; }
+        .counter-display { font-size: 6em; font-weight: bold; text-shadow: 0 0 20px #0f0; }
+        #click-count { animation: glow 1.5s infinite alternate; }
+        p { margin-top: 20px; color: #888; }
+        @keyframes glow { from { text-shadow: 0 0 20px #0f0; } to { text-shadow: 0 0 40px #0ff; color: #0ff; } }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+    <div class="container">
+        <h1>LIVE PRANK VIEWS</h1>
+        <div class="counter-display">
+            👀 <span id="click-count">0</span>
+        </div>
+        <p>यह पेज अपने आप रिफ्रेश होता रहेगा...</p>
+    </div>
+    <script>
+        const API_NAMESPACE = "somil-prank-project"; const API_KEY = "total-clicks";
+        async function updateCounter() {
+            try {
+                const response = await fetch(`https://api.countapi.xyz/get/${API_NAMESPACE}/${API_KEY}`);
+                const data = await response.json();
+                document.getElementById('click-count').textContent = data.value || 0;
+            } catch (error) { document.getElementById('click-count').textContent = 'Error'; }
+        }
+        setInterval(updateCounter, 5000);
+        window.addEventListener('DOMContentLoaded', updateCounter);
+        const matrixCanvas = document.getElementById('matrix'); const ctx = matrixCanvas.getContext('2d'); let letters = '01'; let fontSize = 16; let columns, drops; function setupMatrix() { matrixCanvas.width = window.innerWidth; matrixCanvas.height = window.innerHeight; columns = matrixCanvas.width / fontSize; drops = Array(Math.floor(columns)).fill(1); } function drawMatrix() { ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height); ctx.fillStyle = '#0f0'; ctx.font = fontSize + 'px monospace'; for (let i = 0; i < drops.length; i++) { const text = letters[Math.floor(Math.random() * letters.length)]; ctx.fillText(text, i * fontSize, drops[i] * fontSize); if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; } } setupMatrix(); setInterval(drawMatrix, 40); window.addEventListener('resize', setupMatrix);
+    </script>
+</body>
+</html>
