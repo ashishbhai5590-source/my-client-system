@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miss SMM पैनल</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #6a11cb;
+            --secondary-color: #2575fc;
+            --success-color: #1db954; 
+            --light-gray: #f0f2f5;
+            --dark-gray: #333;
+            --white: #ffffff;
+        }
+
+        /* Basic Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-gray);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .smm-panel {
+            background-color: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+        }
+        .panel-header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+        .panel-header p { margin: 5px 0 0; font-size: 16px; opacity: 0.9; }
+        .panel-body { padding: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--dark-gray); }
+        .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); }
+
+        .platform-selector { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; }
+        .platform-selector input[type="radio"] { display: none; }
+        .platform-selector label { border: 2px solid #ddd; border-radius: 10px; padding: 20px 15px; cursor: pointer; width: 140px; height: 140px; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        .platform-selector img { width: 48px; height: 48px; }
+        .platform-selector span { font-weight: 600; color: var(--dark-gray); font-size: 16px; }
+        .platform-selector input[type="radio"]:checked + label { border-color: var(--primary-color); background-color: #f4efff; transform: scale(1.05); box-shadow: 0 5px 15px rgba(106, 17, 203, 0.1); }
+
+        .price-display { text-align: center; margin: -10px 0 20px 0; font-size: 24px; font-weight: 700; color: var(--primary-color); }
+        .price-display span { font-size: 18px; }
+
+        .submit-btn { background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: var(--white); border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .submit-btn:hover { transform: scale(1.02); }
+
+        .support-btn-container { text-align: center; margin-top: 20px; }
+        .support-btn { background-color: #0088cc; color: var(--white); border: none; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px; }
+        .support-btn:hover { background-color: #0077b5; transform: scale(1.05); }
+        .support-btn svg { width: 24px; height: 24px; fill: white; }
+
+        .warning { background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; padding: 10px; font-size: 14px; margin-top: 15px; text-align: center; }
+
+        .full-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--white); z-index: 1000; overflow-y: auto; }
+
+        #payment-page .content { padding: 30px; max-width: 500px; margin: 40px auto; text-align: center; }
+        #payment-page .qr-code { width: 200px; height: 200px; margin: 15px 0; border: 1px solid #eee; }
+        #timer { font-size: 28px; font-weight: 700; color: var(--primary-color); margin: 10px 0 20px 0; }
+        #final-amount { font-size: 32px; font-weight: 700; color: var(--dark-gray); margin-bottom: 20px; }
+
+        /* === FINAL & FIXED Success Screen === */
+        #success-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--success-color);
+            color: var(--white);
+            text-align: center;
+            padding: 20px 30px; /* Increased horizontal padding */
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        #success-screen.visible {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .success-animation-container {
+            width: 120px; height: 120px;
+            margin-bottom: 20px;
+        }
+        .checkmark-circle {
+            stroke-dasharray: 315; stroke-dashoffset: 315;
+            stroke-width: 4; stroke: white; fill: none;
+            animation: circle-anim 0.8s ease-in-out forwards;
+        }
+        .checkmark-tick {
+            stroke-dasharray: 80; stroke-dashoffset: 80;
+            stroke-width: 5; stroke-linecap: round; stroke-linejoin: round;
+            stroke: white; fill: none;
+            animation: tick-anim 0.6s ease-out forwards 0.5s;
+        }
+        
+        #success-screen h1 { 
+            font-size: clamp(1.6rem, 6vw, 2.2rem);
+            margin-bottom: 15px; 
+            animation: fade-in 0.6s ease-in-out 1s forwards;
+            opacity: 0;
+            max-width: 100%;
+        }
+        
+        #success-screen p { 
+            font-size: 0.95rem; 
+            max-width: 100%; 
+            opacity: 0; 
+            line-height: 1.6;
+            animation: fade-in 0.6s ease-in-out 1.2s forwards;
+        }
+        
+        #success-screen .submit-btn { 
+            width: auto; padding: 15px 40px; margin-top: 30px; 
+            opacity: 0;
+            animation: fade-in 0.6s ease-in-out 1.4s forwards;
+        }
+        
+        @keyframes circle-anim { to { stroke-dashoffset: 0; } }
+        @keyframes tick-anim { to { stroke-dashoffset: 0; } }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="order-section" class="container">
+        <div class="smm-panel">
+             <div class="panel-header">
+                <h1>Miss SMM पैनल</h1><p>आपकी सभी सोशल मीडिया जरूरतों के लिए</p>
+            </div>
+            <div class="panel-body">
+                <form id="orderForm" onsubmit="return false;">
+                    <div class="form-group platform-selector">
+                        <input type="radio" id="instagram" name="platform" value="Instagram" checked onchange="updateServices()"><label for="instagram"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram"><span>इंस्टाग्राम</span></label>
+                        <input type="radio" id="youtube" name="platform" value="YouTube" onchange="updateServices()"><label for="youtube"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/1280px-YouTube_full-color_icon_%282017%29.svg.png" alt="YouTube"><span>यूट्यूब</span></label>
+                    </div>
+                    <div class="form-group"><label for="service">सर्विस चुनें</label><select id="service" name="service" required onchange="calculatePrice()"></select></div>
+                    <div class="form-group"><label for="username">अपना यूजरनेम या लिंक डालें</label><input type="text" id="username" name="username" placeholder="जैसे: @yourusername या पूरा लिंक" required></div>
+                    <div class="form-group"><label for="quantity">मात्रा (Quantity)</label><input type="number" id="quantity" name="quantity" placeholder="1000 से कम स्वीकार नहीं" required oninput="calculatePrice()"></div>
+                    <div class="price-display" id="price-display"><span>कीमत:</span> ₹0</div>
+                    <hr style="border:0;border-top:1px solid #eee;margin:25px 0;">
+                    <div class="form-group"><label for="customer_name">आपका नाम</label><input type="text" id="customer_name" name="customer_name" placeholder="अपना पूरा नाम दर्ज करें" required></div>
+                    <div class="form-group"><label for="customer_contact">संपर्क (WhatsApp)</label><input type="text" id="customer_contact" name="customer_contact" placeholder="अपना व्हाट्सएप नंबर दर्ज करें" required></div>
+                    <div class="warning" style="margin-bottom:20px;"><strong>ध्यान दें:</strong> कृपया सभी जानकारी सही-सही भरें। 1000 से कम मात्रा का ऑर्डर पूरा नहीं होगा।</div>
+                    <button type="button" class="submit-btn" onclick="proceedToPayment()">पेमेंट करने के लिए आगे बढ़ें</button>
+                    <div class="support-btn-container"><a href="https://t.me/Apnabhai55" target="_blank" class="support-btn"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M0 0h24v24H0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg><span>टेलीग्राम पर सपोर्ट</span></a></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-page" class="full-page">
+        <div class="content">
+            <h2>पेमेंट करें</h2><p>ऑर्डर फाइनल करने के लिए कृपया नीचे दिए गए QR पर पेमेंट करें।</p>
+            <div id="final-amount">₹0</div>
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi1tmavzx0UjD2rrMAqB9xgNUCs9Au7DAG8wQwgy37TEP-PowKjk8gP4HLpxuGXW6XNLdZ1UlKvCRoPrDUKElKFZ2C8p7AhikyoA5RX0gvgxjhonhjqoKPXASre19AwqvqU_OkIRkeP6W1RgfxhS_NwghvCAeK8UYyGgGquY_NNg1rvmQfcW0fjIG-_3ZsN/s320/1000035146.png" alt="QR Code" class="qr-code">
+            <p><strong>UPI ID:</strong> your-upi-only@Qr</p>
+            <div id="timer">05:00</div>
+            <form id="paymentForm" onsubmit="return false;">
+                <div class="form-group" style="text-align:left;"><label for="utr">UTR/Transaction ID डालें</label><input type="text" id="utr" name="utr" placeholder="12 अंकों का UTR नंबर" required></div>
+                <div class="warning"><strong>जरूरी:</strong> पेमेंट करने के बाद सही UTR नंबर यहां डालें। गलत जानकारी देने पर आपका ऑर्डर कन्फर्म नहीं होगा।</div>
+                <button type="button" class="submit-btn" style="margin-top:20px;" onclick="confirmOrder()">ऑर्डर कन्फर्म करें</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="success-screen" class="full-page">
+        <svg class="success-animation-container" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle class="checkmark-circle" cx="50" cy="50" r="45"/><polyline class="checkmark-tick" points="25,50 45,70 75,30"/>
+        </svg>
+        <h1>ऑर्डर सफलतापूर्वक कन्फर्म हुआ!</h1>
+        <p>आपका ऑर्डर हमें मिल गया है और 24 घंटे के अंदर पूरा कर दिया जाएगा।<br>अधिक जानकारी के लिए हमारे सपोर्ट से संपर्क करें।</p>
+        <button class="submit-btn" onclick="orderAgain()">एक और ऑर्डर करें</button>
+    </div>
+
+    <script>
+        // --- JavaScript is the same as before, no changes needed ---
+        const services = {
+            Instagram: [
+                { name: '💎 प्रीमियम फॉलोअर्स', value: 'insta_premium_followers', price: 80, unit: 1000 },
+                { name: '❤️ प्रोफेशनल लाइक्स', value: 'insta_pro_likes', price: 30, unit: 1000 },
+                { name: '👀 रील व्यूज', value: 'insta_reel_views', price: 50, unit: 5000 }
+            ],
+            YouTube: [
+                { name: '👑 प्रीमियम सब्सक्राइबर्स', value: 'yt_premium_subscribers', price: 80, unit: 1000 },
+                { name: '📈 प्रोफेशनल व्यूज', value: 'yt_pro_views', price: 60, unit: 5000 },
+                { name: '👍 लाइक्स', value: 'yt_likes', price: 30, unit: 2000 }
+            ]
+        };
+
+        function updateServices() {
+            const platform = document.querySelector('input[name="platform"]:checked').value;
+            const serviceSelect = document.getElementById('service');
+            serviceSelect.innerHTML = '';
+            services[platform].forEach(service => {
+                const option = document.createElement('option');
+                option.value = service.value;
+                option.textContent = `${service.name} - ₹${service.price}/${service.unit/1000}k`;
+                option.dataset.price = service.price;
+                option.dataset.unit = service.unit;
+                serviceSelect.appendChild(option);
+            });
+            calculatePrice();
+        }
+        
+        function calculatePrice() {
+            const serviceSelect = document.getElementById('service');
+            const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+            const quantityInput = document.getElementById('quantity');
+            const priceDisplay = document.getElementById('price-display');
+
+            if (!selectedOption || !quantityInput.value || quantityInput.value < 1) {
+                priceDisplay.innerHTML = '<span>कीमत:</span> ₹0';
+                return;
+            }
+
+            const price = parseFloat(selectedOption.dataset.price);
+            const unit = parseInt(selectedOption.dataset.unit);
+            const total = (parseInt(quantityInput.value) / unit) * price;
+
+            priceDisplay.innerHTML = `<span>कीमत:</span> ₹${total.toFixed(2)}`;
+        }
+
+        let timerInterval;
+
+        function startTimer(duration, display) {
+            let timer = duration, minutes, seconds;
+            timerInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                display.textContent = minutes + ":" + seconds;
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    alert("पेमेंट का समय समाप्त हो गया है! कृपया फिर से प्रयास करें।");
+                    document.getElementById('payment-page').style.display = 'none';
+                    document.getElementById('order-section').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function proceedToPayment() {
+            const quantityInput = document.getElementById('quantity');
+            if (parseInt(quantityInput.value) < 1000) {
+                alert("कृपया कम से कम 1000 की मात्रा दर्ज करें।");
+                return;
+            }
+
+            if (document.getElementById('orderForm').checkValidity()) {
+                const priceText = document.getElementById('price-display').innerText;
+                document.getElementById('final-amount').innerText = priceText.replace('कीमत: ', '');
+                document.getElementById('order-section').style.display = 'none';
+                document.getElementById('payment-page').style.display = 'block';
+                const fiveMinutes = 60 * 5;
+                const display = document.querySelector('#timer');
+                startTimer(fiveMinutes, display);
+            } else {
+                alert('कृपया ऑर्डर की सभी जानकारी सही-सही भरें!');
+                document.getElementById('orderForm').reportValidity();
+            }
+        }
+
+        async function confirmOrder() {
+            if (!document.getElementById('paymentForm').checkValidity()) {
+                 alert('कृपया सही UTR नंबर डालें!');
+                 document.getElementById('paymentForm').reportValidity();
+                 return;
+            }
+            
+            clearInterval(timerInterval);
+
+            document.getElementById('payment-page').style.display = 'none';
+            const successScreen = document.getElementById('success-screen');
+            successScreen.classList.add('visible');
+            
+            const orderForm = new FormData(document.getElementById('orderForm'));
+            const paymentForm = new FormData(document.getElementById('paymentForm'));
+            const data = {
+                ...Object.fromEntries(orderForm.entries()),
+                ...Object.fromEntries(paymentForm.entries()),
+                price: document.getElementById('final-amount').innerText
+            };
+            
+            try {
+                const response = await fetch('send_to_telegram.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                console.log('Server Response:', result.message);
+            } catch (error) {
+                console.error('Error sending data to server:', error);
+            }
+        }
+
+        function orderAgain() {
+            const successScreen = document.getElementById('success-screen');
+            successScreen.classList.remove('visible');
+            
+            setTimeout(() => {
+                document.getElementById('orderForm').reset();
+                document.getElementById('paymentForm').reset();
+                updateServices();
+                document.getElementById('order-section').style.display = 'block';
+            }, 400); 
+        }
+        
+        document.addEventListener('DOMContentLoaded', updateServices);
+    </script>
+</body>
+</html>
