@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank-Grade Secure P2P Stream</title>
+    <!-- Libraries -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        :root {
+            --primary-glow: rgba(220, 20, 60, 0.6); /* Crimson */
+            --primary-color: #DC143C;
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+            --text-light: #e0e0e0;
+            --text-muted: #888;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --shadow: 0 0 40px var(--primary-glow);
+        }
+        body { font-family: 'Poppins', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--bg-dark); color: var(--text-light); }
+        .container { background: var(--card-bg); padding: 2.5rem; border-radius: 24px; box-shadow: var(--shadow); border: 1px solid rgba(255, 255, 255, 0.1); width: 90%; max-width: 380px; text-align: center; overflow: hidden; }
+        .state { display: none; animation: fadeIn 0.5s ease-out; }
+        .state.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        h1 { font-weight: 600; margin: 0 0 10px 0; font-size: 1.5rem; }
+        p { color: var(--text-muted); line-height: 1.6; }
+        .btn { padding: 0.8rem 1.5rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; cursor: pointer; transition: all 0.3s ease; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn:hover:not(:disabled) { filter: brightness(1.2); }
+        .btn:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
+        .upload-area { border: 2px dashed rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; cursor: pointer; margin-top: 1.5rem; }
+        #file-input { display: none; }
+        .pin-input-container { margin: 1.5rem 0; display: flex; justify-content: center; gap: 10px; }
+        .pin-input { width: 45px; height: 55px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: var(--text-light); font-size: 1.8rem; -moz-appearance: textfield; }
+        .pin-input::-webkit-outer-spin-button, .pin-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        #qr-link-display { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 10px; margin-top: 1rem; font-weight: 600; word-wrap: break-word; font-size: 0.9rem; }
+        #tv-pin-display { color: var(--primary-color); font-size: 2.5rem; letter-spacing: 15px; margin: 0.5rem 0; font-weight: 600; padding-left: 15px; }
+        #qr-code-container { margin: 1.5rem auto; background: white; padding: 12px; border-radius: 12px; display: inline-block; }
+        #scanner-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        #scanner-window { width: 90%; max-width: 400px; padding: 1rem; border-radius: 16px; position: relative; }
+        #scanner-container { width: 100%; border-radius: 12px; overflow: hidden; }
+        #close-scanner { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; border-radius: 50%; width: 30px; height: 30px; border: none; font-size: 1.2rem; cursor: pointer; }
+        #video-player-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; display: none; }
+        #main-video-player { width: 100%; height: 100%; }
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); padding: 1rem 1.5rem; border-radius: 12px; color: white; font-weight: 600; z-index: 3000; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        #toast.show { bottom: 30px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Mobile: Step 1 - Upload -->
+        <div id="mobile-upload-state" class="state">
+            <h1>अल्ट्रा सिक्योर हब</h1>
+            <p>एक सुरक्षित P2P कनेक्शन बनाने के लिए फ़ाइल चुनें।</p>
+            <label for="file-input" class="upload-area">
+                <p style="font-weight: 600;">फ़ाइल चुनें</p>
+            </label>
+            <input type="file" id="file-input" accept="video/*">
+        </div>
+
+        <!-- Mobile: Step 2 - Set PIN -->
+        <div id="mobile-pin-state" class="state">
+            <h1>सुरक्षा पिन सेट करें</h1>
+            <p>एक 4-अंकों का पिन बनाएँ जो केवल आपको पता हो।</p>
+            <div class="pin-input-container">
+                <input type="number" class="pin-input" maxlength="1">
+                <input type="number" class="pin-input" maxlength="1">
+                <input type="number" class="pin-input" maxlength="1">
+                <input type="number" class="pin-input" maxlength="1">
+            </div>
+            <button id="set-pin-btn" class="btn" disabled>लिंक बनाएँ</button>
+        </div>
+
+        <!-- Mobile: Step 3 - Scan -->
+        <div id="mobile-scan-state" class="state">
+            <h1>कनेक्ट करने के लिए तैयार</h1>
+            <p>यह लिंक अपने टीवी ब्राउज़र में खोलें:</p>
+            <div id="qr-link-display"></div>
+            <p style="margin-top: 1.5rem;">जब टीवी पर QR कोड दिखे, उसे स्कैन करें:</p>
+            <button id="scan-btn" class="btn">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path></svg>
+                स्कैन करें
+            </button>
+        </div>
+
+        <!-- TV: Waiting State -->
+        <div id="tv-wait-state" class="state">
+            <h1>सुरक्षित कनेक्शन...</h1>
+            <p>सुनिश्चित करें कि मोबाइल का पिन इससे मैच हो:</p>
+            <div id="tv-pin-display"></div>
+            <p style="margin-top:1.5rem;">अब अपने मोबाइल से इस QR कोड को स्कैन करें।</p>
+            <div id="qr-code-container"></div>
+        </div>
+    </div>
+    
+    <div id="scanner-modal">
+        <div id="scanner-window">
+            <button id="close-scanner">&times;</button>
+            <div id="scanner-container"></div>
+        </div>
+    </div>
+    <div id="video-player-container"><video id="main-video-player" controls autoplay></video></div>
+    <div id="toast"></div>
+
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
+    <script>
+    const App = {
+        peer: null, conn: null, fileToSend: null, pin: null, secret: null, qrScanner: null,
+        elements: {},
+
+        init() {
+            // Cache all DOM elements
+            this.elements.container = document.querySelector('.container');
+            this.elements.states = document.querySelectorAll('.state');
+            this.elements.fileInput = document.getElementById('file-input');
+            this.elements.pinInputs = document.querySelectorAll('.pin-input');
+            this.elements.setPinBtn = document.getElementById('set-pin-btn');
+            this.elements.qrLinkDisplay = document.getElementById('qr-link-display');
+            this.elements.scanBtn = document.getElementById('scan-btn');
+            this.elements.tvPinDisplay = document.getElementById('tv-pin-display');
+            this.elements.qrCodeContainer = document.getElementById('qr-code-container');
+            this.elements.scannerModal = document.getElementById('scanner-modal');
+            this.elements.scannerContainer = document.getElementById('scanner-container');
+            this.elements.closeScannerBtn = document.getElementById('close-scanner');
+            this.elements.videoContainer = document.getElementById('video-player-container');
+            this.elements.videoPlayer = document.getElementById('main-video-player');
+            this.elements.toast = document.getElementById('toast');
+
+            this.attachEventListeners();
+            
+            // Check URL to determine if Mobile or TV
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            if (params.has('session') && params.has('secret')) {
+                this.initTV(params.get('session'), params.get('secret'));
+            } else {
+                this.initMobile();
+            }
+        },
+        
+        showState(stateId) {
+            this.elements.states.forEach(s => s.classList.remove('active'));
+            document.getElementById(stateId)?.classList.add('active');
+        },
+
+        showToast(message, isSuccess = true) {
+            this.elements.toast.textContent = message;
+            this.elements.toast.style.background = isSuccess ? 'var(--success-color)' : 'var(--error-color)';
+            this.elements.toast.classList.add('show');
+            setTimeout(() => this.elements.toast.classList.remove('show'), 4000);
+        },
+
+        // --- MOBILE WORKFLOW ---
+        initMobile() { this.showState('mobile-upload-state'); },
+        
+        handleFileSelect(event) {
+            this.fileToSend = event.target.files[0];
+            if (this.fileToSend) {
+                this.showState('mobile-pin-state');
+                this.elements.pinInputs[0].focus();
+            }
+        },
+
+        handlePinInput(e) {
+            const inputs = Array.from(this.elements.pinInputs);
+            if (e.target.value && e.target.nextElementSibling) {
+                e.target.nextElementSibling.focus();
+            }
+            let pin = inputs.map(i => i.value).join('');
+            this.elements.setPinBtn.disabled = pin.length !== 4;
+        },
+
+        generateLink() {
+            this.pin = Array.from(this.elements.pinInputs).map(i => i.value).join('');
+            this.secret = Math.random().toString(36).substring(2, 12);
+            const sessionId = Math.random().toString(36).substring(2, 7);
+            const params = new URLSearchParams({ session: sessionId, secret: this.secret });
+            const url = `${window.location.href.split('#')[0]}#${params.toString()}`;
+            this.elements.qrLinkDisplay.textContent = url;
+            this.showState('mobile-scan-state');
+            this.initializePeer(sessionId, true);
+        },
+
+        startScanner() {
+            this.elements.scannerModal.style.display = 'flex';
+            this.qrScanner = new Html5Qrcode("scanner-container");
+            this.qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => { this.stopScanner(); this.connectToTV(decodedText); },
+                () => {}
+            ).catch(err => {
+                this.showToast('कैमरा शुरू नहीं हो सका।', false);
+                this.stopScanner();
+            });
+        },
+        
+        stopScanner() {
+            if (this.qrScanner && this.qrScanner.isScanning) {
+                this.qrScanner.stop();
+            }
+            this.elements.scannerModal.style.display = 'none';
+        },
+
+        connectToTV(tvPeerId) {
+            this.showToast('सुरक्षित कनेक्शन बना रहा है...');
+            this.conn = this.peer.connect(tvPeerId);
+            this.conn.on('open', () => {
+                // SECURITY HANDSHAKE
+                this.conn.send({ type: 'auth', secret: this.secret, pin: this.pin });
+            });
+            this.conn.on('error', () => this.showToast('कनेक्शन विफल।', false));
+        },
+
+        // --- TV WORKFLOW ---
+        initTV(sessionId, secret) {
+            this.secret = secret;
+            this.showState('tv-wait-state');
+            this.initializePeer(sessionId, false);
+        },
+
+        // --- PEERJS LOGIC (for both) ---
+        initializePeer(id, isMobile) {
+            this.peer = new Peer(id, {
+                // For better reliability, especially on restrictive networks
+                // You might need a TURN server for networks outside your local WiFi
+                // For local WiFi, this is usually not needed.
+            });
+            this.peer.on('open', (peerId) => {
+                if (!isMobile) {
+                    new QRCode(this.elements.qrCodeContainer, { text: peerId, width: 200, height: 200 });
+                }
+            });
+
+            this.peer.on('connection', (connection) => {
+                this.conn = connection;
+                this.conn.on('data', (data) => {
+                    if (data.type === 'auth') { // TV receives auth request
+                        if (data.secret === this.secret) {
+                            this.showToast('प्रमाणीकरण सफल!', true);
+                            this.elements.tvPinDisplay.textContent = data.pin;
+                            this.conn.send({ type: 'auth_success' });
+                        } else {
+                            this.showToast('असुरक्षित कनेक्शन! अस्वीकृत।', false);
+                            this.conn.close();
+                        }
+                    } else if (data.type === 'auth_success' && isMobile) { // Mobile receives confirmation
+                        this.showToast('कनेक्शन सफल! फ़ाइल भेजी जा रही है...', true);
+                        this.conn.send(this.fileToSend); // Send the actual file
+                    } else if (data instanceof ArrayBuffer && !isMobile) { // TV receives file
+                        const blobUrl = URL.createObjectURL(new Blob([data]));
+                        this.elements.videoPlayer.src = blobUrl;
+                        this.elements.container.style.display = 'none';
+                        this.elements.videoContainer.style.display = 'block';
+                        this.elements.videoPlayer.requestFullscreen();
+                    }
+                });
+            });
+
+            this.peer.on('error', (err) => this.showToast(`त्रुटि: ${err.type}`, false));
+        },
+
+        attachEventListeners() {
+            this.elements.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+            this.elements.pinInputs.forEach(input => {
+                input.addEventListener('keyup', this.handlePinInput.bind(this));
+            });
+            this.elements.setPinBtn.addEventListener('click', this.generateLink.bind(this));
+            this.elements.scanBtn.addEventListener('click', this.startScanner.bind(this));
+            this.elements.closeScannerBtn.addEventListener('click', this.stopScanner.bind(this));
+        }
+    };
+    App.init();
+    </script>
+</body>
+</html>
