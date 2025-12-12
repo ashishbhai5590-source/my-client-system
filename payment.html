@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Payment</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        *,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:'Poppins',sans-serif;background-color:#f4f7fe;display:grid;place-items:center;min-height:100vh;padding:20px}.payment-container{width:100%;max-width:450px;background-color:#fff;box-shadow:0 20px 50px -10px rgba(0,0,0,.1);border-radius:24px;overflow:hidden;animation:popIn .6s cubic-bezier(.165,.84,.44,1) forwards}[data-view]{display:none}[data-view].active{display:block}.buy-now-view{padding:4rem 2rem;text-align:center}.buy-now-view h1{font-size:2rem;margin:0 0 1rem 0;font-weight:700}.buy-now-view p{color:#555;margin:0 0 2.5rem 0}.buy-now-view .button{background:linear-gradient(45deg,#5D50FE,#8A4AF3);color:#fff;padding:1rem 3rem;border:none;border-radius:12px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all .3s ease;box-shadow:0 5px 20px -5px rgba(93,80,254,.5)}.buy-now-view .button:hover{transform:translateY(-4px);box-shadow:0 8px 25px -5px rgba(93,80,254,.7)}.payment-view{animation:fadeIn .5s}.payment-header{background:linear-gradient(45deg,#5D50FE,#8A4AF3);color:#fff;padding:25px 30px;display:flex;justify-content:space-between;align-items:center}.merchant-info{display:flex;align-items:center;gap:15px}.header-logo{width:48px;height:48px}.merchant-name{font-size:1.3rem;font-weight:600}.amount{font-size:1.8rem;font-weight:700}.payment-body{padding:30px;text-align:center;background-color:#f7f8fc}.timer{color:#333;font-weight:600;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px}.qr-card{background:#fff;padding:20px;border-radius:18px;box-shadow:0 10px 25px -5px rgba(0,0,0,.07);display:inline-block}.qr-code{width:250px;height:250px;display:block}.scan-instruction{margin-top:25px;color:#555;font-size:1rem}.app-icons{margin-top:15px;display:flex;justify-content:center;align-items:center;gap:20px}.app-icon-container{height:40px;width:85px;display:grid;place-items:center;opacity:.6;transition:opacity .2s}.app-icon-container:hover{opacity:1}.app-icons img{max-height:100%;max-width:100%}.success-view{padding:4rem 2rem;text-align:center}.success-checkmark{width:100px;height:100px;border-radius:50%;display:block;stroke-width:2;stroke:#fff;stroke-miterlimit:10;box-shadow:inset 0 0 0 #2dce89;animation:fill .4s ease-in-out .4s forwards,scale .3s ease-in-out .9s both;margin:0 auto 20px}.success-checkmark__circle{stroke-dasharray:166;stroke-dashoffset:166;stroke-width:2;stroke-miterlimit:10;stroke:#2dce89;fill:none;animation:stroke .6s cubic-bezier(.65,0,.45,1) forwards}.success-checkmark__check{transform-origin:50% 50%;stroke-dasharray:48;stroke-dashoffset:48;animation:stroke .3s cubic-bezier(.65,0,.45,1) .8s forwards}.success-view .subheading{font-size:1.1rem;color:#555;margin-bottom:.5rem}.success-view .heading{font-size:2rem;font-weight:700;margin:0}@keyframes stroke{100%{stroke-dashoffset:0}}@keyframes scale{0%,100%{transform:none}50%{transform:scale3d(1.1,1.1,1)}}@keyframes fill{100%{box-shadow:inset 0 0 0 50px #2dce89}}@keyframes popIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    </style>
+</head>
+<body>
+
+    <div class="payment-container">
+        <!-- (HTML का बॉडी वाला हिस्सा बिलकुल डेमो जैसा ही है) -->
+        <div data-view="product" class="active"><div class="buy-now-view"><h1 id="product-name">Premium Plan</h1><p>Unlock all features for just <strong id="product-price">₹25.00</strong></p><button id="pay-button" class="button">Pay Securely</button></div></div><div data-view="payment" class="payment-view"><header class="payment-header"><div class="merchant-info"><svg class="header-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg><div class="merchant-name">Pay Now</div></div><div class="amount" id="payment-amount">₹25.00</div></header><main class="payment-body"><div class="timer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Payment ends in <span id="timer-span">04:59</span></span></div><div class="qr-card"><img id="qr-image" src="" alt="UPI QR Code" class="qr-code"></div><p class="scan-instruction">Scan this QR with any UPI app</p><div class="app-icons"><div class="app-icon-container"><img src="https://www.guide2gambling.in/wp-content/uploads/2021/10/PhonePe-Logo.png" alt="PhonePe"></div><div class="app-icon-container"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/725px-Google_Pay_Logo.svg.png" alt="Google Pay"></div><div class="app-icon-container"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Paytm_logo.png/640px-Paytm_logo.png" alt="Paytm"></div></div></main></div><div data-view="success"><div class="success-view"><svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="success-checkmark__circle" cx="26" cy="26" r="25" fill="none"></circle><path class="success-checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"></path></svg><p class="subheading">Thank you! Your transaction has been confirmed.</p><h2 class="heading">Payment Successful!</h2></div></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // =======================================================
+        // ==========   1. अपनी डिटेल्स यहां डालें   ==============
+        // =======================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBVYK7YGIVX5l_-AnnNzdcRXcEHDpGGRK8",
+    authDomain: "my-awesome-project-c3d9f.firebaseapp.com",
+    projectId: "my-awesome-project-c3d9f",
+    storageBucket: "my-awesome-project-c3d9f.firebasestorage.app",
+    messagingSenderId: "890773373218",
+    appId: "1:890773373218:web:a1c1c4fcccd33cf5d1a57b",
+    measurementId: "G-D1NSZTGV10"
+  };
+
+        const YOUR_UPI_ID = "ashishroy5221@okaxis"; // <<< अपने माता-पिता की UPI ID
+        const YOUR_APP_NAME = "Pay Now";
+        
+        // =======================================================
+        // ========   यह असली जादू वाला कोड है   =============
+        // =======================================================
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const payButton = document.getElementById('pay-button');
+        const timerSpan = document.getElementById('timer-span');
+        const qrImage = document.getElementById('qr-image');
+        let transactionUnsubscribe = null;
+        let timerInterval = null;
+
+        const switchView = (viewName) => { document.querySelectorAll('[data-view]').forEach(v=>v.classList.remove('active')); document.querySelector(`[data-view="${viewName}"]`).classList.add('active'); };
+        const startTimer = () => { let a=299;timerInterval=setInterval(()=>{let b=String(Math.floor(a/60)).padStart(2,"0"),c=String(a%60).padStart(2,"0");timerSpan.textContent=`${b}:${c}`,--a<0&&(clearInterval(timerInterval),alert("Time is up!"),window.location.reload())},1e3)};
+
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productName = urlParams.get('product') || "Premium Plan";
+            const price = parseFloat(urlParams.get('price')) || 25.0;
+            document.getElementById('product-name').textContent = productName;
+            document.getElementById('product-price').textContent = `₹${price.toFixed(2)}`;
+            document.getElementById('payment-amount').textContent = `₹${price.toFixed(2)}`;
+        };
+
+        payButton.addEventListener('click', async () => {
+            payButton.disabled = true;
+            payButton.textContent = "Please wait...";
+            const urlParams = new URLSearchParams(window.location.search);
+            const price = parseFloat(urlParams.get('price')) || 25.0;
+            const newTransactionRef = db.collection('transactions').doc();
+            const transactionId = newTransactionRef.id;
+            await newTransactionRef.set({
+                transactionId: transactionId,
+                amount: price,
+                status: "pending",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            const upiUrl = `upi://pay?pa=${YOUR_UPI_ID}&pn=${YOUR_APP_NAME}&am=${price}&tr=${transactionId}`;
+            qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
+            switchView('payment');
+            startTimer();
+            listenForPayment(transactionId);
+        });
+
+        function listenForPayment(transactionId) {
+            transactionUnsubscribe = db.collection('transactions').doc(transactionId)
+                .onSnapshot((doc) => {
+                    if (doc.exists && doc.data().status === 'success') {
+                        clearInterval(timerInterval);
+                        switchView('success');
+                        if(transactionUnsubscribe) transactionUnsubscribe();
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
