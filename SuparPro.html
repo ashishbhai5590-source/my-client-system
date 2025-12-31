@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>प्रोजेक्ट: साइबरस्पेस /// आपका इंटरफ़ेस</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0a0c10; --primary-color: #00ffc3; --text-color: #e0f2f1;
+            --card-color: rgba(10, 25, 47, 0.5); --border-color: rgba(0, 255, 195, 0.2);
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        body { font-family: 'Share Tech Mono', monospace; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; padding-top: 80px; }
+        .card { background: var(--card-color); border: 1px solid var(--border-color); border-radius: 10px; backdrop-filter: blur(10px); }
+        
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+            background: rgba(10, 12, 16, 0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto; padding: 15px 20px; }
+        .logo { font-size: 1.5rem; color: var(--primary-color); text-shadow: 0 0 5px var(--primary-color); }
+        .menu-container { position: relative; }
+        .menu-btn { background: none; border: none; color: var(--text-color); font-size: 1.5rem; cursor: pointer; }
+        .menu-dropdown { display: none; position: absolute; top: 40px; right: 0; background: #111a28; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 101; }
+        .menu-dropdown.show { display: block; }
+        .menu-dropdown button { background: none; border: none; color: var(--text-color); padding: 10px 20px; width: 100%; text-align: left; cursor: pointer; white-space: nowrap; font-size: 0.9rem; font-family: 'Share Tech Mono', monospace; }
+        .menu-dropdown button:hover { background-color: var(--primary-color); color: #0a0c10; }
+
+        #profile-container { padding: 30px; display: flex; align-items: center; gap: 30px; flex-wrap: nowrap; }
+        .profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary-color); object-fit: cover; box-shadow: 0 0 15px var(--primary-color); }
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 2rem; color: var(--primary-color); text-shadow: 0 0 5px var(--primary-color); }
+        .profile-title { font-size: 1.1rem; color: #aaa; margin-top: 5px; }
+        .skills-container { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .skill-tag { background: rgba(0, 255, 195, 0.1); border: 1px solid var(--border-color); padding: 5px 12px; border-radius: 5px; font-size: 0.9rem; }
+
+        .section-title { font-size: 1.8rem; margin: 40px 0 20px; color: var(--primary-color); }
+        #projects-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .project-card { display: flex; align-items: center; padding: 20px; gap: 20px; position: relative; transition: background-color 0.3s; }
+        .project-card:hover { background-color: rgba(10, 25, 47, 0.9); }
+        .project-icons { display: flex; flex-wrap: wrap; gap: 15px; font-size: 2.5rem; color: var(--primary-color); width: 80px; justify-content: center; }
+        .project-details { flex: 1; }
+        .project-title { font-size: 1.2rem; margin: 0 0 10px; }
+        .check-btn { background: none; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; font-family: 'Share Tech Mono', monospace; transition: all 0.3s; }
+        .check-btn:hover { background: var(--primary-color); color: #0a0c10; box-shadow: 0 0 10px var(--primary-color); }
+        .project-card .menu-container { position: absolute; top: 10px; right: 10px; }
+        
+        @media (max-width: 600px) {
+            #profile-container { flex-direction: column; text-align: center; }
+        }
+        
+        .modal { position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal.show { display: flex; }
+        .modal-content { background: #0a0c10; border: 1px solid var(--border-color); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 0 20px rgba(0, 255, 195, 0.3); }
+        .modal-content h2 { margin: 0 0 20px; color: var(--primary-color); }
+        .form-group label { display: block; margin-bottom: 8px; }
+        .form-group input { width: 100%; padding: 12px; border-radius: 5px; border: 1px solid var(--border-color); background: #111a28; color: var(--text-color); box-sizing: border-box; font-family: 'Share Tech Mono', monospace; }
+        #image-preview { max-width: 100px; margin-top: 10px; border-radius: 50%; }
+        .skills-checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 150px; overflow-y: auto; }
+        .skills-checklist label { display: flex; align-items: center; gap: 8px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-primary { background-color: var(--primary-color); color: #0a0c10; border: none; padding: 10px 15px; cursor: pointer; font-family: 'Share Tech Mono', monospace; }
+        .btn-secondary { background-color: #333; color: var(--text-color); border: none; padding: 10px 15px; cursor: pointer; font-family: 'Share Tech Mono', monospace; }
+
+        footer { text-align: center; padding: 40px 0 20px; margin-top: 50px; color: #777; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <audio id="click-sound" preload="auto" src="data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQBAAD//w=="></audio>
+
+    <header class="header">
+        <div class="header-content">
+            <div id="logoName" class="logo"></div>
+            <div class="menu-container">
+                <button id="main-menu-btn" class="menu-btn"><i class="fas fa-bars"></i></button>
+                <div id="main-menu-dropdown" class="menu-dropdown">
+                    <button id="edit-profile-btn"><i class="fas fa-user-cog fa-fw"></i> प्रोफाइल</button>
+                    <button id="add-project-btn"><i class="fas fa-plus-square fa-fw"></i> नया प्रोजेक्ट</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="profile-container" class="card"></div>
+        <h2 class="section-title"> > प्रोजेक्ट्स_</h2>
+        <section id="projects-grid"></section>
+    </div>
+
+    <footer>
+        <p id="footer-text"></p>
+    </footer>
+
+    <div id="profile-modal" class="modal"></div>
+    <div id="project-modal" class="modal"></div>
+
+    <script>
+    const MasterData = {
+        defaultProfile: {
+            name: "Beerendra Kumar", title: "Code & Cyberspace Navigator",
+            photo: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzBhMGMxMCIvPjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjU2IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMGZmYzMiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMThweCIgZmlsbD0iI2UwZjJmMSI+UGhvdG88L3RleHQ+PC9zdmc+",
+            skills: ["JavaScript", "React", "Node.js", "Python"]
+        },
+        defaultProjects: [
+            { id: "1", title: "Project Chimera", link: "#", tech: ["React", "Node.js", "MongoDB"] },
+            { id: "2", title: "Project Spectre", link: "#", tech: ["Python", "Figma"] }
+        ],
+        allPossibleSkills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "Python", "Figma", "UI/UX", "Java", "PHP", "Angular", "Vue.js", "Git", "GitHub", "MongoDB", "SQL"]
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const app = {
+            profile: {}, projects: [],
+            init() {
+                this.cacheDOMElements(); this.loadData(); this.renderAll(); this.bindEvents();
+            },
+            cacheDOMElements() {
+                this.logoName = document.getElementById('logoName');
+                this.profileContainer = document.getElementById('profile-container');
+                this.projectsGrid = document.getElementById('projects-grid');
+                this.mainMenuBtn = document.getElementById('main-menu-btn');
+                this.mainMenuDropdown = document.getElementById('main-menu-dropdown');
+                this.footerText = document.getElementById('footer-text');
+                this.clickSound = document.getElementById('click-sound');
+            },
+            loadData() {
+                this.profile = JSON.parse(localStorage.getItem('cyberspaceProfile')) || MasterData.defaultProfile;
+                this.projects = JSON.parse(localStorage.getItem('cyberspaceProjects')) || MasterData.defaultProjects;
+            },
+            saveData() {
+                localStorage.setItem('cyberspaceProfile', JSON.stringify(this.profile));
+                localStorage.setItem('cyberspaceProjects', JSON.stringify(this.projects));
+            },
+            renderAll() { this.renderProfile(); this.renderProjects(); },
+            renderProfile() {
+                this.logoName.textContent = `<${this.profile.name.split(' ')[0]}>`;
+                const skillsHtml = this.profile.skills.map(skill => `<div class="skill-tag">${skill}</div>`).join('');
+                this.profileContainer.innerHTML = `
+                    <img src="${this.profile.photo}" alt="Profile Picture" class="profile-pic">
+                    <div class="profile-info">
+                        <h1 class="profile-name">${this.profile.name}</h1>
+                        <p class="profile-title">// ${this.profile.title}</p>
+                        <div class="skills-container">${skillsHtml}</div>
+                    </div>`;
+                this.footerText.innerHTML = `&copy; ${new Date().getFullYear()} ${this.profile.name}. All Rights Reserved.`;
+            },
+            renderProjects() {
+                this.projectsGrid.innerHTML = '';
+                if (this.projects.length === 0) {
+                    this.projectsGrid.innerHTML = `<p style="text-align:center;">[सिस्टम में कोई प्रोजेक्ट लोड नहीं है]</p>`; return;
+                }
+                const techIcons = {'html':'fa-html5','css':'fa-css3-alt','javascript':'fa-js','react':'fa-react','node.js':'fa-node-js','python':'fa-python','figma':'fa-figma','java':'fa-java','php':'fa-php','angular':'fa-angular','vue.js':'fa-vuejs','git':'fa-git-alt','github':'fa-github','mongodb':'fa-database','sql':'fa-database', 'ui/ux': 'fa-pen-nib'};
+                this.projects.forEach(p => {
+                    const iconsHtml = p.tech.slice(0, 3).map(tech => {
+                        const key = tech.trim().toLowerCase();
+                        const icon = techIcons[key] || 'fa-code';
+                        return `<i class="fab ${icon}" title="${tech.trim()}"></i>`;
+                    }).join('');
+                    const card = document.createElement('div');
+                    card.className = 'project-card card';
+                    card.innerHTML = `
+                        <div class="project-icons">${iconsHtml}</div>
+                        <div class="project-details">
+                            <h3 class="project-title">${p.title}</h3>
+                            <a href="${p.link}" target="_blank" class="check-btn">[ Access ]</a>
+                        </div>
+                        <div class="menu-container">
+                             <button class="menu-btn project-menu-btn" data-id="${p.id}"><i class="fas fa-ellipsis-v"></i></button>
+                             <div class="menu-dropdown project-menu-dropdown" id="menu-${p.id}">
+                                <button class="edit-project-btn" data-id="${p.id}"><i class="fas fa-edit fa-fw"></i> एडिट</button>
+                                <button class="delete-project-btn" data-id="${p.id}"><i class="fas fa-trash fa-fw"></i> डिलीट</button>
+                             </div>
+                        </div>`;
+                    this.projectsGrid.appendChild(card);
+                });
+            },
+            bindEvents() {
+                document.body.addEventListener('click', (e) => { if (e.target.closest('button, a')) { this.clickSound.currentTime = 0; this.clickSound.play(); } }, true);
+                this.mainMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); this.mainMenuDropdown.classList.toggle('show'); });
+                document.addEventListener('click', () => this.closeAllDropdowns());
+                document.getElementById('edit-profile-btn').addEventListener('click', () => { this.closeAllDropdowns(); this.showProfileModal(); });
+                document.getElementById('add-project-btn').addEventListener('click', () => { this.closeAllDropdowns(); this.showProjectModal(); });
+                this.projectsGrid.addEventListener('click', (e) => {
+                    const button = e.target.closest('button'); if (!button) return; e.stopPropagation(); const id = button.dataset.id;
+                    if (button.classList.contains('project-menu-btn')) {
+                        this.closeAllDropdowns(id); document.getElementById(`menu-${id}`).classList.toggle('show');
+                    } else if (button.classList.contains('edit-project-btn')) {
+                        this.closeAllDropdowns(); this.showProjectModal(id);
+                    } else if (button.classList.contains('delete-project-btn')) {
+                        this.closeAllDropdowns();
+                        if (confirm('// क्या आप वाकई इस प्रोजेक्ट को डिलीट करना चाहते हैं?')) {
+                            this.projects = this.projects.filter(p => p.id !== id); this.saveData(); this.renderProjects();
+                        }
+                    }
+                });
+            },
+            closeAllDropdowns(exceptId = null) { document.querySelectorAll('.menu-dropdown').forEach(dd => { if (exceptId === null || dd.id !== `menu-${exceptId}`) dd.classList.remove('show'); }); },
+            showProfileModal() {
+                const modalContainer = document.getElementById('profile-modal');
+                const skillsHtml = MasterData.allPossibleSkills.map(skill => `<label><input type="checkbox" value="${skill}" ${this.profile.skills.includes(skill) ? 'checked' : ''}> ${skill}</label>`).join('');
+                modalContainer.innerHTML = `
+                    <div class="modal-content"><h2>// प्रोफाइल_कॉन्फ़िगरेशन</h2><form id="profile-form">
+                        <div class="form-group"><label>नाम ></label><input type="text" id="p-name" value="${this.profile.name}" required></div>
+                        <div class="form-group"><label>टाइटल ></label><input type="text" id="p-title" value="${this.profile.title}" required></div>
+                        <div class="form-group"><label>स्किल्स ></label><div class="skills-checklist">${skillsHtml}</div></div>
+                        <div class="form-group"><label>फोटो ></label><input type="file" id="p-image-input" accept="image/*"><img id="image-preview" src="${this.profile.photo}" style="display:block;"/><input type="hidden" id="p-image-base64" value="${this.profile.photo}"></div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" id="cancel-profile">रद्द करें</button>
+                            <button type="submit" class="btn-primary">अपडेट करें</button>
+                        </div>
+                    </form></div>`;
+                modalContainer.querySelector('#cancel-profile').addEventListener('click', () => modalContainer.classList.remove('show'));
+                modalContainer.querySelector('#p-image-input').addEventListener('change', e => this.handleImageUpload(e, modalContainer));
+                modalContainer.querySelector('#profile-form').addEventListener('submit', e => {
+                    e.preventDefault();
+                    this.profile.name = modalContainer.querySelector('#p-name').value; this.profile.title = modalContainer.querySelector('#p-title').value;
+                    this.profile.photo = modalContainer.querySelector('#p-image-base64').value;
+                    this.profile.skills = Array.from(modalContainer.querySelectorAll('.skills-checklist input:checked')).map(el => el.value);
+                    this.saveData(); this.renderProfile(); modalContainer.classList.remove('show');
+                });
+                modalContainer.classList.add('show');
+            },
+            showProjectModal(id = null) {
+                const modalContainer = document.getElementById('project-modal');
+                const p = id ? this.projects.find(proj => proj.id === id) : { id: null, title: '', link: '', tech: [] };
+                const techHtml = MasterData.allPossibleSkills.map(skill => `<label><input type="checkbox" value="${skill}" ${p.tech.includes(skill) ? 'checked' : ''}> ${skill}</label>`).join('');
+                modalContainer.innerHTML = `
+                    <div class="modal-content"><h2>// ${id ? 'प्रोजेक्ट_एडिट' : 'नया_प्रोजेक्ट'}</h2><form id="project-form">
+                        <div class="form-group"><label>टाइटल ></label><input type="text" id="proj-title" value="${p.title}" required></div>
+                        <div class="form-group"><label>लिंक ></label><input type="url" id="proj-link" value="${p.link}" required></div>
+                        <div class="form-group"><label>टेक्नोलॉजी ></label><div class="skills-checklist">${techHtml}</div></div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" id="cancel-project">रद्द करें</button>
+                            <button type="submit" class="btn-primary">सेव करें</button>
+                        </div>
+                    </form></div>`;
+                modalContainer.querySelector('#cancel-project').addEventListener('click', () => modalContainer.classList.remove('show'));
+                modalContainer.querySelector('#project-form').addEventListener('submit', e => {
+                    e.preventDefault();
+                    const updatedProject = {
+                        id: id || Date.now().toString(),
+                        title: modalContainer.querySelector('#proj-title').value,
+                        link: modalContainer.querySelector('#proj-link').value,
+                        tech: Array.from(modalContainer.querySelectorAll('.skills-checklist input:checked')).map(el => el.value),
+                    };
+                    if (id) this.projects = this.projects.map(proj => proj.id === id ? updatedProject : proj);
+                    else this.projects.push(updatedProject);
+                    this.saveData(); this.renderProjects(); modalContainer.classList.remove('show');
+                });
+                modalContainer.classList.add('show');
+            },
+            handleImageUpload(event, modal) {
+                const file = event.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    modal.querySelector('input[type=hidden]').value = e.target.result;
+                    modal.querySelector('img').src = e.target.result;
+                    modal.querySelector('img').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        app.init();
+    });
+    </script>
+</body>
+</html>
