@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>आपका निजी सहायक</title>
+    <style>
+        /* CSS कोड पहले जैसा ही है, कोई बदलाव नहीं */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        :root { --bg-color: #1a1a2e; --orb-color: #16213e; --glow-color: #0f3460; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; overflow: hidden; }
+        .container { display: flex; flex-direction: column; align-items: center; padding: 20px; opacity: 0; animation: fadeIn 1.5s forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        #ai-orb { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #533483, var(--orb-color)); cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; transition: transform 0.2s ease; box-shadow: 0 0 10px var(--bg-color); border: 3px solid #3d2c56; }
+        #ai-orb::before { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; transition: box-shadow 0.5s ease; }
+        #ai-orb.idle::before { animation: idle-glow 3s infinite alternate; }
+        #ai-orb.listening::before { animation: listening-pulse 1.5s infinite; }
+        #ai-orb.speaking::before { animation: speaking-glow 1s infinite alternate; }
+        #mic-icon { width: 50px; height: 50px; fill: var(--text-primary); filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        @keyframes idle-glow { from { box-shadow: 0 0 15px -5px var(--glow-color); } to { box-shadow: 0 0 30px 5px var(--glow-color); } }
+        @keyframes listening-pulse { 0% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.7); } 70% { box-shadow: 0 0 0 40px rgba(25, 118, 210, 0); } 100% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0); } }
+        @keyframes speaking-glow { from { box-shadow: 0 0 20px 0px #27ae60; } to { box-shadow: 0 0 40px 10px #27ae60; } }
+        #status { font-size: 1.4em; margin-top: 40px; font-weight: 400; height: 30px; }
+        #transcript { margin-top: 15px; font-size: 1em; color: var(--text-secondary); min-height: 40px; max-width: 80vw; font-weight: 300; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="ai-orb" class="idle">
+            <svg id="mic-icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>
+        </div>
+        <h2 id="status">आपके आदेश का इंतज़ार है</h2>
+        <p id="transcript"></p>
+    </div>
+
+    <script>
+        // --- الأساسيات ---
+        const orb = document.getElementById('ai-orb');
+        const statusDiv = document.getElementById('status');
+        const transcriptDiv = document.getElementById('transcript');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'hi-IN';
+        recognition.continuous = false;
+
+        let bestHindiVoice = null;
+        let isAssistantActive = false;
+        let inactivityTimer;
+        
+        // --- नया लॉजिक: बातचीत की स्थिति को याद रखना ---
+        let conversationState = 'idle'; // idle, awaiting_study_status, awaiting_screentime_permission, awaiting_app_name
+
+        // --- आवाज़ और सहायक की स्थिति ---
+        function loadVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            bestHindiVoice = voices.find(v => v.lang === 'hi-IN' && v.name.includes('Google')) || voices.find(v => v.lang === 'hi-IN');
+        }
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+
+        function setOrbState(state) { orb.className = state; }
+
+        function speak(text, onEndCallback) {
+            setOrbState('speaking');
+            statusDiv.textContent = 'बोल रही हूँ...';
+            const utterance = new SpeechSynthesisUtterance(text);
+            if (bestHindiVoice) utterance.voice = bestHindiVoice;
+            utterance.lang = 'hi-IN';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.onend = () => { if (onEndCallback) onEndCallback(); };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function startListening(state) {
+            conversationState = state; // सेट करें कि किस सवाल का जवाब सुनना है
+            setOrbState('listening');
+            statusDiv.textContent = 'सुन रही हूँ...';
+            transcriptDiv.textContent = '';
+            clearTimeout(inactivityTimer);
+            try { recognition.start(); } catch(e) {}
+        }
+        
+        // --- आवाज़ सुनना और समझना ---
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            transcriptDiv.textContent = `आपने कहा: "${transcript}"`;
+            processCommand(transcript);
+        };
+        
+        recognition.onerror = (event) => {
+            if (event.error !== 'no-speech') statusDiv.textContent = "त्रुटि: " + event.error;
+            setOrbState('idle');
+        };
+
+        recognition.onend = () => {
+            if(isAssistantActive) {
+                inactivityTimer = setTimeout(() => {
+                    speak("मेरे मालिक, क्या आपको मेरी सेवा की आवश्यकता है?", () => startListening('general'));
+                }, 15000);
+            }
+        };
+
+        // --- मुख्य लॉजिक: कमांड को प्रोसेस करना ---
+        function processCommand(command) {
+            const userText = command.toLowerCase();
+            let assistantReply = "";
+            setOrbState('thinking');
+            statusDiv.textContent = 'समझ रही हूँ...';
+
+            setTimeout(() => {
+                // बातचीत की स्थिति के अनुसार जवाब देना
+                switch (conversationState) {
+                    case 'awaiting_study_status':
+                        if (userText.includes("अच्छी") || userText.includes("ठीक")) {
+                            assistantReply = "यह सुनकर बहुत अच्छा लगा, मेरे मालिक! आपकी आज्ञा हो तो क्या मैं आपके स्क्रीन उपयोग के बारे में पूछ सकती हूँ, ताकि मैं आपकी और बेहतर सेवा कर सकूँ?";
+                        } else {
+                            assistantReply = "चिंता न करें, मेरे मालिक। थोड़ी देर आराम करें। आपकी आज्ञा हो तो क्या मैं आपके स्क्रीन उपयोग के बारे में पूछ सकती हूँ?";
+                        }
+                        speak(assistantReply, () => startListening('awaiting_screentime_permission'));
+                        break;
+
+                    case 'awaiting_screentime_permission':
+                        if (userText.includes("हाँ") || userText.includes("पूछो") || userText.includes("ठीक है")) {
+                            assistantReply = "धन्यवाद मेरे मालिक। आज आपने सबसे ज़्यादा समय किस ऐप पर बिताया?";
+                            speak(assistantReply, () => startListening('awaiting_app_name'));
+                        } else {
+                            assistantReply = "जी मेरे मालिक, जैसा आपका हुक्म।";
+                            speak(assistantReply, () => startListening('general'));
+                        }
+                        break;
+                    
+                    case 'awaiting_app_name':
+                        if (userText.includes("youtube") || userText.includes("यूट्यूब") || userText.includes("इंस्टाग्राम") || userText.includes("instagram") || userText.includes("फेसबुक")) {
+                            assistantReply = `मेरे मालिक, ये ऐप्स बहुत समय ले सकते हैं। मेरा सुझाव है कि आप इनके लिए एक समय-सीमा तय करें। आपका लक्ष्य सर्वोपरि है।`;
+                        } else if (userText.includes("गेम") || userText.includes("game")) {
+                            assistantReply = "मेरे मालिक, मनोरंजन भी ज़रूरी है, लेकिन पढ़ाई के साथ संतुलन बनाना होगा। क्या मैं आपके लिए स्टडी रिमाइंडर लगा दूँ?";
+                        } else if (userText.includes("पढ़ाई") || userText.includes("स्टडी") || userText.includes("किताब")) {
+                             assistantReply = "शाबाश मेरे मालिक! यह सुनकर मुझे बहुत गर्व हुआ। आप सही रास्ते पर हैं।";
+                        } else {
+                            assistantReply = `जी मेरे मालिक, मैंने नोट कर लिया है। कृपया पढ़ाई पर ध्यान केंद्रित रखें।`;
+                        }
+                        speak(assistantReply, () => startListening('general'));
+                        break;
+                        
+                    default: // सामान्य बातचीत
+                        if (userText.includes("तुम कौन हो")) {
+                            assistantReply = "मैं आपकी निजी सहायक हूँ, मेरे मालिक। आपकी सेवा में हमेशा حاضر।";
+                        } else if (userText.includes("बंद करो") || userText.includes("धन्यवाद")) {
+                             assistantReply = "जी मेरे मालिक। आपके अगले आदेश का इंतज़ार रहेगा।";
+                             isAssistantActive = false;
+                        } else {
+                            assistantReply = "जी मेरे मालिक, मैं आपकी बात सुन रही हूँ।";
+                        }
+                        
+                        speak(assistantReply, () => {
+                            if (isAssistantActive) {
+                                startListening('general');
+                            } else {
+                                setOrbState('idle');
+                                statusDiv.textContent = 'आपके आदेश का इंतज़ार है';
+                            }
+                        });
+                        break;
+                }
+            }, 1000);
+        }
+
+        // --- असिस्टेंट को शुरू करना ---
+        orb.addEventListener('click', () => {
+            if (!isAssistantActive) {
+                isAssistantActive = true;
+                speak("नमस्ते बीरेंद्र मेरे मालिक! आपकी निजी सहायक सेवा में حاضر है। कृपया बताएं, आपकी पढ़ाई कैसी चल रही है?", () => startListening('awaiting_study_status'));
+            }
+        });
+    </script>
+</body>
+</html>
