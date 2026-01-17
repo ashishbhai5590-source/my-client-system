@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>अल्टीमेट AI असिस्टेंट</title>
     <style>
+        /* CSS कोड पहले जैसा ही है, कोई बदलाव नहीं */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
         :root { --bg-color: #121829; --orb-color: #16213e; --glow-color: #00aaff; --text-primary: #ecf0f1; --text-secondary: #95a5a6; }
         body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; overflow: hidden; }
@@ -41,10 +42,8 @@
 
         let bestHindiVoice = null;
         let isAssistantActive = false;
-        
-        // --- ब्रेन ऑफ़ द असिस्टेंट: यह सब कुछ याद रखता है ---
         let chatState = {
-            currentUser: null, // 'beerendra', 'suryansh', 'boy', 'girl', 'janu'
+            currentUser: null,
             currentQuestion: 'initial_identity', 
         };
 
@@ -82,10 +81,6 @@
             transcriptDiv.textContent = `आपने कहा: "${transcript}"`;
             processCommand(transcript);
         };
-        
-        recognition.onend = () => {
-             // बातचीत को जारी रखने के लिए इसे खाली छोड़ दिया गया है, क्योंकि speak() के बाद startListening() कॉल होता है
-        };
 
         function processCommand(command) {
             const userText = command.toLowerCase();
@@ -94,17 +89,16 @@
             statusDiv.textContent = 'सोच रही हूँ...';
 
             setTimeout(() => {
-                // --- बातचीत का मुख्य लॉजिक ---
                 switch (chatState.currentQuestion) {
                     
                     case 'initial_identity':
-                        if (userText.includes("बीरेंद्र") || userText.includes("बिरेंदर")) {
-                            chatState.currentUser = 'beerendra';
-                            assistantReply = "नमस्ते बीरेंद्र भैया! मैं आपकी मदद के लिए तैयार हूँ। कृपया बताएं, आपकी पढ़ाई कैसी चल रही है?";
-                            speak(assistantReply, () => startListening('beerendra_study_status'));
+                        if (userText.includes("वीरेंद्र") || userText.includes("बिरेंदर")) {
+                            chatState.currentUser = 'veerendra';
+                            assistantReply = "नमस्ते वीरेंद्र भैया! मैं आपकी मदद के लिए तैयार हूँ। कृपया बताएं, आपकी पढ़ाई कैसी चल रही है?";
+                            speak(assistantReply, () => startListening('veerendra_study_status'));
                         } else if (userText.includes("सूर्यांश")) {
                             chatState.currentUser = 'suryansh';
-                            assistantReply = "अरे सूर्यांश भैया! बीरेंद्र भैया ने मुझे बताया है कि आप बहुत लड़कियों से प्यार करते हैं। सुधर जाओ! खैर, यह सब छोड़ो और बताओ, पढ़ाई कैसी चल रही है?";
+                            assistantReply = "अरे सूर्यांश भैया! वीरेंद्र भैया ने मुझे बताया है कि आप बहुत लड़कियों से प्यार करते हैं। सुधर जाओ! खैर, यह सब छोड़ो और बताओ, पढ़ाई कैसी चल रही है?";
                             speak(assistantReply, () => startListening('suryansh_study_status'));
                         } else {
                             chatState.currentUser = 'unknown';
@@ -112,7 +106,6 @@
                             speak(assistantReply, () => startListening('ask_gender'));
                         }
                         break;
-
                     case 'ask_gender':
                         if (userText.includes("लड़का") || userText.includes("boy")) {
                             chatState.currentUser = 'boy';
@@ -120,14 +113,13 @@
                             speak(assistantReply, () => startListening('general_query'));
                         } else if (userText.includes("लड़की") || userText.includes("girl")) {
                             chatState.currentUser = 'girl';
-                            assistantReply = "ओह! तो तुम एक लड़की हो। तुम पक्का मेरे बीरेंद्र भैया की जानू हो, झूठ मत बोलना, हो कि नहीं?";
+                            assistantReply = "ओह! तो तुम एक लड़की हो। तुम पक्का मेरे वीरेंद्र भैया की जानू हो, झूठ मत बोलना, हो कि नहीं?";
                             speak(assistantReply, () => startListening('is_janu'));
                         } else {
                             assistantReply = "ठीक से बताओ, लड़के हो या लड़की?";
                             speak(assistantReply, () => startListening('ask_gender'));
                         }
                         break;
-                    
                     case 'is_janu':
                          if (userText.includes("हाँ") || userText.includes("हूं")) {
                             chatState.currentUser = 'janu';
@@ -138,17 +130,15 @@
                             speak(assistantReply, () => startListening('ask_insta'));
                         }
                         break;
-                    
                     case 'ask_insta':
                         if (userText.includes("हाँ") || userText.includes("चलाती हूं")) {
-                            assistantReply = "तो फिर एक काम करो, मेरे बीरेंद्र भैया की आईडी फॉलो कर लो। प्यार नहीं करती तो करने लगोगी! उनकी आईडी है 'Beerendra Official'...";
+                            assistantReply = "तो फिर एक काम करो, मेरे वीरेंद्र भैया की आईडी फॉलो कर लो। प्यार नहीं करती तो करने लगोगी! उनकी आईडी है 'Veerendra Official'...";
                         } else {
                              assistantReply = "कोई बात नहीं। तो बताओ, मैं तुम्हारी क्या मदद कर सकती हूँ?";
                         }
                         speak(assistantReply, () => startListening('general_query'));
                         break;
-
-                    case 'beerendra_study_status':
+                    case 'veerendra_study_status':
                     case 'suryansh_study_status':
                         if (userText.includes("अच्छी") || userText.includes("ठीक")) {
                             assistantReply = "बहुत बढ़िया! अब यह बताओ, आज सबसे ज़्यादा समय किस ऐप पर और कितने घंटे बिताया?";
@@ -157,7 +147,6 @@
                         }
                         speak(assistantReply, () => startListening('ask_screentime'));
                         break;
-
                     case 'ask_screentime':
                         if (userText.includes("youtube") || userText.includes("यूट्यूब") || userText.includes("इंस्टाग्राम") || userText.includes("instagram")) {
                             assistantReply = "ये ऐप्स पढ़ाई से बहुत ध्यान भटकाते हैं। इनके इस्तेमाल के लिए एक समय तय करो। अब यह बताओ, लव के चक्कर में तो नहीं पड़े हो?";
@@ -168,7 +157,6 @@
                         }
                         speak(assistantReply, () => startListening('ask_love'));
                         break;
-
                     case 'ask_love':
                         if (userText.includes("हाँ") || userText.includes("yes")) {
                             assistantReply = "देखो, यह उम्र करियर बनाने की है। इन सब चक्करों में पड़कर अपना लक्ष्य मत भूलना। ठीक है, अब पढ़ाई से जुड़ा कोई सवाल पूछो।";
@@ -179,7 +167,6 @@
                         break;
 
                     case 'general_query':
-                        // --- बेसिक ज्ञानकोष ---
                         if (userText.includes("प्रकाश संश्लेषण") || userText.includes("photosynthesis")) {
                             assistantReply = "प्रकाश संश्लेषण वह प्रक्रिया है जिसमें हरे पौधे सूर्य के प्रकाश का उपयोग करके अपना भोजन बनाते हैं।";
                         } else if (userText.includes("न्यूटन के नियम") || userText.includes("newton's laws")) {
@@ -190,7 +177,13 @@
                             assistantReply = "ठीक है, जब भी ज़रूरत हो, मुझे एक्टिवेट कर लेना।";
                             isAssistantActive = false;
                         } else {
-                            assistantReply = "यह एक अच्छा सवाल है, लेकिन मैं एक पर्सनल असिस्टेंट हूँ, गूगल नहीं। विस्तृत जानकारी के लिए आप गूगल पर खोज सकते हैं। कोई और सवाल?";
+                            // --- गूगल सर्च लॉजिक ---
+                            assistantReply = "यह एक बहुत अच्छा सवाल है। मैं आपके लिए गूगल पर इसकी जानकारी खोज रही हूँ।";
+                            speak(assistantReply, () => {
+                                window.open(`https://www.google.com/search?q=${encodeURIComponent(command)}`, '_blank');
+                                startListening('general_query');
+                            });
+                            return; 
                         }
                         
                         if(isAssistantActive) {
@@ -209,7 +202,7 @@
         orb.addEventListener('click', () => {
             if (!isAssistantActive) {
                 isAssistantActive = true;
-                speak("असिस्टेंट एक्टिवेट हो गया है। कृपया बताएं, आप बीरेंद्र भैया हैं या सूर्यांश भैया?", () => startListening('initial_identity'));
+                speak("असिस्टेंट एक्टिवेट हो गया है। कृपया बताएं, आप वीरेंद्र भैया हैं या सूर्यांश भैया?", () => startListening('initial_identity'));
             }
         });
     </script>
