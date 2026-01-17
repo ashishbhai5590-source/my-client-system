@@ -42,14 +42,13 @@
 
         let bestHindiVoice = null;
         let isAssistantActive = false;
-        let waitingForReturnFromSearch = false; // नया: गूगल सर्च से लौटने का इंतज़ार
+        let waitingForReturnFromSearch = false;
         
         let chatState = {
             currentUser: null,
             currentQuestion: 'initial_identity', 
         };
 
-        // --- सभी फंक्शन्स (कोई बदलाव नहीं) ---
         function loadVoices() {
             const voices = window.speechSynthesis.getVoices();
             bestHindiVoice = voices.find(v => v.lang === 'hi-IN' && v.name.includes('Google')) || voices.find(v => v.lang === 'hi-IN');
@@ -73,15 +72,30 @@
             setOrbState('listening');
             statusDiv.textContent = 'सुन रही हूँ...';
             transcriptDiv.textContent = '';
-            try { recognition.start(); } catch(e) {}
+            try { recognition.start(); } catch(e) { console.error("Recognition start error:", e); }
         }
+        
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
             transcriptDiv.textContent = `आपने कहा: "${transcript}"`;
             processCommand(transcript);
         };
+        
+        // --- सुधार #2: माइक के लिए बेहतर एरर हैंडलिंग ---
+        recognition.onerror = (event) => {
+            if (event.error === 'no-speech') {
+                speak("माफ़ कीजिए, मैंने आपकी आवाज़ नहीं सुनी। क्या आप दोहरा सकते हैं?", () => {
+                    if (isAssistantActive) startListening(chatState.currentQuestion);
+                });
+            } else if (event.error === 'not-allowed') {
+                statusDiv.textContent = "एरर: माइक्रोफ़ोन की अनुमति नहीं दी गई है।";
+                isAssistantActive = false;
+            } else {
+                console.error("Speech recognition error:", event.error);
+                setOrbState('idle');
+            }
+        };
 
-        // --- मुख्य लॉजिक (सुधारों के साथ) ---
         function processCommand(command) {
             const userText = command.toLowerCase();
             let assistantReply = "";
@@ -91,7 +105,6 @@
             setTimeout(() => {
                 switch (chatState.currentQuestion) {
                     
-                    // (अन्य सभी केस पहले जैसे ही रहेंगे)
                     case 'initial_identity':
                         if (userText.includes("वीरेंद्र")) {
                             chatState.currentUser = 'veerendra';
@@ -107,21 +120,44 @@
                             speak(assistantReply, () => startListening('ask_gender'));
                         }
                         break;
+                    
+                    // --- सुधार #1: पूरी तरह से काम करने वाला लॉजिक ---
                     case 'ask_gender':
-                        if (userText.includes("लड़का")) { /*...*/ speak(assistantReply, () => startListening('general_query')); } 
-                        else if (userText.includes("लड़की")) { /*...*/ speak(assistantReply, () => startListening('is_janu')); }
-                        break;
-                    case 'is_janu':
-                        if (userText.includes("हाँ")) { /*...*/ speak(assistantReply, () => startListening('general_query')); } 
-                        else { /*...*/ speak(assistantReply, () => startListening('ask_insta')); }
-                        break;
-                    case 'ask_insta':
-                        /*...*/ speak(assistantReply, () => startListening('general_query'));
+                        if (userText.includes("लड़का") || userText.includes("boy")) {
+                            chatState.currentUser = 'boy';
+                            assistantReply = "अरे भाई! क्या हाल चाल? पढ़ाई-वढ़ाई करते हो या बस हवा में तीर चला रहे हो?";
+                            speak(assistantReply, () => startListening('general_query'));
+                        } else if (userText.includes("लड़की") || userText.includes("girl")) {
+                            chatState.currentUser = 'girl';
+                            assistantReply = "ओह! तो तुम एक लड़की हो। तुम पक्का मेरे वीरेंद्र भैया की जानू हो, झूठ मत बोलना, हो कि नहीं?";
+                            speak(assistantReply, () => startListening('is_janu'));
+                        } else {
+                            assistantReply = "ठीक से बताओ, लड़के हो या लड़की?";
+                            speak(assistantReply, () => startListening('ask_gender'));
+                        }
                         break;
 
+                    case 'is_janu':
+                         if (userText.includes("हाँ") || userText.includes("हूं")) {
+                            chatState.currentUser = 'janu';
+                            assistantReply = "मैं तो जानती थी! भैया आजकल बहुत खुश रहते हैं। वैसे, मेरे भैया ने खाना खाया?";
+                            speak(assistantReply, () => startListening('general_query'));
+                        } else {
+                            assistantReply = "चलो कोई बात नहीं। वैसे, तुम इंस्टाग्राम चलाती हो क्या?";
+                            speak(assistantReply, () => startListening('ask_insta'));
+                        }
+                        break;
+                    
+                    case 'ask_insta':
+                        if (userText.includes("हाँ") || userText.includes("चलाती हूं")) {
+                            assistantReply = "तो फिर एक काम करो, मेरे वीरेंद्र भैया की आईडी फॉलो कर लो। प्यार नहीं करती तो करने लगोगी! उनकी आईडी है 'Veerendra Official'...";
+                        } else {
+                             assistantReply = "कोई बात नहीं। तो बताओ, मैं तुम्हारी क्या मदद कर सकती हूँ?";
+                        }
+                        speak(assistantReply, () => startListening('general_query'));
+                        break;
 
                     case 'study_status':
-                        // --- सुधार #1: भावनात्मक जवाब ---
                         if (userText.includes("अच्छी") || userText.includes("ठीक") || userText.includes("बढ़िया")) {
                             assistantReply = "बहुत बढ़िया! यह सुनकर मुझे बहुत खुशी हुई। आपकी मेहनत ज़रूर रंग लाएगी। अच्छा, अब यह बताओ, आज सबसे ज़्यादा समय किस ऐप पर और कितने घंटे बिताया?";
                         } else if (userText.includes("खराब") || userText.includes("नहीं") || userText.includes("मन नहीं")) {
@@ -160,10 +196,10 @@
                         else {
                             assistantReply = "यह एक बहुत अच्छा सवाल है। मैं आपके लिए गूगल पर इसकी जानकारी खोज रही हूँ।";
                             speak(assistantReply, () => {
-                                waitingForReturnFromSearch = true; // सर्च पर भेजने से पहले फ़्लैग सेट करें
+                                waitingForReturnFromSearch = true;
                                 window.open(`https://www.google.com/search?q=${encodeURIComponent(command)}`, '_blank');
                                 statusDiv.textContent = "सर्च रिजल्ट देखकर वापस आएँ...";
-                                setOrbState('idle'); // जब तक आप वापस न आएं, ऑर्ब शांत रहेगा
+                                setOrbState('idle');
                             });
                             return; 
                         }
@@ -185,14 +221,13 @@
             }
         });
 
-        // --- सुधार #2: गूगल सर्च से वापस आने पर बातचीत जारी रखना ---
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && waitingForReturnFromSearch) {
-                waitingForReturnFromSearch = false; // फ़्लैग को रीसेट करें
+                waitingForReturnFromSearch = false;
                 const reengageMessage = "वापस आने के लिए धन्यवाद! क्या आपको आपके सवाल का जवाब मिल गया? आप चाहें तो मुझसे कोई और सवाल पूछ सकते हैं।";
                 speak(reengageMessage, () => startListening('general_query'));
             }
         });
     </script>
 </body>
-</html>
+</html>```
