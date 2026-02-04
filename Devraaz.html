@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devraaz SMM पैनल</title>
+    
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        :root{--primary-color:#6a11cb;--secondary-color:#2575fc;--success-color:#1db954;--light-gray:#f0f2f5;--dark-gray:#333;--white:#ffffff}*,*::before,*::after{box-sizing:border-box}body{font-family:'Poppins',sans-serif;background-color:var(--light-gray);margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh}.container{width:100%;max-width:650px}.smm-panel{background-color:var(--white);border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.1);overflow:hidden}.panel-header{background:linear-gradient(135deg,var(--primary-color) 0%,var(--secondary-color) 100%);color:var(--white);padding:30px;text-align:center}.panel-header h1{margin:0;font-size:28px;font-weight:700}.panel-header p{margin:5px 0 0;font-size:16px;opacity:.9}.panel-body{padding:30px}.form-group{margin-bottom:20px}.form-group label{display:block;font-weight:600;margin-bottom:8px;color:var(--dark-gray)}.form-group input,.form-group select{width:100%;padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:16px;transition:border-color .3s}.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary-color)}.platform-selector{display:flex;gap:15px;justify-content:center;margin-bottom:25px}.platform-selector input[type=radio]{display:none}.platform-selector label{border:2px solid #ddd;border-radius:10px;padding:20px 15px;cursor:pointer;width:140px;height:140px;transition:all .3s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}.platform-selector img{width:48px;height:48px}.platform-selector span{font-weight:600;color:var(--dark-gray);font-size:16px}.platform-selector input[type=radio]:checked+label{border-color:var(--primary-color);background-color:#f4efff;transform:scale(1.05);box-shadow:0 5px 15px rgba(106,17,203,0.1)}.price-display{text-align:center;margin:-10px 0 20px 0;font-size:24px;font-weight:700;color:var(--primary-color)}.price-display span{font-size:18px}.submit-btn{background:linear-gradient(135deg,var(--primary-color) 0%,var(--secondary-color) 100%);color:var(--white);border:none;padding:15px;width:100%;border-radius:8px;font-size:18px;font-weight:600;cursor:pointer;transition:all .3s}.submit-btn:hover{transform:scale(1.02)}.support-btn-container{text-align:center;margin-top:20px}.support-btn{background-color:#0088cc;color:var(--white);border:none;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:10px;padding:12px 25px}.support-btn:hover{background-color:#0077b5;transform:scale(1.05)}.support-btn svg{width:24px;height:24px;fill:white}.warning{background-color:#fff3cd;border:1px solid #ffeeba;border-radius:8px;padding:10px;font-size:14px;margin-top:15px;text-align:center}.full-page{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:var(--white);z-index:1000;overflow-y:auto}#payment-page .content{padding:30px;max-width:500px;margin:40px auto;text-align:center}#payment-page .qr-code{width:200px;height:200px;margin:15px 0;border:1px solid #eee}#timer{font-size:28px;font-weight:700;color:var(--primary-color);margin:10px 0 20px 0}#final-amount{font-size:32px;font-weight:700;color:var(--dark-gray);margin-bottom:20px}#success-screen{display:none;flex-direction:column;justify-content:center;align-items:center;background-color:var(--success-color);color:var(--white);text-align:center;padding:20px 30px;opacity:0;transition:opacity .4s ease}#success-screen.visible{display:flex;opacity:1}.success-animation-container{width:120px;height:120px;margin-bottom:20px}.checkmark-circle{stroke-dasharray:315;stroke-dashoffset:315;stroke-width:4;stroke:white;fill:none;animation:circle-anim .8s ease-in-out forwards}.checkmark-tick{stroke-dasharray:80;stroke-dashoffset:80;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke:white;fill:none;animation:tick-anim .6s ease-out forwards .5s}#success-screen h1{font-size:clamp(1.6rem, 6vw, 2.2rem);margin-bottom:15px;animation:fade-in .6s ease-in-out 1s forwards;opacity:0;max-width:100%}#success-screen p{font-size:.95rem;max-width:100%;opacity:0;line-height:1.6;animation:fade-in .6s ease-in-out 1.2s forwards}#success-screen .submit-btn{width:auto;padding:15px 40px;margin-top:20px;opacity:0;animation:fade-in .6s ease-in-out 1.6s forwards}@keyframes circle-anim{to{stroke-dashoffset:0}}@keyframes tick-anim{to{stroke-dashoffset:0}}@keyframes fade-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.receipt-instruction{background-color:rgba(255,255,255,0.15);border-radius:12px;padding:20px;margin-top:30px;max-width:450px;border:1px solid rgba(255,255,255,0.3);opacity:0;animation:fade-in .6s ease-in-out 1.4s forwards}.receipt-instruction p{margin:0 0 15px 0;font-size:1rem;font-weight:600}.receipt-instruction a{background-color:var(--white);color:var(--success-color);text-decoration:none;padding:10px 20px;border-radius:50px;font-weight:700;display:inline-flex;align-items:center;gap:8px;transition:transform .2s}.receipt-instruction a:hover{transform:scale(1.05)}
+    </style>
+</head>
+<body>
+
+    <div id="order-section" class="container">
+        <!-- Main Order Form -->
+        <div class="smm-panel">
+            <div class="panel-header">
+                <h1>Devraaz SMM पैनल</h1><p>आपकी सभी सोशल मीडिया जरूरतों के लिए</p>
+            </div>
+            <div class="panel-body">
+                <form id="orderForm" onsubmit="return false;">
+                    <div class="form-group platform-selector">
+                        <input type="radio" id="instagram" name="platform" value="Instagram" checked onchange="updateServices()"><label for="instagram"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram"><span>इंस्टाग्राम</span></label>
+                        <input type="radio" id="youtube" name="platform" value="YouTube" onchange="updateServices()"><label for="youtube"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/1280px-YouTube_full-color_icon_%282017%29.svg.png" alt="YouTube"><span>यूट्यूब</span></label>
+                    </div>
+                    <div class="form-group"><label for="service">सर्विस चुनें</label><select id="service" name="service" required onchange="calculatePrice()"></select></div>
+                    <div class="form-group"><label for="username">अपना यूजरनेम या लिंक डालें</label><input type="text" id="username" name="username" placeholder="जैसे: @yourusername या पूरा लिंक" required></div>
+                    <div class="form-group"><label for="quantity">मात्रा (Quantity)</label><input type="number" id="quantity" name="quantity" placeholder="1000 से कम स्वीकार नहीं" required oninput="calculatePrice()"></div>
+                    <div class="price-display" id="price-display"><span>कीमत:</span> ₹0</div>
+                    <hr style="border:0;border-top:1px solid #eee;margin:25px 0;">
+                    <div class="form-group"><label for="customer_name">आपका नाम</label><input type="text" id="customer_name" name="customer_name" placeholder="अपना पूरा नाम दर्ज करें" required></div>
+                    <div class="form-group"><label for="customer_contact">संपर्क (WhatsApp)</label><input type="text" id="customer_contact" name="customer_contact" placeholder="अपना व्हाट्सएप नंबर दर्ज करें" required></div>
+                    <div class="warning" style="margin-bottom:20px;"><strong>ध्यान दें:</strong> कृपया सभी जानकारी सही-सही भरें। 1000 से कम मात्रा का ऑर्डर पूरा नहीं होगा।</div>
+                    <button type="button" class="submit-btn" onclick="proceedToPayment()">पेमेंट करने के लिए आगे बढ़ें</button>
+                    <div class="support-btn-container"><a href="https://t.me/Apnabhai55" target="_blank" class="support-btn"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M0 0h24v24H0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg><span>टेलीग्राम पर सपोर्ट</span></a></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-page" class="full-page">
+        <!-- Payment Page -->
+        <div class="content">
+            <h2>पेमेंट करें</h2><p>ऑर्डर फाइनल करने के लिए कृपया नीचे दिए गए QR पर पेमेंट करें।</p>
+            <div id="final-amount">₹0</div>
+            <img src="Devraaz" alt="QR Code" class="qr-code">
+            <p><strong>UPI ID:</strong> your-upi-id@okhdfcbank</p>
+            <div id="timer">05:00</div>
+            <form id="paymentForm" onsubmit="return false;">
+                <div class="form-group" style="text-align:left;"><label for="utr">UTR/Transaction ID डालें</label><input type="text" id="utr" name="utr" placeholder="12 अंकों का UTR नंबर" required></div>
+                <div class="warning"><strong>जरूरी:</strong> पेमेंट करने के बाद सही UTR नंबर यहां डालें। गलत जानकारी देने पर आपका ऑर्डर कन्फर्म नहीं होगा।</div>
+                <button type="button" class="submit-btn" style="margin-top:20px;" onclick="confirmOrder()">ऑर्डर कन्फर्म करें</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="success-screen" class="full-page">
+        <!-- Success Screen -->
+        <svg class="success-animation-container" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle class="checkmark-circle" cx="50" cy="50" r="45"/><polyline class="checkmark-tick" points="25,50 45,70 75,30"/>
+        </svg>
+        <h1>ऑर्डर सफलतापूर्वक कन्फर्म हुआ!</h1>
+        <p>आपकी PDF रसीद डाउनलोड हो गई है।</p>
+        <div class="receipt-instruction">
+            <p>ऑर्डर को कन्फर्म करने के लिए,<br>कृपया डाउनलोड की हुई रसीद हमें भेजें।</p>
+            <a href="https://t.me/MissSMMPanelBot" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M0 0h24v24H0z" fill="none"/><path d="M9.78 18.65l.28-4.23-7.68-6.92c-.22-.2-.28-.53-.15-.81s.4-.46.71-.46h5.26l2.12-6.1c.12-.34.45-.56.81-.56s.69.22.81.56l2.12 6.1h5.26c.31 0 .58.18.71.46s.07.61-.15.81l-7.68 6.92.28 4.23c.05.33-.11.65-.41.81-.3.16-.65.09-.88-.18l-3.8-3.35-3.8 3.35c-.23.27-.58.34-.88.18-.3-.16-.46-.48-.41-.81z"/></svg>
+                Telegram पर भेजें
+            </a>
+        </div>
+        <button class="submit-btn" onclick="orderAgain()">एक और ऑर्डर करें</button>
+    </div>
+
+    <script>
+        const services = {
+            Instagram: [
+                { name: '💎 प्रीमियम फॉलोअर्स', value: 'insta_premium_followers', price: 80, unit: 1000 },
+                { name: '❤️ प्रोफेशनल लाइक्स', value: 'insta_pro_likes', price: 30, unit: 1000 },
+                { name: '👀 रील व्यूज', value: 'insta_reel_views', price: 50, unit: 5000 }
+            ],
+            YouTube: [
+                { name: '👑 प्रीमियम सब्सक्राइबर्स', value: 'yt_premium_subscribers', price: 80, unit: 1000 },
+                { name: '📈 प्रोफेशनल व्यूज', value: 'yt_pro_views', price: 60, unit: 5000 },
+                { name: '👍 लाइक्स', value: 'yt_likes', price: 30, unit: 2000 }
+            ]
+        };
+
+        function updateServices() { const e = document.querySelector('input[name="platform"]:checked').value, t = document.getElementById("service"); t.innerHTML = "", services[e].forEach(e => { const n = document.createElement("option"); n.value = e.value, n.textContent = `${e.name} - ₹${e.price}/${e.unit / 1e3}k`, n.dataset.price = e.price, n.dataset.unit = e.unit, t.appendChild(n) }), calculatePrice() } function calculatePrice() { const e = document.getElementById("service"), t = e.options[e.selectedIndex], n = document.getElementById("quantity"), o = document.getElementById("price-display"); if (!t || !n.value || n.value < 1) return void (o.innerHTML = "<span>कीमत:</span> ₹0"); const c = parseFloat(t.dataset.price), d = parseInt(t.dataset.unit), a = parseInt(n.value) / d * c; o.innerHTML = `<span>कीमत:</span> ₹${a.toFixed(2)}` } let timerInterval; function startTimer(e, t) { let n, o; timerInterval = setInterval(() => { n = parseInt(e / 60, 10), o = parseInt(e % 60, 10), n = n < 10 ? "0" + n : n, o = o < 10 ? "0" + o : o, t.textContent = n + ":" + o, --e < 0 && (clearInterval(timerInterval), alert("पेमेंट का समय समाप्त हो गया है!"), document.getElementById("payment-page").style.display = "none", document.getElementById("order-section").style.display = "block") }, 1e3) } function proceedToPayment() { const e = document.getElementById("quantity"); if (parseInt(e.value) < 1e3) return void alert("कृपया कम से कम 1000 की मात्रा दर्ज करें।"); if (document.getElementById("orderForm").checkValidity()) { const e = document.getElementById("price-display").innerText; document.getElementById("final-amount").innerText = e.replace("कीमत: ", ""), document.getElementById("order-section").style.display = "none", document.getElementById("payment-page").style.display = "block", startTimer(300, document.querySelector("#timer")) } else alert("कृपया ऑर्डर की सभी जानकारी सही-सही भरें!"), document.getElementById("orderForm").reportValidity() }
+        
+        // === FINAL, 100% WORKING PDF FUNCTION ===
+        function generateAndDownloadPDF(data) {
+            try {
+                if (!window.jspdf) { throw new Error("jsPDF library is not loaded."); }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Helper function to format service names from 'value' to 'Title Case'
+                const formatServiceName = (value) => {
+                    return value.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                };
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(22);
+                doc.text('Devraaz SMM Panel - Order Receipt', 105, 20, { align: 'center' });
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(11);
+                doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, 105, 30, { align: 'center' });
+                
+                doc.setLineWidth(0.5);
+                doc.line(20, 35, 190, 35);
+                
+                let y = 50;
+                const addDetail = (label, value) => {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label, 20, y);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(String(value), 80, y);
+                    y += 10;
+                };
+
+                addDetail('Customer Name:', data.customer_name);
+                addDetail('Contact (WhatsApp):', data.customer_contact);
+                y += 5;
+                addDetail('Platform:', data.platform);
+                addDetail('Service:', formatServiceName(data.service)); // Use formatted English name
+                addDetail('Username / Link:', data.username);
+                addDetail('Quantity:', data.quantity);
+                y += 5;
+                addDetail('Total Price:', `Rs. ${data.price.replace('₹', '').trim()}`); // Use Rs. symbol
+                addDetail('UTR / Transaction ID:', data.utr);
+                
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'italic');
+                doc.text('Note: The order will be processed only after successful verification of the UTR/Transaction ID.', 20, y + 5);
+                y += 10;
+
+                doc.line(20, y, 190, y);
+                doc.setFontSize(10);
+                doc.text('Thank you for your order!', 105, y + 10, { align: 'center' });
+
+                doc.save(`Devraaz_SMM_Panel_Receipt_${Date.now()}.pdf`);
+
+            } catch (error) {
+                console.error("PDF Generation Failed:", error);
+                alert("माफ़ कीजिए, PDF रसीद डाउनलोड नहीं हो सकी। कृपया इस पेज का स्क्रीनशॉट ले लें।");
+            }
+        }
+
+        async function confirmOrder() { if (!document.getElementById("paymentForm").checkValidity()) return alert("कृपया सही UTR नंबर डालें!"), void document.getElementById("paymentForm").reportValidity(); clearInterval(timerInterval), document.getElementById("payment-page").style.display = "none"; const e = document.getElementById("success-screen"); e.classList.add("visible"); const t = new FormData(document.getElementById("orderForm")), n = new FormData(document.getElementById("paymentForm")), o = { ...Object.fromEntries(t.entries()), ...Object.fromEntries(n.entries()), price: document.getElementById("final-amount").innerText }; generateAndDownloadPDF(o) } function orderAgain() { const e = document.getElementById("success-screen"); e.classList.remove("visible"), setTimeout(() => { document.getElementById("orderForm").reset(), document.getElementById("paymentForm").reset(), updateServices(), document.getElementById("order-section").style.display = "block" }, 400) } document.addEventListener("DOMContentLoaded", updateServices);
+    </script>
+</body>
+</html>
