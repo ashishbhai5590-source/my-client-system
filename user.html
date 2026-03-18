@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>आपका वॉलेट</title>
+    
+    <!-- CSS Styles -->
+    <style>
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;background-color:#f4f7f9;color:#333;display:flex;justify-content:center;align-items:center;min-height:100vh}
+        .container{width:100%;max-width:450px;margin:20px;background-color:#fff;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,.1);overflow:hidden}
+        .header{background:linear-gradient(135deg,#5e72e4,#825ee4);color:#fff;padding:25px;text-align:center}
+        .header h1{margin:0;font-size:1.8em}
+        .header p{margin:5px 0 0;opacity:.9}
+        .main-content{padding:25px}
+        .wallet-info{background-color:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:20px;margin-bottom:20px}
+        .wallet-info h2{margin-top:0;color:#5e72e4;border-bottom:2px solid #e9ecef;padding-bottom:10px}
+        .balance-item{display:flex;justify-content:space-between;align-items:center;padding:15px 0;font-size:1.1em;border-bottom:1px solid #e9ecef}
+        .balance-item:last-child{border-bottom:none}
+        .balance-item span:first-child{font-weight:500}
+        .balance-item span:last-child{font-weight:700;color:#2dce89}
+        .btn-group{display:flex;gap:15px;margin-top:20px}
+        .btn{flex:1;padding:12px;border:none;border-radius:8px;font-size:1em;font-weight:700;cursor:pointer;transition:all .3s ease}
+        .btn-primary{background-color:#5e72e4;color:#fff}
+        .btn-primary:hover{background-color:#4a5cc4}
+        .btn-secondary{background-color:#f7fafc;color:#5e72e4;border:1px solid #5e72e4}
+        .btn-secondary:hover{background-color:#e9ecef}
+        .history-list{list-style:none;padding:0}
+        .history-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:8px;margin-bottom:10px;background:#f8f9fa}
+        .history-item .status{padding:5px 10px;border-radius:20px;font-size:.8em;font-weight:700;color:#fff}
+        .status.pending{background-color:#fb6340}
+        .status.processing{background-color:#11cdef}
+        .status.success{background-color:#2dce89}
+        .popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:1000}
+        .popup-content{background:#fff;padding:30px;border-radius:12px;width:90%;max-width:400px;box-shadow:0 5px 15px rgba(0,0,0,.3)}
+        .popup-content h3{margin-top:0}
+        .form-group{margin-bottom:15px}
+        .form-group label{display:block;margin-bottom:5px;font-weight:500}
+        .form-group input{width:100%;padding:10px;border:1px solid #dee2e6;border-radius:8px;box-sizing:border-box}
+        .notification{position:fixed;top:20px;right:20px;padding:15px 25px;border-radius:8px;color:#fff;font-size:1em;z-index:2000;opacity:0;transition:opacity .5s ease;pointer-events:none}
+        .notification.show{opacity:1}
+        .notification.success{background-color:#2dce89}
+        .notification.error{background-color:#f5365c}
+    </style>
+</head>
+<body>
+
+    <div id="notification" class="notification"></div>
+
+    <div id="login-screen" class="container">
+        <div class="header"><h1>सुरक्षित लॉगिन</h1></div>
+        <div class="main-content">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="userId">यूजर आईडी</label>
+                    <input type="text" id="userId" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">पासवर्ड</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">लॉगिन करें</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="wallet-screen" class="container" style="display: none;">
+        <div class="header">
+            <h1 id="welcome-message">आपका वॉलेट</h1>
+            <p id="user-id-display"></p>
+        </div>
+        <div class="main-content">
+            <div class="wallet-info">
+                <h2>वॉलेट बैलेंस</h2>
+                <div class="balance-item"><span>कुल राशि</span><span id="total-amount">₹ 0.00</span></div>
+                <div class="balance-item"><span>कुल रेफरल</span><span id="total-referral">0</span></div>
+            </div>
+            <div class="btn-group">
+                <button id="withdraw-btn" class="btn btn-primary">निकासी करें</button>
+                <button id="settings-btn" class="btn btn-secondary">सेटिंग्स</button>
+            </div>
+            <div style="margin-top: 25px;">
+                <h3>निकासी का इतिहास</h3>
+                <ul id="history-list" class="history-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="withdraw-popup" class="popup-overlay"><div class="popup-content"><h3>निकासी का अनुरोध</h3><form id="withdraw-form"><div class="form-group"><label for="upi-id">आपकी यूपीआई आईडी</label><input type="text" id="upi-id" placeholder="yourname@upi" readonly></div><div class="form-group"><label for="withdraw-amount">राशि (न्यूनतम ₹500)</label><input type="number" id="withdraw-amount" min="500" placeholder="500" required></div><div class="btn-group"><button type="submit" class="btn btn-primary">अनुरोध करें</button><button type="button" id="close-withdraw-popup" class="btn btn-secondary">रद्द करें</button></div></form></div></div>
+    <div id="settings-popup" class="popup-overlay"><div class="popup-content"><h3>सेटिंग्स</h3><form id="settings-form"><div class="form-group"><label for="change-upi">अपनी यूपीआई आईडी बदलें</label><input type="text" id="change-upi" required></div><button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">सेव करें</button></form><button id="logout-btn" class="btn" style="width: 100%; background-color:#f5365c; color:white;">लॉगआउट</button><button type="button" id="close-settings-popup" class="btn" style="width: 100%; margin-top: 10px;">बंद करें</button></div></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script>
+        // 1. यहाँ अपनी फायरबेस कॉन्फिग पेस्ट करें
+const firebaseConfig = {
+  apiKey: "AIzaSyAYFraUQv72RRjleK6xV1p5oizNKJO6kCY",
+  authDomain: "refferal-earn-f75f7.firebaseapp.com",
+  projectId: "refferal-earn-f75f7",
+  storageBucket: "refferal-earn-f75f7.firebasestorage.app",
+  messagingSenderId: "969067796179",
+  appId: "1:969067796179:web:71a94708680beacb486626"
+};
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let currentUserData = null;
+
+        const loginScreen = document.getElementById('login-screen');
+        const walletScreen = document.getElementById('wallet-screen');
+        const notification = document.getElementById('notification');
+        
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            setTimeout(() => { notification.className = 'notification'; }, 3000);
+        }
+
+        function renderHistory(history = []) {
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            if (history.length === 0) {
+                list.innerHTML = '<li>अभी कोई इतिहास नहीं है।</li>';
+                return;
+            }
+            history.slice().reverse().forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                const statusClass = item.status.toLowerCase();
+                li.innerHTML = `<span>₹${item.amount} <br><small>${new Date(item.date).toLocaleString()}</small></span><span class="status ${statusClass}">${item.status}</span>`;
+                list.appendChild(li);
+            });
+        }
+        
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loginScreen.style.display = 'none';
+                walletScreen.style.display = 'block';
+                
+                db.collection('users').doc(user.uid).onSnapshot(doc => {
+                    if (doc.exists) {
+                        currentUserData = doc.data();
+                        document.getElementById('user-id-display').textContent = `यूजर आईडी: ${currentUserData.userId}`;
+                        
+                        if (currentUserData.message) {
+                            showNotification(currentUserData.message, 'error');
+                            db.collection('users').doc(user.uid).update({ message: '' });
+                        }
+
+                        if (currentUserData.status === 'blocked') {
+                            showNotification('आपका खाता ब्लॉक कर दिया गया है।', 'error');
+                            auth.signOut();
+                            return;
+                        }
+
+                        document.getElementById('total-amount').textContent = `₹ ${currentUserData.balance.toFixed(2)}`;
+                        document.getElementById('total-referral').textContent = currentUserData.referrals;
+                        document.getElementById('upi-id').value = currentUserData.upi || '';
+                        document.getElementById('change-upi').value = currentUserData.upi || '';
+                        renderHistory(currentUserData.history);
+                    } else { auth.signOut(); }
+                }, error => { showNotification('डेटा लोड करने में त्रुटि हुई।', 'error'); });
+
+            } else {
+                loginScreen.style.display = 'block';
+                walletScreen.style.display = 'none';
+                currentUserData = null;
+            }
+        });
+
+        // *** नया लॉगिन लॉजिक ***
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+
+            if (!userId || !password) {
+                showNotification('यूजर आईडी और पासवर्ड आवश्यक हैं।', 'error');
+                return;
+            }
+
+            try {
+                // चरण 1: यूजर आईडी से उपयोगकर्ता का ईमेल खोजें
+                const querySnapshot = await db.collection('users').where('userId', '==', userId).limit(1).get();
+
+                if (querySnapshot.empty) {
+                    showNotification('यह यूजर आईडी मौजूद नहीं है।', 'error');
+                    return;
+                }
+
+                const userDoc = querySnapshot.docs[0].data();
+                const userEmail = userDoc.email; // बैकएंड में संग्रहीत ईमेल मिला
+
+                // चरण 2: मिले ईमेल और दिए गए पासवर्ड से लॉगिन करें
+                await auth.signInWithEmailAndPassword(userEmail, password);
+                showNotification('लॉगिन सफल!', 'success');
+
+            } catch (error) {
+                if (error.code === 'auth/wrong-password') {
+                    showNotification('गलत पासवर्ड।', 'error');
+                } else {
+                    showNotification('लॉगिन विफल। कृपया पुनः प्रयास करें।', 'error');
+                    console.error("Login Error:", error);
+                }
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            auth.signOut().then(() => { showNotification('आप सफलतापूर्वक लॉगआउट हो गए हैं।', 'success'); });
+        });
+
+        const withdrawPopup = document.getElementById('withdraw-popup');
+        const settingsPopup = document.getElementById('settings-popup');
+        document.getElementById('withdraw-btn').addEventListener('click', () => withdrawPopup.style.display = 'flex');
+        document.getElementById('close-withdraw-popup').addEventListener('click', () => withdrawPopup.style.display = 'none');
+        document.getElementById('settings-btn').addEventListener('click', () => settingsPopup.style.display = 'flex');
+        document.getElementById('close-settings-popup').addEventListener('click', () => settingsPopup.style.display = 'none');
+
+        document.getElementById('withdraw-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            if (!currentUserData.upi) { showNotification('कृपया पहले सेटिंग्स में अपनी UPI आईडी जोड़ें।', 'error'); return; }
+            if (amount < 500) { showNotification('न्यूनतम निकासी राशि ₹500 है।', 'error'); return; }
+            if (amount > currentUserData.balance) { showNotification('आपके खाते में पर्याप्त बैलेंस नहीं है।', 'error'); return; }
+            const newWithdrawal = { amount: amount, date: new Date().toISOString(), status: 'Pending' };
+            db.collection('users').doc(auth.currentUser.uid).update({
+                balance: firebase.firestore.FieldValue.increment(-amount),
+                history: firebase.firestore.FieldValue.arrayUnion(newWithdrawal)
+            }).then(() => { showNotification('निकासी का अनुरोध सफलतापूर्वक भेज दिया गया है।', 'success'); withdrawPopup.style.display = 'none';
+            }).catch(err => { showNotification('अनुरोध भेजने में विफल।', 'error'); });
+        });
+        
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newUpi = document.getElementById('change-upi').value;
+            db.collection('users').doc(auth.currentUser.uid).update({ upi: newUpi })
+                .then(() => { showNotification('UPI आईडी सफलतापूर्वक अपडेट हो गई है।', 'success'); settingsPopup.style.display = 'none'; })
+                .catch(error => { showNotification('UPI आईडी अपडेट करने में विफल।', 'error'); });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>एडमिन पैनल</title>
+    <style>
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;background-color:#f4f7f9;color:#333;display:flex;justify-content:center;align-items:center;min-height:100vh}.container{width:100%;max-width:800px;margin:20px;background-color:#fff;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,.1);overflow:hidden}.header{background:linear-gradient(135deg,#172b4d,#1a174d);color:#fff;padding:25px;display:flex;justify-content:space-between;align-items:center}.header h1{margin:0;font-size:1.8em}.main-content{padding:25px}.admin-section{background-color:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:20px;margin-bottom:20px}.admin-section h3{margin-top:0;color:#172b4d;border-bottom:2px solid #e9ecef;padding-bottom:10px}.btn-group{display:flex;gap:15px;margin-top:20px}.btn{flex:1;padding:12px;border:none;border-radius:8px;font-size:1em;font-weight:700;cursor:pointer;transition:all .3s ease}.btn-sm{padding:5px 10px;font-size:0.8em;flex:0;}.btn-success{background-color:#2dce89;color:white}.btn-danger{background-color:#f5365c;color:white}.btn-primary{background-color:#5e72e4;color:#fff}.btn-primary:hover{background-color:#4a5cc4}.btn-secondary{background-color:#f7fafc;color:#5e72e4;border:1px solid #5e72e4}.btn-secondary:hover{background-color:#e9ecef}.form-group{margin-bottom:15px}.form-group label{display:block;margin-bottom:5px;font-weight:500}.form-group input{width:100%;padding:10px;border:1px solid #dee2e6;border-radius:8px;box-sizing:border-box}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.notification{position:fixed;top:20px;right:20px;padding:15px 25px;border-radius:8px;color:#fff;font-size:1em;z-index:2000;opacity:0;transition:opacity .5s ease;pointer-events:none}.notification.show{opacity:1}.notification.success{background-color:#2dce89}.notification.error{background-color:#f5365c}table{width:100%;border-collapse:collapse;margin-top:15px}th,td{text-align:left;padding:8px;border-bottom:1px solid #dee2e6}th{background-color:#e9ecef}
+    </style>
+</head>
+<body>
+    <div id="notification" class="notification"></div>
+    <div id="admin-login-screen" class="container" style="max-width: 450px;"><div class="header" style="justify-content: center;"><h1>एडमिन लॉगिन</h1></div><div class="main-content"><form id="admin-login-form"><div class="form-group"><label for="admin-email">एडमिन ईमेल</label><input type="email" id="admin-email" required value="admin@example.com"></div><div class="form-group"><label for="admin-password">एडमिन पासवर्ड</label><input type="password" id="admin-password" required value="admin123"></div><button type="submit" class="btn btn-primary" style="width:100%">लॉगिन</button></form></div></div>
+
+    <div id="admin-panel" class="container" style="display:none;">
+        <div class="header"><h1>एडमिन पैनल</h1><button id="admin-logout-btn" class="btn" style="background: white; color:#172b4d; padding: 8px 15px; flex:0;">लॉगआउट</button></div>
+        <div class="main-content">
+
+            <!-- नया सेक्शन यहाँ से शुरू -->
+            <div class="admin-section">
+                <div style="display:flex; justify-content: space-between; align-items: center;">
+                    <h3>लंबित निकासी अनुरोध</h3>
+                    <button id="refresh-withdrawals-btn" class="btn btn-secondary btn-sm">रिफ्रेश</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr><th>यूजर आईडी</th><th>राशि</th><th>UPI</th><th>तारीख</th><th>एक्शन</th></tr>
+                        </thead>
+                        <tbody id="withdrawal-list-body">
+                            <!-- अनुरोध यहाँ लोड होंगे -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- नया सेक्शन यहाँ खत्म -->
+
+            <div class="admin-section"><h3>नया उपयोगकर्ता बनाएं</h3><form id="create-user-form" class="form-grid"><div class="form-group"><label>यूजर आईडी (कोई स्पेस नहीं)</label><input type="text" id="new-user-id" required></div><div class="form-group"><label>पासवर्ड</label><input type="password" id="new-user-password" required></div><button type="submit" class="btn btn-primary" style="grid-column: 1 / -1;">उपयोगकर्ता बनाएं</button></form></div>
+            <div class="admin-section"><h3>उपयोगकर्ताओं को प्रबंधित करें</h3><div class="form-group"><label>उपयोगकर्ता खोजें (यूजर आईडी द्वारा)</label><input type="text" id="search-user-id" placeholder="user123"><button id="search-user-btn" class="btn btn-secondary" style="margin-top:10px; width: 100%;">खोजें</button></div><hr><div id="user-management-area" style="display:none;"><h4>उपयोगकर्ता: <span id="manage-user-id"></span></h4><div class="form-group"><label>बैलेंस बदलें (उदा: 100 या -50)</label><input type="number" id="change-balance" placeholder="0"></div><div class="form-group"><label>रेफरल बदलें (उदा: 5 या -2)</label><input type="number" id="change-referrals" placeholder="0"></div><div class="form-group"><label>लॉगिन पर संदेश दिखाएं</label><input type="text" id="user-message" placeholder="आपका खाता अस्थायी रूप से बंद है।"></div><div class="btn-group"><button id="update-user-btn" class="btn btn-primary">अपडेट करें</button><button id="block-user-btn" class="btn" style="background-color: #fb6340; color:white;">ब्लॉक/अनब्लॉक</button><button id="delete-user-btn" class="btn" style="background-color: #f5365c; color:white;">डिलीट करें</button></div></div></div>
+        </div>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAYFraUQv72RRjleK6xV1p5oizNKJO6kCY",
+  authDomain: "refferal-earn-f75f7.firebaseapp.com",
+  projectId: "refferal-earn-f75f7",
+  storageBucket: "refferal-earn-f75f7.firebasestorage.app",
+  messagingSenderId: "969067796179",
+  appId: "1:969067796179:web:71a94708680beacb486626"
+};
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        let foundUser = null;
+        const adminLoginScreen = document.getElementById('admin-login-screen');
+        const adminPanel = document.getElementById('admin-panel');
+        const notification = document.getElementById('notification');
+        const userManagementArea = document.getElementById('user-management-area');
+        
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            setTimeout(() => { notification.className = 'notification'; }, 3000);
+        }
+
+        document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const adminEmail = "playjoy64@gmail.com";
+            const adminPass = "admin8887";
+            if (document.getElementById('admin-email').value === adminEmail && document.getElementById('admin-password').value === adminPass) {
+                adminLoginScreen.style.display = 'none'; adminPanel.style.display = 'block';
+                showNotification('एडमिन लॉगिन सफल!', 'success');
+                loadPendingWithdrawals(); // लॉगिन के बाद अनुरोध लोड करें
+            } else { showNotification('अमान्य एडमिन क्रेडेंशियल!', 'error'); }
+        });
+        
+        document.getElementById('admin-logout-btn').addEventListener('click', () => {
+             adminLoginScreen.style.display = 'block'; adminPanel.style.display = 'none';
+        });
+
+        // --- नया जावास्क्रिप्ट कोड यहाँ जोड़ें ---
+
+        const withdrawalListBody = document.getElementById('withdrawal-list-body');
+
+        async function loadPendingWithdrawals() {
+            withdrawalListBody.innerHTML = '<tr><td colspan="5">लोड हो रहा है...</td></tr>';
+            let requestsHTML = '';
+            try {
+                const usersSnapshot = await db.collection('users').get();
+                for (const userDoc of usersSnapshot.docs) {
+                    const userData = userDoc.data();
+                    if (userData.history && userData.history.length > 0) {
+                        userData.history.forEach(item => {
+                            if (item.status === 'Pending') {
+                                requestsHTML += `
+                                    <tr>
+                                        <td>${userData.userId}</td>
+                                        <td>₹${item.amount}</td>
+                                        <td>${userData.upi || 'N/A'}</td>
+                                        <td>${new Date(item.date).toLocaleDateString()}</td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm approve-btn" data-userid="${userDoc.id}" data-itemdate="${item.date}">Approve</button>
+                                            <button class="btn btn-danger btn-sm reject-btn" data-userid="${userDoc.id}" data-itemdate="${item.date}">Reject</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                        });
+                    }
+                }
+                withdrawalListBody.innerHTML = requestsHTML || '<tr><td colspan="5">कोई लंबित अनुरोध नहीं है।</td></tr>';
+            } catch (error) {
+                console.error("Error loading withdrawals:", error);
+                withdrawalListBody.innerHTML = '<tr><td colspan="5">अनुरोध लोड करने में त्रुटि।</td></tr>';
+            }
+        }
+
+        document.getElementById('refresh-withdrawals-btn').addEventListener('click', loadPendingWithdrawals);
+
+        withdrawalListBody.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('approve-btn') || e.target.classList.contains('reject-btn')) {
+                const button = e.target;
+                const userId = button.dataset.userid;
+                const itemDate = button.dataset.itemdate;
+                const isApproved = button.classList.contains('approve-btn');
+
+                button.disabled = true;
+                button.textContent = '...';
+
+                try {
+                    const userRef = db.collection('users').doc(userId);
+                    const userDoc = await userRef.get();
+                    let userData = userDoc.data();
+                    let updatedHistory = userData.history;
+                    let itemAmount = 0;
+
+                    const itemIndex = updatedHistory.findIndex(item => item.date === itemDate);
+                    if (itemIndex > -1) {
+                        itemAmount = updatedHistory[itemIndex].amount;
+                        updatedHistory[itemIndex].status = isApproved ? 'Success' : 'Rejected';
+                    }
+
+                    if (isApproved) {
+                        await userRef.update({ history: updatedHistory });
+                        showNotification('अनुरोध को स्वीकार कर लिया गया है।', 'success');
+                    } else { // If Rejected, refund the amount
+                        await userRef.update({
+                            history: updatedHistory,
+                            balance: firebase.firestore.FieldValue.increment(itemAmount)
+                        });
+                        showNotification('अनुरोध अस्वीकार कर दिया गया और राशि वापस कर दी गई।', 'success');
+                    }
+                    loadPendingWithdrawals(); // Refresh the list
+                } catch (error) {
+                    console.error("Error updating status:", error);
+                    showNotification('स्टेटस अपडेट करने में त्रुटि हुई।', 'error');
+                }
+            }
+        });
+
+        // --- पुराना जावास्क्रिप्ट कोड यहाँ से जारी ---
+
+        document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('new-user-id').value.trim();
+            const password = document.getElementById('new-user-password').value;
+            if (userId.includes(' ')) { showNotification('यूजर आईडी में स्पेस नहीं होना चाहिए।', 'error'); return; }
+            const internalEmail = `${userId}@${firebaseConfig.projectId}.firebaseapp.com`;
+            const tempAdminApp = firebase.initializeApp(firebaseConfig, 'tempAdminApp');
+            try {
+                const existingUser = await db.collection('users').where('userId', '==', userId).get();
+                if (!existingUser.empty) { showNotification('यह यूजर आईडी पहले से मौजूद है।', 'error'); tempAdminApp.delete(); return; }
+                const userCredential = await tempAdminApp.auth().createUserWithEmailAndPassword(internalEmail, password);
+                const user = userCredential.user;
+                await db.collection('users').doc(user.uid).set({ userId, email: internalEmail, balance: 0, referrals: 0, upi: '', history: [], status: 'active', message: 'आपका स्वागत है! आपका खाता सफलतापूर्वक बन गया है।' });
+                showNotification('उपयोगकर्ता सफलतापूर्वक बनाया गया!', 'success');
+                document.getElementById('create-user-form').reset();
+            } catch (error) { showNotification(error.message, 'error');
+            } finally { await tempAdminApp.auth().signOut(); await tempAdminApp.delete(); }
+        });
+        document.getElementById('search-user-btn').addEventListener('click', async () => { /* ... बाकी कोड वही है ... */ });
+        // ... बाकी सभी इवेंट लिस्नर पहले जैसे ही रहेंगे ...
+        document.getElementById('search-user-btn').addEventListener('click', async () => {
+            const userId = document.getElementById('search-user-id').value;
+            if (!userId) { showNotification('कृपया खोजने के लिए एक यूजर आईडी दर्ज करें।', 'error'); return; }
+            const snapshot = await db.collection('users').where('userId', '==', userId).get();
+            if (snapshot.empty) { showNotification('इस यूजर आईडी के साथ कोई उपयोगकर्ता नहीं मिला।', 'error'); userManagementArea.style.display = 'none'; foundUser = null; return; }
+            snapshot.forEach(doc => {
+                foundUser = { id: doc.id, ...doc.data() };
+                document.getElementById('manage-user-id').textContent = foundUser.userId;
+                document.getElementById('block-user-btn').textContent = foundUser.status === 'blocked' ? 'अनब्लॉक' : 'ब्लॉक';
+                userManagementArea.style.display = 'block'; showNotification('उपयोगकर्ता मिल गया!', 'success');
+            });
+        });
+        document.getElementById('update-user-btn').addEventListener('click', () => {
+            if (!foundUser) return;
+            const balanceChange = parseFloat(document.getElementById('change-balance').value) || 0;
+            const referralChange = parseInt(document.getElementById('change-referrals').value) || 0;
+            const message = document.getElementById('user-message').value;
+            db.collection('users').doc(foundUser.id).update({
+                balance: firebase.firestore.FieldValue.increment(balanceChange),
+                referrals: firebase.firestore.FieldValue.increment(referralChange),
+                message: message
+            }).then(() => {
+                showNotification('उपयोगकर्ता सफलतापूर्वक अपडेट हो गया!', 'success');
+                document.getElementById('change-balance').value = '';
+                document.getElementById('change-referrals').value = '';
+                document.getElementById('user-message').value = '';
+            }).catch(err => showNotification('अपडेट विफल!', 'error'));
+        });
+        document.getElementById('block-user-btn').addEventListener('click', () => {
+            if (!foundUser) return;
+            const newStatus = foundUser.status === 'blocked' ? 'active' : 'blocked';
+            db.collection('users').doc(foundUser.id).update({ status: newStatus })
+                .then(() => {
+                    foundUser.status = newStatus;
+                    document.getElementById('block-user-btn').textContent = newStatus === 'blocked' ? 'अनब्लॉक' : 'ब्लॉक';
+                    showNotification(`उपयोगकर्ता को ${newStatus} कर दिया गया है।`, 'success');
+                }).catch(err => showNotification('स्थिति बदलने में विफल!', 'error'));
+        });
+        document.getElementById('delete-user-btn').addEventListener('click', () => {
+            if (!foundUser) return;
+            if (confirm(`क्या आप वाकई ${foundUser.userId} को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती!`)) {
+                db.collection('users').doc(foundUser.id).delete()
+                    .then(() => {
+                        showNotification('उपयोगकर्ता को डेटाबेस से हटा दिया गया है।', 'success');
+                        userManagementArea.style.display = 'none'; foundUser = null;
+                    }).catch(err => showNotification('हटाने में विफल!', 'error'));
+            }
+        });
+
+    </script>
+</body>
+</html>
