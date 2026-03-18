@@ -45,7 +45,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script>
-const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyAYFraUQv72RRjleK6xV1p5oizNKJO6kCY",
   authDomain: "refferal-earn-f75f7.firebaseapp.com",
   projectId: "refferal-earn-f75f7",
@@ -70,8 +70,8 @@ const firebaseConfig = {
 
         document.getElementById('admin-login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const adminEmail = "playjoy64@gmail.com";
-            const adminPass = "admin8887";
+            const adminEmail = "admin@example.com";
+            const adminPass = "admin123";
             if (document.getElementById('admin-email').value === adminEmail && document.getElementById('admin-password').value === adminPass) {
                 adminLoginScreen.style.display = 'none'; adminPanel.style.display = 'block';
                 showNotification('एडमिन लॉगिन सफल!', 'success');
