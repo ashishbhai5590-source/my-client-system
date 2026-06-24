@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Earn Daily - Links</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: linear-gradient(-45deg, #00f2fe, #4facfe, #30cfd0, #330867);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            display: flex; justify-content: center;
+            min-height: 100vh; padding: 40px 10px; overflow-x: hidden;
+        }
+
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .container { width: 100%; max-width: 450px; position: relative; }
+
+        .profile-section { text-align: center; margin-bottom: 35px; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .profile-pic { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); margin-bottom: 15px; }
+        .profile-title { font-size: 26px; font-weight: 800; color: #000000; margin-bottom: 5px; }
+        .profile-bio { font-size: 16px; font-weight: 600; color: #111111; line-height: 1.4; }
+
+        .category-group { margin-bottom: 30px; }
+        .category-heading { text-align: center; font-size: 18px; font-weight: 700; color: #000000; margin-bottom: 15px; animation: fadeInUp 0.6s ease forwards; opacity: 0; animation-delay: calc(var(--delay) * 1s); }
+
+        .link-card {
+            position: relative; display: flex; align-items: center;
+            background-color: #fce86c; 
+            border-radius: 16px; margin-bottom: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0; transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+            animation-delay: calc(var(--delay) * 1s);
+        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        .link-card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15); background-color: #fdf096; }
+
+        .card-main-link { display: flex; flex: 1; align-items: center; text-decoration: none; padding: 10px; }
+        
+        /* IMAGE KI JAGAH NAYA EMOJI BOX */
+        .card-emoji { 
+            width: 55px; height: 55px; border-radius: 12px; 
+            background-color: #ffffff; 
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; /* Emoji ka size */
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card-text { flex: 1; text-align: center; font-size: 14.5px; font-weight: 600; padding: 0 10px; color: #000000; }
+
+        .card-dots { width: 45px; height: 100%; min-height: 55px; background: transparent; border: none; color: #000000; font-size: 20px; cursor: pointer; border-radius: 0 16px 16px 0; display: flex; align-items: center; justify-content: center; z-index: 2; transition: 0.2s; }
+        .card-dots:hover { transform: scale(1.1); }
+
+        .share-popup { position: absolute; right: 50px; background: #ffffff; padding: 8px 16px; border-radius: 30px; display: flex; gap: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.25); z-index: 10; opacity: 0; visibility: hidden; transform: translateX(15px) scale(0.9); transition: all 0.3s; }
+        .share-popup.show { opacity: 1; visibility: visible; transform: translateX(0) scale(1); }
+        .share-popup a { font-size: 22px; text-decoration: none; transition: transform 0.2s; }
+        .share-popup a:hover { transform: scale(1.2); }
+        .icon-wa { color: #25D366; } .icon-tg { color: #0088cc; } .icon-cp { color: #6c757d; }
+
+        .bottom-share-container { display: flex; justify-content: center; margin-top: 40px; margin-bottom: 20px; opacity: 0; animation: fadeInUp 0.6s ease forwards; animation-delay: 1s; }
+        .bottom-share-btn { display: flex; align-items: center; gap: 12px; background-color: #111111; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 50px; font-size: 16px; font-weight: 600; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); animation: pulse-animation 2s infinite ease-in-out; border: none; }
+        .bottom-share-btn .fa-whatsapp { color: #25D366; font-size: 24px; } .bottom-share-btn .fa-telegram { color: #0088cc; font-size: 24px; }
+        @keyframes pulse-animation { 0% { transform: scale(1); } 50% { transform: scale(1.06); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Profile Area -->
+        <div class="profile-section">
+            <!-- Profile Photo ke liye link yahan daalein -->
+            <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=200&q=80" alt="Logo" class="profile-pic">
+            <h1 class="profile-title">Task Earn Daily</h1>
+            <p class="profile-bio">Complete tasks, earn rewards!<br>🤑🎁 Join the fun now!</p>
+        </div>
+
+        <!-- CATEGORY 1 -->
+        <div class="category-group">
+            <h2 class="category-heading" style="--delay: 0.1">Survey Apps 🔗👩‍💻</h2>
+            
+            <!-- APP CARD 1 -->
+            <div class="link-card" style="--delay: 0.2">
+                <a href="https://aapka-app-link.com" class="card-main-link">
+                    <div class="card-emoji">🤑</div>
+                    <span class="card-text">Survey App ✅ min withdrawal 5rs</span>
+                </a>
+                <button class="card-dots" onclick="toggleShare(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                <div class="share-popup">
+                    <a href="#" class="icon-wa"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="icon-tg"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="icon-cp"><i class="fas fa-link"></i></a>
+                </div>
+            </div>
+
+            <!-- APP CARD 2 -->
+            <div class="link-card" style="--delay: 0.3">
+                <a href="https://dusra-app-link.com" class="card-main-link">
+                    <div class="card-emoji">💰</div>
+                    <span class="card-text">Diwa games 2nd App bonus 19-120 🎁</span>
+                </a>
+                <button class="card-dots" onclick="toggleShare(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                <div class="share-popup">
+                    <a href="#" class="icon-wa"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="icon-tg"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="icon-cp"><i class="fas fa-link"></i></a>
+                </div>
+            </div>
+            
+            <!-- APP CARD 3 -->
+            <div class="link-card" style="--delay: 0.4">
+                <a href="https://teesra-app-link.com" class="card-main-link">
+                    <div class="card-emoji">🪎</div>
+                    <span class="card-text">₹54 Bonus new App 🎁</span>
+                </a>
+                <button class="card-dots" onclick="toggleShare(event, this)"><i class="fas fa-ellipsis-v"></i></button>
+                <div class="share-popup">
+                    <a href="#" class="icon-wa"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="icon-tg"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="icon-cp"><i class="fas fa-link"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM SHARE BUTTON -->
+        <div class="bottom-share-container">
+            <a href="#" class="bottom-share-btn">
+                <i class="fab fa-whatsapp"></i> Share with friends <i class="fab fa-telegram"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Script for 3-Dots Popup -->
+    <script>
+        function toggleShare(event, button) {
+            event.preventDefault(); event.stopPropagation();
+            const popup = button.nextElementSibling;
+            document.querySelectorAll('.share-popup').forEach(menu => {
+                if (menu !== popup) menu.classList.remove('show');
+            });
+            popup.classList.toggle('show');
+        }
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.share-popup').forEach(menu => menu.classList.remove('show'));
+        });
+    </script>
+</body>
+</html>
