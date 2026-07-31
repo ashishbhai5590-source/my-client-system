@@ -32,7 +32,7 @@
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 glass-card p-6 border-t-4 border-indigo-500">
             <div class="mb-4 md:mb-0 text-center md:text-left">
                 <h1 class="text-3xl font-bold text-indigo-700"><i class="fa-solid fa-crosshairs mr-2"></i>Ultimate Tracker</h1>
-                <p class="text-gray-500 mt-1">Scan hote hi Beep, aur direct Action!</p>
+                <p class="text-gray-500 mt-1">Smart Memory & Auto Save System</p>
             </div>
             <button onclick="downloadPDF()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow-lg font-semibold w-full md:w-auto transition-all">
                 <i class="fa-solid fa-file-pdf mr-2"></i> Report PDF Download
@@ -60,16 +60,15 @@
                 <div class="glass-card p-6 relative">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Scanner</h2>
-                        <span class="text-xs text-gray-400 font-medium">(Tip: Touch screen for sound)</span>
                     </div>
                     
                     <div id="reader" class="w-full rounded-xl border-4 border-gray-100"></div>
                     
                     <!-- Cooldown Rest Screen -->
                     <div id="cooldown-overlay" class="absolute inset-0 bg-white bg-opacity-95 hidden flex-col items-center justify-center rounded-xl z-10 m-6 shadow-inner">
-                        <i class="fa-solid fa-hourglass-half text-5xl text-yellow-500 animate-spin mb-3"></i>
-                        <h3 class="font-bold text-gray-700 text-lg">Resting...</h3>
-                        <p class="text-sm text-gray-500 font-medium mt-1">Double scan rok raha hu</p>
+                        <i class="fa-solid fa-check-circle text-5xl text-green-500 mb-3 animate-pulse"></i>
+                        <h3 class="font-bold text-gray-700 text-lg">Saved Successfully!</h3>
+                        <p class="text-sm text-gray-500 font-medium mt-1">Ready for next scan...</p>
                     </div>
 
                     <!-- Scan Result Status Box -->
@@ -106,8 +105,8 @@
     <!-- MAGIC MODAL (NEW BARCODE LIST) -->
     <div id="mapping-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl transform transition-all animate-pop">
-            <h2 class="text-2xl font-bold text-indigo-700 mb-2"><i class="fa-solid fa-list-check mr-2"></i>Select Activity</h2>
-            <p class="text-gray-600 mb-6 text-sm">Yeh naya packet scan hua hai, isko kis kaam ke sath jodna hai?</p>
+            <h2 class="text-2xl font-bold text-indigo-700 mb-2"><i class="fa-solid fa-microchip mr-2"></i>Naya Barcode Mila!</h2>
+            <p class="text-gray-600 mb-6 text-sm font-medium bg-gray-50 p-3 rounded-lg border">Isko ek baar set kardo, system isko hamesha ke liye yaad rakhega.</p>
             <div class="grid grid-cols-1 gap-3 mb-4" id="action-buttons"></div>
             <div class="text-center">
                 <button onclick="closeMappingModal()" class="text-red-500 text-sm font-bold hover:underline p-2">Cancel</button>
@@ -118,11 +117,11 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             
-            // Database
+            // Database (Naya naam taaki purani galti na aaye)
             let appData;
             try {
-                appData = JSON.parse(localStorage.getItem('smartTrackerDataFINAL2'));
-                if(!appData) throw new Error("No data");
+                appData = JSON.parse(localStorage.getItem('smartTrackerDataFINAL3'));
+                if(!appData || !appData.barcodeMap) throw new Error("No data");
             } catch (e) {
                 appData = { calendar: {}, logs: [], barcodeMap: {} };
             }
@@ -132,8 +131,8 @@
             
             let tempBarcode = "";
             let html5QrcodeScanner = null;
-            let isScannerPaused = false;
             let audioCtx = null; 
+            let isProcessingScan = false; // YAHI HAI WO SUPER LOCK 🔒
 
             const qrActions = {
                 "STUDY_YES": { msg: "Study Completed ✅", type: "study", icon: "fa-book-open", bg: "bg-green-100 text-green-700 border-green-400" },
@@ -143,7 +142,7 @@
                 "HOME": { msg: "Ghar Gaya (Chhutti!) 🏡", type: "home", icon: "fa-house-chimney-window", bg: "bg-purple-100 text-purple-700 border-purple-400" }
             };
 
-            // Audio Unlock Setup (Bina kisi extra screen ke)
+            // Audio Setup
             function initAudio() {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -224,7 +223,6 @@
                 });
             };
 
-            // Error Logic
             function isDuplicateStudy(actionKey) {
                 return (actionKey === "STUDY_YES" || actionKey === "STUDY_NO") && appData.calendar[currentDateStr];
             }
@@ -235,10 +233,9 @@
                 statusDiv.className = `mt-4 text-center text-lg font-bold p-4 rounded-xl border-2 shadow-md animate-pop block bg-red-100 text-red-800 border-red-500`;
                 statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-xl"></i> Aaj ka Padhai Status pehle hi lag chuka hai!`;
                 setTimeout(() => { statusDiv.classList.add('hidden'); statusDiv.classList.remove('block'); }, 4000);
-                applyScannerCooldown(4000);
+                applyScannerCooldown(3000);
             }
 
-            // Main Action Execution
             function executeAction(actionKey) {
                 const actionData = qrActions[actionKey];
                 const statusDiv = document.getElementById('scan-status');
@@ -246,42 +243,49 @@
                 if (actionKey === "STUDY_YES") appData.calendar[currentDateStr] = "yes";
                 if (actionKey === "STUDY_NO") appData.calendar[currentDateStr] = "no";
                 
-                // Show Banner
                 statusDiv.classList.remove('hidden');
                 statusDiv.className = `mt-4 text-center text-lg font-bold p-4 rounded-xl border-2 shadow-md animate-pop block ${actionData.bg}`;
-                statusDiv.innerHTML = `<i class="fa-solid ${actionData.icon} mr-2 text-xl"></i> ${actionData.msg} Recorded!`;
+                statusDiv.innerHTML = `<i class="fa-solid ${actionData.icon} mr-2 text-xl"></i> ${actionData.msg} Saved!`;
                 setTimeout(() => { statusDiv.classList.add('hidden'); statusDiv.classList.remove('block'); }, 4000);
 
-                // Save Log
                 const timeString = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 appData.logs.push({ type: actionKey, action: actionData.msg, time: timeString, date: currentDateStr });
                 
-                localStorage.setItem('smartTrackerDataFINAL2', JSON.stringify(appData));
+                localStorage.setItem('smartTrackerDataFINAL3', JSON.stringify(appData));
                 renderCalendar();
                 renderLogs();
-                applyScannerCooldown(5000);
+                applyScannerCooldown(3000);
             }
 
-            // --- SCANNER EVENT (Yahi saara Magic hai) ---
+            // --- SCANNER EVENT (SUPER LOCKED) ---
             function onScanSuccess(decodedText) {
-                if (isScannerPaused) return;
+                // Agar process chalu hai, toh doosre scan ko totally ignore karega
+                if (isProcessingScan) return;
+                isProcessingScan = true; // SYSTEM LOCK LAGA DIYA
 
-                let actionKey = appData.barcodeMap[decodedText] || (qrActions[decodedText] ? decodedText : null);
+                let actionKey = null;
+
+                // Memory Check (Kya pehle se save hai?)
+                if (appData.barcodeMap && appData.barcodeMap[decodedText]) {
+                    actionKey = appData.barcodeMap[decodedText];
+                } else if (qrActions[decodedText]) {
+                    actionKey = decodedText;
+                }
 
                 if (actionKey) {
-                    // PURANA BARCODE SCAN HUA
+                    // PURANA BARCODE (Memory mein mila)
                     if (isDuplicateStudy(actionKey)) {
-                        playBeep(true); // Error Sound
+                        playBeep(true); 
                         showErrorBox();
                     } else {
-                        playBeep(false); // Success Sound (Turant Awaaz)
-                        executeAction(actionKey); // Entry save ho jayegi
+                        playBeep(false); 
+                        executeAction(actionKey); 
                     }
                 } else {
-                    // NAYA BARCODE SCAN HUA
+                    // NAYA BARCODE (Pehli Baar)
                     playBeep(false); // SCAN HOTE HI AWAZ AAYEGI!
                     tempBarcode = decodedText;
-                    openMappingModal(); // AUR TURANT LIST KHULEGI!
+                    openMappingModal(); // SIRF EK BAAR LIST KHULEGI
                 }
             }
 
@@ -295,7 +299,7 @@
                 Object.keys(qrActions).forEach(key => {
                     const act = qrActions[key];
                     btnContainer.innerHTML += `
-                        <button onclick="saveMapping('${key}')" class="p-3 text-left rounded-xl border-2 shadow-sm transition-all ${act.bg} flex items-center">
+                        <button onclick="saveMapping('${key}')" class="p-3 text-left rounded-xl border-2 shadow-sm transition-all ${act.bg} flex items-center hover:scale-105">
                             <i class="fa-solid ${act.icon} text-xl mr-3 w-6 text-center"></i>
                             <span class="text-sm font-bold">${act.msg}</span>
                         </button>`;
@@ -304,11 +308,13 @@
             };
 
             window.saveMapping = function(actionKey) {
+                // Hamesha ke liye Memory mein Save
+                if (!appData.barcodeMap) appData.barcodeMap = {};
                 appData.barcodeMap[tempBarcode] = actionKey;
-                localStorage.setItem('smartTrackerDataFINAL2', JSON.stringify(appData));
-                closeMappingModal();
+                localStorage.setItem('smartTrackerDataFINAL3', JSON.stringify(appData));
                 
-                // Yahan beep dobara zaroorat nahi hai kyunki modal khulte waqt beep baj chuki thi
+                document.getElementById('mapping-modal').classList.add('hidden');
+                
                 if (isDuplicateStudy(actionKey)) {
                     playBeep(true); 
                     showErrorBox();
@@ -320,26 +326,27 @@
             window.closeMappingModal = function() {
                 document.getElementById('mapping-modal').classList.add('hidden');
                 if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
+                setTimeout(() => { isProcessingScan = false; }, 500); // UNLOCK
             };
 
             window.applyScannerCooldown = function(ms) {
-                isScannerPaused = true;
                 if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.pause(true);
                 document.getElementById('cooldown-overlay').classList.remove('hidden');
                 document.getElementById('cooldown-overlay').classList.add('flex');
 
                 setTimeout(() => {
-                    isScannerPaused = false;
                     document.getElementById('cooldown-overlay').classList.add('hidden');
                     document.getElementById('cooldown-overlay').classList.remove('flex');
                     if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
+                    
+                    isProcessingScan = false; // SYSTEM UNLOCK FOR NEXT SCAN
                 }, ms);
             };
 
             window.clearLogs = function() {
-                if(confirm("Warning! Data delete kar de?")) {
+                if(confirm("Warning! Data aur Barcode ki memory sab delete kar de?")) {
                     appData = { calendar: {}, logs: [], barcodeMap: {} };
-                    localStorage.setItem('smartTrackerDataFINAL2', JSON.stringify(appData));
+                    localStorage.setItem('smartTrackerDataFINAL3', JSON.stringify(appData));
                     renderCalendar();
                     renderLogs();
                 }
