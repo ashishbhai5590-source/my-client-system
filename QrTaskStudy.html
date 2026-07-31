@@ -6,12 +6,14 @@
     <title>Syllabus Auto-Pilot (PCB)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; overflow-x: hidden; }
         .glass-card { background: #ffffff; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border-radius: 1rem; border: 1px solid #e2e8f0; }
         #reader { border: none !important; border-radius: 1rem; overflow: hidden; background: #000; width: 100%; min-height: 250px; }
+        #reader video { object-fit: cover !important; }
         
         /* Checkbox Custom Styling */
         .task-btn { transition: all 0.2s ease-in-out; }
@@ -49,7 +51,10 @@
                 <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Scan Barcode to Open Chapters</h2>
             </div>
             <div class="relative rounded-xl overflow-hidden shadow-inner border-4 border-gray-100 bg-black min-h-[250px] flex items-center justify-center">
+                
+                <!-- CAMERA CONTAINER -->
                 <div id="reader" class="w-full hidden"></div>
+                
                 <!-- AUDIO UNLOCK & START OVERLAY -->
                 <div id="start-scanner-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-95 z-20 cursor-pointer hover:bg-gray-800 transition-colors">
                     <i class="fa-solid fa-power-off text-6xl text-green-400 mb-4 animate-pulse"></i>
@@ -163,7 +168,7 @@
                 localStorage.setItem('PreloadedSyllabusDB_V2', JSON.stringify(db));
             }
 
-            let html5QrcodeScanner = null;
+            let html5QrCode = null;
             let audioCtx = null;
 
             // --- AUDIO SYSTEM ---
@@ -199,15 +204,33 @@
                 osc.start();
             }
 
-            // --- START SCANNER ---
+            // --- START DIRECT CAMERA SYSTEM ---
             document.getElementById('start-scanner-overlay').addEventListener('click', function() {
                 initAudio();
                 playSound('click');
+                
+                // Hide overlay
                 this.style.display = 'none';
                 document.getElementById('reader').classList.remove('hidden');
 
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150}, rememberLastUsedCamera: true }, false);
-                html5QrcodeScanner.render(onScanSuccess);
+                // Start Camera Directly
+                html5QrCode = new Html5Qrcode("reader");
+                const config = { fps: 10, qrbox: { width: 250, height: 200 } };
+
+                html5QrCode.start(
+                    { facingMode: "environment" }, // Back camera
+                    config,
+                    onScanSuccess, // Success callback
+                    function(errorMessage) {
+                        // ignore background searching errors
+                    }
+                ).catch(err => {
+                    console.error(err);
+                    alert("Camera start failed! Please allow permissions. Or use VS Code Live Server.");
+                    // Reset overlay
+                    document.getElementById('start-scanner-overlay').style.display = 'flex';
+                    document.getElementById('reader').classList.add('hidden');
+                });
             });
 
             // --- PROGRESS OVERVIEW ---
@@ -228,10 +251,13 @@
 
             // --- SCAN SUCCESS TRIGGER ---
             function onScanSuccess(decodedText) {
-                if(!document.getElementById('flashcard-modal').classList.contains('hidden')) return; // ignore if already open
+                if(!document.getElementById('flashcard-modal').classList.contains('hidden')) return; 
                 
                 playSound('scan');
-                if(html5QrcodeScanner) html5QrcodeScanner.pause(true); 
+                
+                if(html5QrCode) {
+                    html5QrCode.pause(true); // Pause camera to save battery while modal is open
+                }
 
                 // Open Modal & Render Cards
                 document.getElementById('flashcard-modal').classList.remove('hidden');
@@ -240,7 +266,9 @@
 
             window.closeModal = function() {
                 document.getElementById('flashcard-modal').classList.add('hidden');
-                if(html5QrcodeScanner) html5QrcodeScanner.resume(); 
+                if(html5QrCode) {
+                    html5QrCode.resume(); // Resume camera scanning
+                }
                 updateOverview();
             }
 
@@ -253,11 +281,8 @@
 
             function renderCard(subject, animationClass = 'animate-pop') {
                 const wrapper = document.getElementById(`wrapper-${subject}`);
-                
-                // Find first pending chapter
                 const chapter = db[subject].find(c => c.status === 'pending');
 
-                // Subject Themes
                 let theme = {};
                 if(subject === 'Physics') theme = { bg: 'bg-indigo-600', lightBg: 'bg-indigo-50', text: 'text-indigo-700', icon: 'fa-atom', border: 'border-indigo-200', btn: 'bg-indigo-100 hover:bg-indigo-200 border-indigo-300 text-indigo-700', task1Name: 'Theory', task2Name: 'Numerical' };
                 if(subject === 'Chemistry') theme = { bg: 'bg-rose-600', lightBg: 'bg-rose-50', text: 'text-rose-700', icon: 'fa-flask', border: 'border-rose-200', btn: 'bg-rose-100 hover:bg-rose-200 border-rose-300 text-rose-700', task1Name: 'Theory', task2Name: 'Numerical' };
@@ -266,7 +291,6 @@
                 wrapper.className = `relative overflow-hidden rounded-3xl bg-white border-2 ${theme.border} shadow-xl flex flex-col h-full ${animationClass}`;
 
                 if(!chapter) {
-                    // ALL COMPLETED!
                     wrapper.innerHTML = `
                         <div class="flex-1 flex flex-col items-center justify-center p-10 text-center ${theme.lightBg}">
                             <i class="fa-solid fa-trophy text-6xl text-yellow-500 mb-4 animate-bounce"></i>
@@ -277,19 +301,16 @@
                 }
 
                 wrapper.innerHTML = `
-                    <!-- Top Subject Banner -->
                     <div class="${theme.bg} text-white p-4 text-center relative shadow-md">
                         <span class="absolute top-3 left-4 opacity-20 text-4xl"><i class="fa-solid ${theme.icon}"></i></span>
                         <h3 class="text-sm font-black uppercase tracking-widest relative z-10">${subject}</h3>
                     </div>
                     
-                    <!-- Chapter Name -->
                     <div class="p-6 text-center flex-1 flex flex-col justify-center border-b border-gray-100 min-h-[150px]">
                         <p class="text-gray-400 font-bold text-[10px] mb-2 uppercase tracking-widest">Current Focus</p>
                         <h2 class="text-2xl font-extrabold text-gray-800 leading-tight">${chapter.name}</h2>
                     </div>
                     
-                    <!-- REQUIRED TASKS (MUST CHECK BOTH) -->
                     <div class="p-4 ${theme.lightBg} flex flex-col gap-3">
                         <button onclick="toggleTask('${subject}', '${chapter.id}', 'task1')" class="task-btn w-full p-4 rounded-xl border-2 font-bold text-lg text-left flex justify-between items-center ${chapter.task1 ? 'active' : theme.btn}">
                             <span>${theme.task1Name}</span>
@@ -302,7 +323,6 @@
                         </button>
                     </div>
 
-                    <!-- DROP BUTTON -->
                     <div class="p-3 bg-white border-t border-gray-100">
                         <button onclick="dropChapter('${subject}', '${chapter.id}')" class="w-full py-3 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg font-bold transition-all text-sm uppercase tracking-wider">
                             <i class="fa-solid fa-angles-down mr-1"></i> Drop (Do Later)
@@ -316,15 +336,13 @@
                 playSound('click');
                 const chapter = db[subject].find(c => c.id === chapterId);
                 if(chapter) {
-                    chapter[taskKey] = !chapter[taskKey]; // toggle boolean
+                    chapter[taskKey] = !chapter[taskKey];
                     localStorage.setItem('PreloadedSyllabusDB_V2', JSON.stringify(db));
                     
-                    // Re-render card quickly to show ticked state
-                    renderCard(subject, ''); // empty animation class so it doesn't pop again
+                    renderCard(subject, '');
 
-                    // CHECK IF BOTH ARE TRUE
                     if(chapter.task1 && chapter.task2) {
-                        setTimeout(() => completeChapter(subject, chapterId), 300); // 300ms delay for visual satisfaction
+                        setTimeout(() => completeChapter(subject, chapterId), 300);
                     }
                 }
             }
@@ -337,27 +355,22 @@
                 localStorage.setItem('PreloadedSyllabusDB_V2', JSON.stringify(db));
                 updateOverview();
 
-                // Animate Out
                 const wrapper = document.getElementById(`wrapper-${subject}`);
                 wrapper.classList.add('slide-out');
 
-                // Animate In Next Chapter
                 setTimeout(() => {
                     renderCard(subject, 'slide-in');
                 }, 400);
             }
 
-            // --- DROP LOGIC (Baad mein Karunga) ---
+            // --- DROP LOGIC ---
             window.dropChapter = function(subject, chapterId) {
                 playSound('drop');
-                
-                // Remove from current position and push to END of array
                 const index = db[subject].findIndex(c => c.id === chapterId);
                 if(index > -1) {
                     const chapter = db[subject].splice(index, 1)[0];
-                    // reset ticks just in case
                     chapter.task1 = false; chapter.task2 = false; 
-                    db[subject].push(chapter); // Add to end
+                    db[subject].push(chapter);
                     localStorage.setItem('PreloadedSyllabusDB_V2', JSON.stringify(db));
                 }
 
