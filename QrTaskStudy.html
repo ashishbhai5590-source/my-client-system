@@ -3,146 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Study & Activity Tracker</title>
+    <title>Auto-Pilot Syllabus Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border-radius: 1rem; }
-        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0.5rem; border: 1px solid #e5e7eb; transition: all 0.2s; }
-        #reader { border: none !important; border-radius: 1rem; overflow: hidden; background: #000; width: 100%; min-height: 250px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; overflow-x: hidden; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border-radius: 1rem; border: 1px solid #e2e8f0; }
+        #reader { border: none !important; border-radius: 1rem; overflow: hidden; background: #000; width: 100%; min-height: 220px; }
         #reader__dashboard_section_csr button { background-color: #4f46e5; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; margin-top: 10px;}
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
+        /* Premium Subject Gradients */
+        .bg-phy { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #3730a3; border: 1px solid #a5b4fc; }
+        .bg-che { background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%); color: #9f1239; border: 1px solid #fda4af; }
+        .bg-bio { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; border: 1px solid #6ee7b7; }
+
+        /* 🔥 Mind-Blowing Animations 🔥 */
         @keyframes popIn {
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes slideInRight {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes swipeRightOut {
+            0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(150%) rotate(10deg); opacity: 0; }
+        }
+        @keyframes swipeLeftOut {
+            0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
+        }
+
+        .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .animate-slide-in { animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .animate-swipe-complete { animation: swipeRightOut 0.4s ease-in forwards; }
+        .animate-swipe-drop { animation: swipeLeftOut 0.4s ease-in forwards; }
     </style>
 </head>
 <body class="text-gray-800 p-4 md:p-8 relative">
 
     <div class="max-w-6xl mx-auto" id="main-content">
         <!-- Header -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 glass-card p-6 border-t-4 border-indigo-500">
-            <div class="mb-4 md:mb-0 text-center md:text-left">
-                <h1 class="text-3xl font-bold text-indigo-700"><i class="fa-solid fa-crosshairs mr-2"></i>Ultimate Tracker</h1>
-                <p class="text-gray-500 mt-1">Smart Memory & Auto Save System</p>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 glass-card p-6 border-t-4 border-indigo-600 shadow-md">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800"><i class="fa-solid fa-rocket text-indigo-600 mr-2"></i>Auto-Pilot Tracker</h1>
+                <p class="text-gray-500 font-medium mt-1">Ek baar save karo, auto complete karte jao!</p>
             </div>
-            <button onclick="downloadPDF()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow-lg font-semibold w-full md:w-auto transition-all">
-                <i class="fa-solid fa-file-pdf mr-2"></i> Report PDF Download
-            </button>
+            <div class="mt-4 md:mt-0 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-2 rounded-lg animate-pulse">
+                <i class="fa-solid fa-hand-pointer mr-1"></i> Tap anywhere for sound
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Left Panel -->
-            <div class="space-y-6 md:col-span-1">
-                <div class="glass-card p-6">
-                    <h2 class="text-xl font-bold mb-4 text-gray-700"><i class="fa-solid fa-chart-pie mr-2 text-indigo-500"></i>Monthly Status</h2>
-                    <div class="grid grid-cols-2 gap-4 text-center">
-                        <div class="bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm">
-                            <h3 class="text-green-600 font-bold text-3xl" id="days-utilized">0</h3>
-                            <p class="text-sm text-green-800 font-medium">Din Aabad ✅</p>
-                        </div>
-                        <div class="bg-red-50 p-4 rounded-xl border border-red-200 shadow-sm">
-                            <h3 class="text-red-600 font-bold text-3xl" id="days-wasted">0</h3>
-                            <p class="text-sm text-red-800 font-medium">Din Barbad ❌</p>
-                        </div>
-                    </div>
+        <!-- PROGRESS BARS (Overview) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card p-5 border-b-4 border-indigo-500 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2 relative z-10">
+                    <h3 class="font-bold text-lg text-indigo-700"><i class="fa-solid fa-atom mr-2"></i>Physics</h3>
+                    <span id="phy-percent" class="font-extrabold text-indigo-600 text-2xl">0%</span>
                 </div>
-
-                <!-- Scanner -->
-                <div class="glass-card p-6 relative">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Scanner</h2>
-                    </div>
-                    
-                    <div id="reader" class="w-full rounded-xl border-4 border-gray-100"></div>
-                    
-                    <!-- Cooldown Rest Screen -->
-                    <div id="cooldown-overlay" class="absolute inset-0 bg-white bg-opacity-95 hidden flex-col items-center justify-center rounded-xl z-10 m-6 shadow-inner">
-                        <i class="fa-solid fa-check-circle text-5xl text-green-500 mb-3 animate-pulse"></i>
-                        <h3 class="font-bold text-gray-700 text-lg">Saved Successfully!</h3>
-                        <p class="text-sm text-gray-500 font-medium mt-1">Ready for next scan...</p>
-                    </div>
-
-                    <!-- Scan Result Status Box -->
-                    <div id="scan-status" class="hidden mt-4 text-center font-bold p-4 rounded-xl border-2 shadow-md"></div>
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-2 relative z-10">
+                    <div id="phy-bar" class="bg-indigo-500 h-3 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
                 </div>
+                <p id="phy-text" class="text-xs font-bold text-gray-500 text-right relative z-10">0 / 0 Done</p>
+            </div>
+            <div class="glass-card p-5 border-b-4 border-rose-500">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-lg text-rose-700"><i class="fa-solid fa-flask mr-2"></i>Chemistry</h3>
+                    <span id="che-percent" class="font-extrabold text-rose-600 text-2xl">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                    <div id="che-bar" class="bg-rose-500 h-3 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                </div>
+                <p id="che-text" class="text-xs font-bold text-gray-500 text-right">0 / 0 Done</p>
+            </div>
+            <div class="glass-card p-5 border-b-4 border-emerald-500">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-lg text-emerald-700"><i class="fa-solid fa-dna mr-2"></i>Biology</h3>
+                    <span id="bio-percent" class="font-extrabold text-emerald-600 text-2xl">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                    <div id="bio-bar" class="bg-emerald-500 h-3 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                </div>
+                <p id="bio-text" class="text-xs font-bold text-gray-500 text-right">0 / 0 Done</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- 1. SAVE CHAPTER (ONE TIME ADD) -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-700"><i class="fa-solid fa-folder-plus mr-2 text-indigo-500"></i>1. Save New Chapter</h2>
+                <form id="add-chapter-form" class="space-y-4">
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="subject" value="Physics" checked class="peer sr-only">
+                            <div class="p-3 text-center rounded-lg border-2 peer-checked:bg-indigo-100 peer-checked:border-indigo-500 peer-checked:text-indigo-700 font-bold text-gray-500 transition-all">Physics</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="subject" value="Chemistry" class="peer sr-only">
+                            <div class="p-3 text-center rounded-lg border-2 peer-checked:bg-rose-100 peer-checked:border-rose-500 peer-checked:text-rose-700 font-bold text-gray-500 transition-all">Chem</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="subject" value="Biology" class="peer sr-only">
+                            <div class="p-3 text-center rounded-lg border-2 peer-checked:bg-emerald-100 peer-checked:border-emerald-500 peer-checked:text-emerald-700 font-bold text-gray-500 transition-all">Bio</div>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="text" id="chapter-name" required placeholder="Enter Chapter Name..." class="w-full p-4 rounded-xl border border-gray-300 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-bold text-gray-700 text-lg">
+                    </div>
+                    <button type="submit" class="w-full bg-gray-800 hover:bg-black text-white font-bold py-4 rounded-xl transition-all shadow-lg text-lg">
+                        <i class="fa-solid fa-plus-circle mr-2"></i> Add to Pending List
+                    </button>
+                </form>
             </div>
 
-            <!-- Right Panel -->
-            <div class="space-y-6 md:col-span-2">
-                <!-- Calendar -->
-                <div class="glass-card p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-700"><i class="fa-regular fa-calendar-check mr-2 text-indigo-500"></i>Study Calendar</h2>
-                        <span id="month-name" class="font-bold text-indigo-700 bg-indigo-50 px-4 py-1 rounded-full border border-indigo-100"></span>
-                    </div>
-                    <div class="grid grid-cols-7 gap-2 text-center text-sm font-bold text-gray-400 mb-2 uppercase tracking-wider">
-                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                    </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
-                </div>
+            <!-- 2. SCANNER (ACTION TRIGGER) -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-700"><i class="fa-solid fa-barcode mr-2 text-indigo-500"></i>2. Scan To Start Action</h2>
+                <div id="reader" class="w-full rounded-xl border-4 border-gray-200 shadow-inner"></div>
+            </div>
+        </div>
 
-                <!-- Timeline -->
-                <div class="glass-card p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-list-check mr-2 text-indigo-500"></i>Activity Log</h2>
-                        <button onclick="clearLogs()" class="text-sm font-semibold text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash mr-1"></i>Clear Data</button>
-                    </div>
-                    <div class="h-80 overflow-y-auto pr-2 space-y-3" id="activity-logs"></div>
-                </div>
+        <!-- HIDDEN COMPLETED SECTION -->
+        <div class="glass-card p-6">
+            <button onclick="toggleCompleted()" class="w-full flex justify-between items-center bg-gray-50 hover:bg-gray-100 p-4 rounded-xl border border-gray-200 transition-colors">
+                <h2 class="text-lg font-bold text-gray-700"><i class="fa-solid fa-check-double text-green-500 mr-2"></i>Completed Chapters (Hidden)</h2>
+                <i id="toggle-icon" class="fa-solid fa-chevron-down text-gray-500"></i>
+            </button>
+            <div id="completed-section" class="hidden mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div><h3 class="font-bold text-indigo-700 mb-3 border-b-2 border-indigo-100 pb-2">Physics</h3><ul id="comp-phy" class="space-y-2 text-sm"></ul></div>
+                <div><h3 class="font-bold text-rose-700 mb-3 border-b-2 border-rose-100 pb-2">Chemistry</h3><ul id="comp-che" class="space-y-2 text-sm"></ul></div>
+                <div><h3 class="font-bold text-emerald-700 mb-3 border-b-2 border-emerald-100 pb-2">Biology</h3><ul id="comp-bio" class="space-y-2 text-sm"></ul></div>
             </div>
         </div>
     </div>
 
-    <!-- MAGIC MODAL (NEW BARCODE LIST) -->
-    <div id="mapping-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl transform transition-all animate-pop">
-            <h2 class="text-2xl font-bold text-indigo-700 mb-2"><i class="fa-solid fa-microchip mr-2"></i>Naya Barcode Mila!</h2>
-            <p class="text-gray-600 mb-6 text-sm font-medium bg-gray-50 p-3 rounded-lg border">Isko ek baar set kardo, system isko hamesha ke liye yaad rakhega.</p>
-            <div class="grid grid-cols-1 gap-3 mb-4" id="action-buttons"></div>
-            <div class="text-center">
-                <button onclick="closeMappingModal()" class="text-red-500 text-sm font-bold hover:underline p-2">Cancel</button>
-            </div>
+    <!-- 🚀 🔥 FLASHCARD MODAL (ONE-BY-ONE AUTO SHOW) 🔥 🚀 -->
+    <div id="flashcard-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center hidden z-50 p-4 backdrop-blur-md">
+        
+        <!-- TOP CONTROLS -->
+        <div class="absolute top-6 right-6">
+            <button onclick="closeFlashcard()" class="text-white hover:text-red-500 text-3xl transition-colors"><i class="fa-solid fa-circle-xmark"></i></button>
         </div>
+        <div class="absolute top-6 left-6 text-white font-bold text-lg">
+            <i class="fa-solid fa-layer-group text-indigo-400 mr-2"></i> Pending: <span id="pending-count">0</span>
+        </div>
+
+        <!-- THE ANIMATED CARD WRAPPER -->
+        <div id="card-wrapper" class="w-full max-w-md">
+            <!-- Card Content Injected Here by JS -->
+        </div>
+
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             
-            // Database (Naya naam taaki purani galti na aaye)
-            let appData;
-            try {
-                appData = JSON.parse(localStorage.getItem('smartTrackerDataFINAL3'));
-                if(!appData || !appData.barcodeMap) throw new Error("No data");
-            } catch (e) {
-                appData = { calendar: {}, logs: [], barcodeMap: {} };
-            }
+            // Database
+            let db = JSON.parse(localStorage.getItem('autoSyllabusDB'));
+            if(!db) db = { Physics: [], Chemistry: [], Biology: [] };
 
-            const today = new Date();
-            const currentDateStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-            
-            let tempBarcode = "";
             let html5QrcodeScanner = null;
             let audioCtx = null; 
-            let isProcessingScan = false; // YAHI HAI WO SUPER LOCK 🔒
+            
+            // Queue for Auto-Pilot
+            let pendingQueue = [];
+            let currentCardIndex = 0;
 
-            const qrActions = {
-                "STUDY_YES": { msg: "Study Completed ✅", type: "study", icon: "fa-book-open", bg: "bg-green-100 text-green-700 border-green-400" },
-                "STUDY_NO": { msg: "Study Missed (Din Barbad) ❌", type: "nostudy", icon: "fa-book-skull", bg: "bg-red-100 text-red-700 border-red-400" },
-                "ROOM_ENTRY": { msg: "Room Mein Entry Ki", type: "entry", icon: "fa-door-open", bg: "bg-blue-100 text-blue-700 border-blue-400" },
-                "ROOM_EXIT": { msg: "Room Se Bahar Nikla", type: "exit", icon: "fa-person-walking-arrow-right", bg: "bg-gray-200 text-gray-700 border-gray-400" },
-                "HOME": { msg: "Ghar Gaya (Chhutti!) 🏡", type: "home", icon: "fa-house-chimney-window", bg: "bg-purple-100 text-purple-700 border-purple-400" }
-            };
-
-            // Audio Setup
+            // Audio Functions (Touch unlock)
             function initAudio() {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -150,218 +180,224 @@
             document.addEventListener('click', initAudio, { once: true });
             document.addEventListener('touchstart', initAudio, { once: true });
 
-            window.playBeep = function(isError = false) {
+            function playSound(type) {
                 try {
                     initAudio();
                     if (!audioCtx) return;
                     let osc = audioCtx.createOscillator();
                     let gain = audioCtx.createGain();
                     
-                    osc.type = isError ? "square" : "sine";
-                    osc.frequency.setValueAtTime(isError ? 300 : 900, audioCtx.currentTime);
-                    if(isError) osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
+                    if(type === 'scan') {
+                        osc.type = 'sine'; osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+                        osc.stop(audioCtx.currentTime + 0.1);
+                    } else if (type === 'complete') {
+                        osc.type = 'triangle'; 
+                        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+                        osc.stop(audioCtx.currentTime + 0.2);
+                    } else if (type === 'drop') {
+                        osc.type = 'square'; 
+                        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                        osc.stop(audioCtx.currentTime + 0.2);
+                    }
                     
-                    gain.gain.setValueAtTime(0.5, audioCtx.currentTime); 
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+                    osc.connect(gain); gain.connect(audioCtx.destination);
                     osc.start();
-                    osc.stop(audioCtx.currentTime + (isError ? 0.3 : 0.15));
                 } catch(e) {}
-            };
+            }
 
-            // UI Render Functions
-            window.renderCalendar = function() {
-                const grid = document.getElementById('calendar-grid');
-                grid.innerHTML = '';
-                const year = today.getFullYear();
-                const month = today.getMonth();
-                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                document.getElementById('month-name').innerText = `${monthNames[month]} ${year}`;
+            // Form Submit (Save Chapter)
+            document.getElementById('add-chapter-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const subject = document.querySelector('input[name="subject"]:checked').value;
+                const name = document.getElementById('chapter-name').value.trim();
+                
+                if(name) {
+                    db[subject].push({ id: Date.now(), name: name, status: 'pending', subject: subject });
+                    localStorage.setItem('autoSyllabusDB', JSON.stringify(db));
+                    document.getElementById('chapter-name').value = '';
+                    
+                    // Button Animation feedback
+                    const btn = this.querySelector('button');
+                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Saved!';
+                    btn.classList.replace('bg-gray-800', 'bg-green-500');
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i> Add to Pending List';
+                        btn.classList.replace('bg-green-500', 'bg-gray-800');
+                    }, 1000);
 
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                let utilized = 0, wasted = 0;
-
-                for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="calendar-day border-none"></div>`;
-
-                for (let i = 1; i <= daysInMonth; i++) {
-                    let dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                    let status = appData.calendar[dateStr];
-                    let content = `<span class="text-sm font-semibold text-gray-400">${i}</span>`;
-                    let bgClass = "bg-white";
-
-                    if (status === 'yes') { content += `<i class="fa-solid fa-check text-green-500 mt-1 text-2xl"></i>`; bgClass = "bg-green-50 border-green-200 shadow-sm"; utilized++; }
-                    else if (status === 'no') { content += `<i class="fa-solid fa-xmark text-red-500 mt-1 text-2xl"></i>`; bgClass = "bg-red-50 border-red-200 shadow-sm"; wasted++; }
-                    if(dateStr === currentDateStr) bgClass += " ring-2 ring-indigo-500 shadow-md";
-
-                    grid.innerHTML += `<div class="calendar-day ${bgClass}">${content}</div>`;
+                    updateOverview();
+                    renderCompleted();
                 }
-                document.getElementById('days-utilized').innerText = utilized;
-                document.getElementById('days-wasted').innerText = wasted;
-            };
+            });
 
-            window.renderLogs = function() {
-                const logsContainer = document.getElementById('activity-logs');
-                logsContainer.innerHTML = '';
-                if (appData.logs.length === 0) {
-                    logsContainer.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa-solid fa-barcode text-4xl mb-3 block"></i>No activities yet.</div>`;
+            // Overview Update
+            function updateOverview() {
+                const subjects = ['Physics', 'Chemistry', 'Biology'];
+                const prefixes = { 'Physics': 'phy', 'Chemistry': 'che', 'Biology': 'bio' };
+
+                subjects.forEach(sub => {
+                    const chapters = db[sub];
+                    const total = chapters.length;
+                    const completed = chapters.filter(c => c.status === 'completed').length;
+                    const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+                    document.getElementById(`${prefixes[sub]}-percent`).innerText = `${percent}%`;
+                    document.getElementById(`${prefixes[sub]}-bar`).style.width = `${percent}%`;
+                    document.getElementById(`${prefixes[sub]}-text`).innerText = `${completed} / ${total} Done`;
+                });
+            }
+
+            function renderCompleted() {
+                const prefixes = { 'Physics': 'comp-phy', 'Chemistry': 'comp-che', 'Biology': 'comp-bio' };
+                Object.keys(prefixes).forEach(sub => {
+                    const list = document.getElementById(prefixes[sub]);
+                    list.innerHTML = '';
+                    const completed = db[sub].filter(c => c.status === 'completed');
+                    if(completed.length === 0) list.innerHTML = '<li class="text-gray-400 italic">No chapters</li>';
+                    else completed.forEach(c => list.innerHTML += `<li class="flex items-start"><i class="fa-solid fa-check text-green-500 mt-1 mr-2"></i> <span class="font-medium text-gray-700">${c.name}</span></li>`);
+                });
+            }
+
+            window.toggleCompleted = function() {
+                const section = document.getElementById('completed-section');
+                const icon = document.getElementById('toggle-icon');
+                section.classList.toggle('hidden');
+                if(section.classList.contains('hidden')) icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                else icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            }
+
+            // --- 🔥 AUTO-PILOT SYSTEM 🔥 ---
+            
+            function buildPendingQueue() {
+                pendingQueue = [];
+                ['Physics', 'Chemistry', 'Biology'].forEach(sub => {
+                    db[sub].forEach(ch => {
+                        if(ch.status === 'pending') pendingQueue.push(ch);
+                    });
+                });
+            }
+
+            function onScanSuccess(decodedText) {
+                if(!document.getElementById('flashcard-modal').classList.contains('hidden')) return;
+                
+                playSound('scan');
+                if(html5QrcodeScanner) html5QrcodeScanner.pause(true); 
+
+                buildPendingQueue();
+                currentCardIndex = 0;
+
+                if(pendingQueue.length === 0) {
+                    alert("Awesome! No pending chapters left. Add new ones.");
+                    if(html5QrcodeScanner) html5QrcodeScanner.resume();
                     return;
                 }
-                [...appData.logs].reverse().forEach(log => {
-                    const actionData = qrActions[log.type];
-                    logsContainer.innerHTML += `
-                        <div class="flex items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm mb-3">
-                            <div class="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center mr-4 border border-gray-200">
-                                <i class="fa-solid ${actionData.icon} text-lg ${actionData.bg.split(' ')[1]}"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-gray-800">${actionData.msg}</h4>
-                                <p class="text-xs text-gray-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>${log.time}</p>
-                            </div>
+
+                document.getElementById('flashcard-modal').classList.remove('hidden');
+                showCurrentCard();
+            }
+
+            function showCurrentCard() {
+                const wrapper = document.getElementById('card-wrapper');
+                document.getElementById('pending-count').innerText = (pendingQueue.length - currentCardIndex);
+
+                if (currentCardIndex >= pendingQueue.length) {
+                    // All caught up for this session
+                    wrapper.innerHTML = `
+                        <div class="bg-white p-10 rounded-3xl text-center animate-pop shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                            <i class="fa-solid fa-trophy text-6xl text-yellow-500 mb-4 animate-bounce"></i>
+                            <h2 class="text-3xl font-black text-gray-800">You're All Caught Up!</h2>
+                            <p class="text-gray-500 mt-2 font-medium">Great session. Close window.</p>
+                            <button onclick="closeFlashcard()" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full">Close</button>
                         </div>`;
-                });
-            };
-
-            function isDuplicateStudy(actionKey) {
-                return (actionKey === "STUDY_YES" || actionKey === "STUDY_NO") && appData.calendar[currentDateStr];
-            }
-
-            function showErrorBox() {
-                const statusDiv = document.getElementById('scan-status');
-                statusDiv.classList.remove('hidden');
-                statusDiv.className = `mt-4 text-center text-lg font-bold p-4 rounded-xl border-2 shadow-md animate-pop block bg-red-100 text-red-800 border-red-500`;
-                statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-xl"></i> Aaj ka Padhai Status pehle hi lag chuka hai!`;
-                setTimeout(() => { statusDiv.classList.add('hidden'); statusDiv.classList.remove('block'); }, 4000);
-                applyScannerCooldown(3000);
-            }
-
-            function executeAction(actionKey) {
-                const actionData = qrActions[actionKey];
-                const statusDiv = document.getElementById('scan-status');
-
-                if (actionKey === "STUDY_YES") appData.calendar[currentDateStr] = "yes";
-                if (actionKey === "STUDY_NO") appData.calendar[currentDateStr] = "no";
-                
-                statusDiv.classList.remove('hidden');
-                statusDiv.className = `mt-4 text-center text-lg font-bold p-4 rounded-xl border-2 shadow-md animate-pop block ${actionData.bg}`;
-                statusDiv.innerHTML = `<i class="fa-solid ${actionData.icon} mr-2 text-xl"></i> ${actionData.msg} Saved!`;
-                setTimeout(() => { statusDiv.classList.add('hidden'); statusDiv.classList.remove('block'); }, 4000);
-
-                const timeString = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                appData.logs.push({ type: actionKey, action: actionData.msg, time: timeString, date: currentDateStr });
-                
-                localStorage.setItem('smartTrackerDataFINAL3', JSON.stringify(appData));
-                renderCalendar();
-                renderLogs();
-                applyScannerCooldown(3000);
-            }
-
-            // --- SCANNER EVENT (SUPER LOCKED) ---
-            function onScanSuccess(decodedText) {
-                // Agar process chalu hai, toh doosre scan ko totally ignore karega
-                if (isProcessingScan) return;
-                isProcessingScan = true; // SYSTEM LOCK LAGA DIYA
-
-                let actionKey = null;
-
-                // Memory Check (Kya pehle se save hai?)
-                if (appData.barcodeMap && appData.barcodeMap[decodedText]) {
-                    actionKey = appData.barcodeMap[decodedText];
-                } else if (qrActions[decodedText]) {
-                    actionKey = decodedText;
+                    return;
                 }
 
-                if (actionKey) {
-                    // PURANA BARCODE (Memory mein mila)
-                    if (isDuplicateStudy(actionKey)) {
-                        playBeep(true); 
-                        showErrorBox();
-                    } else {
-                        playBeep(false); 
-                        executeAction(actionKey); 
-                    }
-                } else {
-                    // NAYA BARCODE (Pehli Baar)
-                    playBeep(false); // SCAN HOTE HI AWAZ AAYEGI!
-                    tempBarcode = decodedText;
-                    openMappingModal(); // SIRF EK BAAR LIST KHULEGI
-                }
+                const chapter = pendingQueue[currentCardIndex];
+                
+                let bgClass = "";
+                let icon = "";
+                if(chapter.subject === 'Physics') { bgClass = "bg-phy"; icon = "fa-atom"; }
+                if(chapter.subject === 'Chemistry') { bgClass = "bg-che"; icon = "fa-flask"; }
+                if(chapter.subject === 'Biology') { bgClass = "bg-bio"; icon = "fa-dna"; }
+
+                // Reset wrapper animation
+                wrapper.className = "w-full max-w-md animate-slide-in";
+
+                wrapper.innerHTML = `
+                    <div class="rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden bg-white">
+                        <!-- Top Subject Banner -->
+                        <div class="p-4 ${bgClass} text-center relative">
+                            <span class="absolute top-4 left-4 opacity-30 text-4xl"><i class="fa-solid ${icon}"></i></span>
+                            <h3 class="text-sm font-black uppercase tracking-widest relative z-10">${chapter.subject}</h3>
+                        </div>
+                        
+                        <!-- Middle Chapter Name -->
+                        <div class="p-10 text-center">
+                            <p class="text-gray-400 font-bold text-sm mb-2 uppercase tracking-wide">Current Topic</p>
+                            <h2 class="text-3xl font-black text-gray-800 leading-tight">${chapter.name}</h2>
+                        </div>
+                        
+                        <!-- Bottom Action Buttons -->
+                        <div class="p-4 bg-gray-50 flex gap-4 border-t border-gray-100">
+                            <button onclick="actionDrop()" class="flex-1 bg-white hover:bg-red-50 text-red-500 border-2 border-red-200 hover:border-red-500 font-extrabold py-4 rounded-2xl transition-all shadow-sm flex flex-col items-center">
+                                <i class="fa-solid fa-angles-down text-2xl mb-1"></i>
+                                <span class="text-xs">DROP FOR LATER</span>
+                            </button>
+                            
+                            <button onclick="actionComplete(${chapter.id}, '${chapter.subject}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-extrabold py-4 rounded-2xl transition-all shadow-lg shadow-green-500/30 flex flex-col items-center transform hover:scale-105">
+                                <i class="fa-solid fa-check-double text-2xl mb-1"></i>
+                                <span class="text-xs">COMPLETED!</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
             }
 
-            // Modal Logic
-            window.openMappingModal = function() {
-                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.pause(); 
-                const modal = document.getElementById('mapping-modal');
-                const btnContainer = document.getElementById('action-buttons');
-                btnContainer.innerHTML = '';
-
-                Object.keys(qrActions).forEach(key => {
-                    const act = qrActions[key];
-                    btnContainer.innerHTML += `
-                        <button onclick="saveMapping('${key}')" class="p-3 text-left rounded-xl border-2 shadow-sm transition-all ${act.bg} flex items-center hover:scale-105">
-                            <i class="fa-solid ${act.icon} text-xl mr-3 w-6 text-center"></i>
-                            <span class="text-sm font-bold">${act.msg}</span>
-                        </button>`;
-                });
-                modal.classList.remove('hidden');
-            };
-
-            window.saveMapping = function(actionKey) {
-                // Hamesha ke liye Memory mein Save
-                if (!appData.barcodeMap) appData.barcodeMap = {};
-                appData.barcodeMap[tempBarcode] = actionKey;
-                localStorage.setItem('smartTrackerDataFINAL3', JSON.stringify(appData));
+            // Actions
+            window.actionComplete = function(id, subject) {
+                playSound('complete');
                 
-                document.getElementById('mapping-modal').classList.add('hidden');
+                // Update DB
+                const chapter = db[subject].find(c => c.id === id);
+                if(chapter) chapter.status = 'completed';
+                localStorage.setItem('autoSyllabusDB', JSON.stringify(db));
+                updateOverview();
+                renderCompleted();
+
+                // Play Animation Swipe Right
+                const wrapper = document.getElementById('card-wrapper');
+                wrapper.className = "w-full max-w-md animate-swipe-complete";
                 
-                if (isDuplicateStudy(actionKey)) {
-                    playBeep(true); 
-                    showErrorBox();
-                } else {
-                    executeAction(actionKey); 
-                }
-            };
-
-            window.closeMappingModal = function() {
-                document.getElementById('mapping-modal').classList.add('hidden');
-                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
-                setTimeout(() => { isProcessingScan = false; }, 500); // UNLOCK
-            };
-
-            window.applyScannerCooldown = function(ms) {
-                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.pause(true);
-                document.getElementById('cooldown-overlay').classList.remove('hidden');
-                document.getElementById('cooldown-overlay').classList.add('flex');
-
                 setTimeout(() => {
-                    document.getElementById('cooldown-overlay').classList.add('hidden');
-                    document.getElementById('cooldown-overlay').classList.remove('flex');
-                    if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
-                    
-                    isProcessingScan = false; // SYSTEM UNLOCK FOR NEXT SCAN
-                }, ms);
-            };
+                    currentCardIndex++;
+                    showCurrentCard(); // Show next immediately
+                }, 400); // Wait for animation
+            }
 
-            window.clearLogs = function() {
-                if(confirm("Warning! Data aur Barcode ki memory sab delete kar de?")) {
-                    appData = { calendar: {}, logs: [], barcodeMap: {} };
-                    localStorage.setItem('smartTrackerDataFINAL3', JSON.stringify(appData));
-                    renderCalendar();
-                    renderLogs();
-                }
-            };
+            window.actionDrop = function() {
+                playSound('drop');
+                
+                // Play Animation Swipe Left
+                const wrapper = document.getElementById('card-wrapper');
+                wrapper.className = "w-full max-w-md animate-swipe-drop";
+                
+                setTimeout(() => {
+                    currentCardIndex++; // Just skip it
+                    showCurrentCard();
+                }, 400);
+            }
 
-            window.downloadPDF = function() {
-                const element = document.getElementById('main-content');
-                document.getElementById('reader').style.display = 'none'; 
-                html2pdf().set({ margin: 0.5, filename: `Track-Report-${currentDateStr}.pdf`, jsPDF: { format: 'a4' }})
-                .from(element).save().then(() => { document.getElementById('reader').style.display = 'block'; });
-            };
+            window.closeFlashcard = function() {
+                document.getElementById('flashcard-modal').classList.add('hidden');
+                if(html5QrcodeScanner) html5QrcodeScanner.resume();
+            }
 
-            // Start 
-            renderCalendar();
-            renderLogs();
+            // Start up
+            updateOverview();
+            renderCompleted();
             try {
                 html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150}, rememberLastUsedCamera: true }, false);
                 html5QrcodeScanner.render(onScanSuccess);
