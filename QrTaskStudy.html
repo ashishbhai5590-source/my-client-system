@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- मोबाइल में ज़ूम लॉक करने के लिए -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Task Roulette Pro</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+        
+        * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; padding: 0; background: #050505; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; background-image: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%); }
+        
+        /* Container for Mobile bounds */
+        .app-container { width: 100%; max-width: 450px; height: 100dvh; display: flex; flex-direction: column; padding: 25px 20px; position: relative; }
+        
+        h1 { font-size: 26px; font-weight: 800; text-align: center; text-transform: uppercase; margin: 0 0 5px 0; background: linear-gradient(90deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; }
+        .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 25px; }
+
+        /* Inputs & Buttons (Mobile Optimized) */
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #111; color: white; font-size: 16px; outline: none; transition: 0.3s; }
+        input[type="text"]:focus { border-color: #00f2fe; box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
+        
+        .btn-add { background: #00f2fe; color: #000; border: none; border-radius: 12px; width: 50px; font-size: 24px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-add:active { transform: scale(0.95); }
+
+        .btn-primary { width: 100%; padding: 18px; border-radius: 12px; border: none; font-size: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); margin-top: auto; }
+        
+        .btn-lock { background: linear-gradient(45deg, #ff0844 0%, #ffb199 100%); color: white; box-shadow: 0 5px 20px rgba(255, 8, 68, 0.4); }
+        .btn-complete { background: linear-gradient(45deg, #0ba360 0%, #3cba92 100%); color: white; box-shadow: 0 5px 20px rgba(11, 163, 96, 0.4); }
+        .btn-fullscreen { background: #222; color: #fff; margin-bottom: 15px; border: 1px solid #444; }
+
+        /* Task List */
+        .task-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; padding-bottom: 20px; }
+        .task-list li { background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #00f2fe; font-size: 15px; backdrop-filter: blur(10px); }
+        .delete-btn { background: none; border: none; color: #ff0844; font-size: 18px; font-weight: bold; padding: 5px; cursor: pointer; }
+
+        /* View Panels */
+        .panel { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.4s ease-out; }
+        .panel.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Scanner Specifics */
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #333; margin-top: 10px; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        
+        /* Active Task View */
+        .active-task-card { background: rgba(20, 20, 20, 0.8); border: 2px solid #00f2fe; border-radius: 20px; padding: 40px 20px; text-align: center; margin: auto 0; box-shadow: 0 0 30px rgba(0, 242, 254, 0.1); }
+        .active-task-card h2 { color: #fff; font-size: 28px; margin: 0; line-height: 1.4; }
+        .active-label { color: #00f2fe; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: block; }
+
+        /* Full Screen Spinner Overlay */
+        #spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        .spin-text { font-size: 40px; font-weight: 800; color: #333; text-transform: uppercase; line-height: 1.2; word-break: break-word; transition: all 0.05s ease; }
+        .spin-text.highlight { color: #fff; transform: scale(1.1); text-shadow: 0 0 20px #00f2fe, 0 0 40px #00f2fe; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- PHASE 1: SETUP -->
+        <div id="panel-setup" class="panel active">
+            <button class="btn-primary btn-fullscreen" onclick="goFullScreen()">🔲 GO FULL SCREEN</button>
+            <h1>Mission Control</h1>
+            <p class="subtitle">Set your targets for today</p>
+            
+            <div class="input-group">
+                <input type="text" id="task-input" placeholder="Enter task..." onkeypress="if(event.key === 'Enter') addTask()">
+                <button class="btn-add" onclick="addTask()">+</button>
+            </div>
+            
+            <ul class="task-list" id="task-list">
+                <!-- Tasks will appear here -->
+            </ul>
+            
+            <button class="btn-primary btn-lock" onclick="lockTasks()">🔒 LOCK IN MISSIONS</button>
+        </div>
+
+        <!-- PHASE 2: SCANNER -->
+        <div id="panel-scanner" class="panel">
+            <h1>Scan To Spin</h1>
+            <p class="subtitle">Scan any barcode/QR on your notebook</p>
+            
+            <div id="reader"></div>
+            
+            <p style="text-align:center; color:#555; font-size:12px; margin-top:20px;">
+                Waiting for scan... <br> No cheating allowed!
+            </p>
+        </div>
+
+        <!-- PHASE 3: ACTIVE TASK -->
+        <div id="panel-active" class="panel">
+            <h1>Mission Locked</h1>
+            <p class="subtitle">You cannot spin until this is done</p>
+            
+            <div class="active-task-card">
+                <span class="active-label">Current Target</span>
+                <h2 id="current-task-text">Task goes here</h2>
+            </div>
+            
+            <button class="btn-primary btn-complete" onclick="completeTask()">✅ MISSION ACCOMPLISHED</button>
+        </div>
+
+        <!-- PHASE 4: DONE -->
+        <div id="panel-done" class="panel" style="align-items: center; justify-content: center; text-align: center;">
+            <h1 style="font-size: 50px; background: linear-gradient(45deg, #0ba360, #3cba92); -webkit-background-clip: text; margin-bottom:10px;">🏆</h1>
+            <h1 style="background: linear-gradient(45deg, #0ba360, #3cba92); -webkit-background-clip: text;">ALL DONE!</h1>
+            <p style="color:#aaa;">You crushed it today. Take a break.</p>
+        </div>
+    </div>
+
+    <!-- SPINNER OVERLAY -->
+    <div id="spinner-overlay">
+        <p style="color: #00f2fe; letter-spacing: 4px; font-size: 14px; font-weight: 600; margin-bottom: 30px;">ROULETTE SPINNING...</p>
+        <div class="spin-text" id="spin-display">WAITING</div>
+    </div>
+
+    <script>
+        let tasks = [];
+        let html5QrCode = null;
+        let audioCtx = null;
+        let isSpinning = false;
+
+        // --- FULL SCREEN API ---
+        function goFullScreen() {
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); }
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } // Safari
+            document.querySelector('.btn-fullscreen').style.display = 'none'; // Hide button after click
+        }
+
+        // --- AUDIO SYSTEM (Premium Beeps) ---
+        function initAudio() {
+            if (!audioCtx) {
+                let AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+        }
+        function playTick() {
+            if (!audioCtx) return;
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'square'; osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.03);
+        }
+        function playWin() {
+            if (!audioCtx) return;
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'sine'; osc.frequency.value = 600;
+            gain.gain.setValueAtTime(1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+        }
+
+        // --- UI NAVIGATION ---
+        function showPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+        }
+
+        // --- TASK SETUP ---
+        function addTask() {
+            let input = document.getElementById('task-input');
+            let val = input.value.trim();
+            if(val === "") return;
+            tasks.push(val);
+            input.value = "";
+            renderList();
+        }
+        
+        function renderList() {
+            let list = document.getElementById('task-list');
+            list.innerHTML = "";
+            tasks.forEach((t, i) => {
+                list.innerHTML += `<li>${t} <button class="delete-btn" onclick="removeTask(${i})">×</button></li>`;
+            });
+        }
+        function removeTask(i) { tasks.splice(i, 1); renderList(); }
+
+        // --- LOCK TASKS & SCANNER ---
+        function lockTasks() {
+            if(tasks.length === 0) { alert("Enter at least one task!"); return; }
+            initAudio(); // Init audio context on user interaction
+            showPanel('panel-scanner');
+            startScanner();
+        }
+
+        function startScanner() {
+            // Using custom setup for better mobile camera handling
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            
+            // Start back camera
+            html5QrCode.start(
+                { facingMode: "environment" }, // Forces back camera on mobile
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    if(!isSpinning) {
+                        html5QrCode.pause(true); // Pause scanner immediately
+                        startSpin();
+                    }
+                },
+                (errorMessage) => { /* ignore background errors */ }
+            ).catch(err => alert("Camera error. Please allow permissions."));
+        }
+
+        // --- SPIN ANIMATION ---
+        function startSpin() {
+            isSpinning = true;
+            let overlay = document.getElementById('spinner-overlay');
+            let display = document.getElementById('spin-display');
+            overlay.style.display = 'flex';
+            
+            let spins = 0;
+            let maxSpins = 40;
+            let speed = 40;
+
+            function doSpin() {
+                let randomTask = tasks[Math.floor(Math.random() * tasks.length)];
+                display.innerText = randomTask;
+                display.classList.add('highlight');
+                setTimeout(() => display.classList.remove('highlight'), speed - 15);
+                playTick();
+                
+                spins++;
+                if (spins < maxSpins) {
+                    if (spins > 25) speed += 25; // Slow down effect
+                    setTimeout(doSpin, speed);
+                } else {
+                    // Final Selection
+                    playWin();
+                    display.classList.add('highlight');
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                        lockTask(randomTask);
+                    }, 2000);
+                }
+            }
+            setTimeout(doSpin, speed);
+        }
+
+        // --- ACTIVE TASK ---
+        function lockTask(task) {
+            document.getElementById('current-task-text').innerText = task;
+            showPanel('panel-active');
+        }
+
+        function completeTask() {
+            initAudio();
+            let current = document.getElementById('current-task-text').innerText;
+            tasks = tasks.filter(t => t !== current);
+            isSpinning = false;
+            
+            if (tasks.length === 0) {
+                html5QrCode.stop(); // Turn off camera to save battery
+                showPanel('panel-done');
+                playWin();
+            } else {
+                showPanel('panel-scanner');
+                html5QrCode.resume(); // Resume scanner for next task
+            }
+        }
+    </script>
+</body>
+</html>
