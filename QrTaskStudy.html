@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome (Icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- HTML5 QR & Barcode Scanner (GitHub Friendly CDN) -->
+    <!-- HTML5 QR & Barcode Scanner -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <!-- PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -22,7 +22,6 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* Smooth Pop Animation for Green Box */
         @keyframes popIn {
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
@@ -32,7 +31,15 @@
 </head>
 <body class="text-gray-800 p-4 md:p-8 relative">
 
-    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+    <!-- ✅ 100% SOUND FIX: START SCREEN OVERLAY -->
+    <div id="start-overlay" class="fixed inset-0 bg-indigo-900 z-[999] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-500">
+        <i class="fa-solid fa-volume-high text-6xl mb-6 animate-bounce"></i>
+        <h2 class="text-3xl font-extrabold text-center px-4">Tracker Start Karein</h2>
+        <p class="mt-3 text-indigo-200 text-center px-6 font-medium text-lg">Sound (Awaz) aur Camera on karne ke liye niche button dabayein</p>
+        <button class="mt-8 bg-green-500 hover:bg-green-400 text-white font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] text-xl transition-all">
+            Start Now <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
+    </div>
 
     <div class="max-w-6xl mx-auto" id="main-content">
         <!-- Header Section -->
@@ -123,16 +130,15 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             
-            // Safe Local Storage for GitHub Pages
+            // Safe Local Storage
             let appData;
             try {
-                appData = JSON.parse(localStorage.getItem('smartTrackerData3'));
+                appData = JSON.parse(localStorage.getItem('smartTrackerDataFINAL'));
                 if(!appData) throw new Error("No data");
             } catch (e) {
                 appData = { calendar: {}, logs: [], barcodeMap: {} };
             }
 
-            // Real local date calculation fix
             const today = new Date();
             const currentDateStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
             
@@ -141,7 +147,6 @@
             let isScannerPaused = false;
             let audioCtx = null; // Used for BEEP SOUND
 
-            // NEW UI DESIGN FOR GREEN/RED BOXES
             const qrActions = {
                 "STUDY_YES": { msg: "Study Completed ✅", type: "study", icon: "fa-book-open", bg: "bg-green-100 text-green-700 border-green-400" },
                 "STUDY_NO": { msg: "Study Missed (Din Barbad) ❌", type: "nostudy", icon: "fa-book-skull", bg: "bg-red-100 text-red-700 border-red-400" },
@@ -150,33 +155,53 @@
                 "HOME": { msg: "Ghar Gaya (Chhutti!) 🏡", type: "home", icon: "fa-house-chimney-window", bg: "bg-purple-100 text-purple-700 border-purple-400" }
             };
 
-            // Unlock Audio on First Screen Touch (Crucial for GitHub/Chrome)
-            document.body.addEventListener('click', function() {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-            }, { once: true });
+            // ✅ BUTTON DABANE PAR SOUND UNLOCK & CAMERA START HOGA
+            document.getElementById('start-overlay').addEventListener('click', function() {
+                try {
+                    // Browser ki Audio permission bypass karna
+                    window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    let osc = window.audioCtx.createOscillator();
+                    let gain = window.audioCtx.createGain();
+                    gain.gain.value = 0; // Mute starting sound
+                    osc.connect(gain);
+                    gain.connect(window.audioCtx.destination);
+                    osc.start();
+                    osc.stop(window.audioCtx.currentTime + 0.1);
+                } catch(e) { console.log("Audio Error:", e); }
 
+                // Parda (Overlay) hatana
+                this.classList.add('opacity-0');
+                setTimeout(() => { this.style.display = 'none'; }, 500);
+
+                // Camera Initialize Karna
+                try {
+                    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150}, rememberLastUsedCamera: true }, false);
+                    html5QrcodeScanner.render(onScanSuccess);
+                } catch (err) {
+                    document.getElementById('reader').innerHTML = '<p class="text-red-500 text-center p-4">Camera could not be loaded.</p>';
+                }
+            });
+
+            // Awaz ka function
             window.playBeep = function(type = 'success') {
                 try {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioCtx.state === 'suspended') audioCtx.resume();
-                    
-                    let oscillator = audioCtx.createOscillator();
-                    let gainNode = audioCtx.createGain();
+                    if (!window.audioCtx) return;
+                    let oscillator = window.audioCtx.createOscillator();
+                    let gainNode = window.audioCtx.createGain();
                     
                     oscillator.type = type === 'error' ? "square" : "sine";
-                    oscillator.frequency.setValueAtTime(type === 'error' ? 300 : 800, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(type === 'error' ? 300 : 800, window.audioCtx.currentTime);
                     if(type === 'error') {
-                        oscillator.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
+                        oscillator.frequency.exponentialRampToValueAtTime(150, window.audioCtx.currentTime + 0.3);
                     }
                     
-                    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime); 
+                    gainNode.gain.setValueAtTime(0.5, window.audioCtx.currentTime); 
                     oscillator.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
+                    gainNode.connect(window.audioCtx.destination);
                     
                     oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + (type === 'error' ? 0.3 : 0.15));
-                } catch(e) { console.log("Audio not supported"); }
+                    oscillator.stop(window.audioCtx.currentTime + (type === 'error' ? 0.3 : 0.15));
+                } catch(e) { console.log("Audio Failed", e); }
             };
 
             window.showHomeAnimation = function() {
@@ -245,17 +270,14 @@
             window.processAction = function(actionKey) {
                 const statusDiv = document.getElementById('scan-status');
 
-                // Error Check: Din mein 1 hi baar Study status save hoga
+                // Study Check
                 if (actionKey === "STUDY_YES" || actionKey === "STUDY_NO") {
                     if (appData.calendar[currentDateStr]) {
                         playBeep('error');
-                        
-                        // Error Red Box Animation
                         statusDiv.classList.remove('hidden');
                         statusDiv.className = `mt-4 text-center text-lg font-bold p-4 rounded-xl border-2 shadow-md animate-pop block bg-red-100 text-red-800 border-red-500`;
                         statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2 text-xl"></i> Aaj ka Padhai Status pehle hi lag chuka hai!`;
                         setTimeout(() => { statusDiv.classList.add('hidden'); statusDiv.classList.remove('block'); }, 4000);
-                        
                         applyScannerCooldown(4000);
                         return;
                     }
@@ -264,15 +286,9 @@
 
                 const actionData = qrActions[actionKey];
                 
-                // Normal Processing
-                if (actionKey === "HOME") { 
-                    showHomeAnimation(); 
-                    playBeep(); 
-                } else { 
-                    playBeep(); 
-                }
+                if (actionKey === "HOME") { showHomeAnimation(); playBeep(); } else { playBeep(); }
 
-                // Show Green/Blue/Red Big Box Below Camera (Hara/Laal hona)
+                // Green/Red UI Box Update
                 statusDiv.classList.remove('hidden');
                 statusDiv.className = `mt-4 text-center text-lg font-bold p-4 rounded-xl border-2 shadow-md animate-pop block ${actionData.bg}`;
                 statusDiv.innerHTML = `<i class="fa-solid ${actionData.icon} mr-2 text-xl"></i> ${actionData.msg} Recorded!`;
@@ -285,7 +301,7 @@
                 const timeString = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 appData.logs.push({ type: actionKey, action: actionData.msg, time: timeString, date: currentDateStr });
                 
-                try { localStorage.setItem('smartTrackerData3', JSON.stringify(appData)); } catch(e) {}
+                try { localStorage.setItem('smartTrackerDataFINAL', JSON.stringify(appData)); } catch(e) {}
                 renderCalendar();
                 renderLogs();
                 applyScannerCooldown(5000);
@@ -324,7 +340,7 @@
 
             window.saveMapping = function(actionKey) {
                 appData.barcodeMap[tempBarcode] = actionKey;
-                try { localStorage.setItem('smartTrackerData3', JSON.stringify(appData)); } catch(e) {}
+                try { localStorage.setItem('smartTrackerDataFINAL', JSON.stringify(appData)); } catch(e) {}
                 closeMappingModal();
                 processAction(actionKey); 
             };
@@ -337,7 +353,7 @@
             window.clearLogs = function() {
                 if(confirm("Warning! Kya sach mein poori history delete karni hai?")) {
                     appData = { calendar: {}, logs: [], barcodeMap: {} };
-                    try { localStorage.setItem('smartTrackerData3', JSON.stringify(appData)); } catch(e) {}
+                    try { localStorage.setItem('smartTrackerDataFINAL', JSON.stringify(appData)); } catch(e) {}
                     renderCalendar();
                     renderLogs();
                     alert("All data cleared!");
@@ -355,16 +371,10 @@
                 });
             };
 
-            // SCANNER INITIALIZATION
+            // Scanner Event
             function onScanSuccess(decodedText) {
                 if (isScannerPaused) return;
                 
-                // IMPORTANT: Agar first scan me sound na aaye toh error na ho
-                try {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioCtx.state === 'suspended') audioCtx.resume();
-                } catch(e) {}
-
                 if (appData.barcodeMap[decodedText]) {
                     processAction(appData.barcodeMap[decodedText]);
                 } else if (qrActions[decodedText]) {
@@ -377,14 +387,6 @@
 
             renderCalendar();
             renderLogs();
-            
-            try {
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150}, rememberLastUsedCamera: true }, false);
-                html5QrcodeScanner.render(onScanSuccess);
-            } catch (err) {
-                document.getElementById('reader').innerHTML = '<p class="text-red-500 text-center p-4">Camera could not be loaded. Please ensure permissions are granted.</p>';
-            }
-
         });
     </script>
 </body>
