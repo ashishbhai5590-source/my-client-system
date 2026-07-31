@@ -2,273 +2,302 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- मोबाइल में ज़ूम लॉक करने के लिए -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Task Roulette Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Study Tracker (Smart Barcode)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- HTML5 QR & Barcode Scanner -->
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
-        
-        * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { margin: 0; padding: 0; background: #050505; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; background-image: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%); }
-        
-        /* Container for Mobile bounds */
-        .app-container { width: 100%; max-width: 450px; height: 100dvh; display: flex; flex-direction: column; padding: 25px 20px; position: relative; }
-        
-        h1 { font-size: 26px; font-weight: 800; text-align: center; text-transform: uppercase; margin: 0 0 5px 0; background: linear-gradient(90deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; }
-        .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 25px; }
-
-        /* Inputs & Buttons (Mobile Optimized) */
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        input[type="text"] { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #111; color: white; font-size: 16px; outline: none; transition: 0.3s; }
-        input[type="text"]:focus { border-color: #00f2fe; box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
-        
-        .btn-add { background: #00f2fe; color: #000; border: none; border-radius: 12px; width: 50px; font-size: 24px; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .btn-add:active { transform: scale(0.95); }
-
-        .btn-primary { width: 100%; padding: 18px; border-radius: 12px; border: none; font-size: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); margin-top: auto; }
-        
-        .btn-lock { background: linear-gradient(45deg, #ff0844 0%, #ffb199 100%); color: white; box-shadow: 0 5px 20px rgba(255, 8, 68, 0.4); }
-        .btn-complete { background: linear-gradient(45deg, #0ba360 0%, #3cba92 100%); color: white; box-shadow: 0 5px 20px rgba(11, 163, 96, 0.4); }
-        .btn-fullscreen { background: #222; color: #fff; margin-bottom: 15px; border: 1px solid #444; }
-
-        /* Task List */
-        .task-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; padding-bottom: 20px; }
-        .task-list li { background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #00f2fe; font-size: 15px; backdrop-filter: blur(10px); }
-        .delete-btn { background: none; border: none; color: #ff0844; font-size: 18px; font-weight: bold; padding: 5px; cursor: pointer; }
-
-        /* View Panels */
-        .panel { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.4s ease-out; }
-        .panel.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Scanner Specifics */
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #333; margin-top: 10px; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        
-        /* Active Task View */
-        .active-task-card { background: rgba(20, 20, 20, 0.8); border: 2px solid #00f2fe; border-radius: 20px; padding: 40px 20px; text-align: center; margin: auto 0; box-shadow: 0 0 30px rgba(0, 242, 254, 0.1); }
-        .active-task-card h2 { color: #fff; font-size: 28px; margin: 0; line-height: 1.4; }
-        .active-label { color: #00f2fe; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: block; }
-
-        /* Full Screen Spinner Overlay */
-        #spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
-        .spin-text { font-size: 40px; font-weight: 800; color: #333; text-transform: uppercase; line-height: 1.2; word-break: break-word; transition: all 0.05s ease; }
-        .spin-text.highlight { color: #fff; transform: scale(1.1); text-shadow: 0 0 20px #00f2fe, 0 0 40px #00f2fe; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border-radius: 1rem; }
+        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0.5rem; border: 1px solid #e5e7eb; transition: all 0.2s; }
+        #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
+        #reader__dashboard_section_csr button { background-color: #4f46e5; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="text-gray-800 p-4 md:p-8 relative">
 
-    <div class="app-container">
-        
-        <!-- PHASE 1: SETUP -->
-        <div id="panel-setup" class="panel active">
-            <button class="btn-primary btn-fullscreen" onclick="goFullScreen()">🔲 GO FULL SCREEN</button>
-            <h1>Mission Control</h1>
-            <p class="subtitle">Set your targets for today</p>
-            
-            <div class="input-group">
-                <input type="text" id="task-input" placeholder="Enter task..." onkeypress="if(event.key === 'Enter') addTask()">
-                <button class="btn-add" onclick="addTask()">+</button>
+    <div class="max-w-6xl mx-auto" id="main-content">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 glass-card p-6">
+            <div class="mb-4 md:mb-0 text-center md:text-left">
+                <h1 class="text-3xl font-bold text-indigo-700"><i class="fa-solid fa-barcode mr-2"></i>Smart Barcode Tracker</h1>
+                <p class="text-gray-500 mt-1">Kisi bhi Biscuit/Product ka barcode scan karo aur track karo!</p>
             </div>
-            
-            <ul class="task-list" id="task-list">
-                <!-- Tasks will appear here -->
-            </ul>
-            
-            <button class="btn-primary btn-lock" onclick="lockTasks()">🔒 LOCK IN MISSIONS</button>
+            <button onclick="downloadPDF()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow-lg font-semibold w-full md:w-auto">
+                <i class="fa-solid fa-file-pdf mr-2"></i> Download PDF Report
+            </button>
         </div>
 
-        <!-- PHASE 2: SCANNER -->
-        <div id="panel-scanner" class="panel">
-            <h1>Scan To Spin</h1>
-            <p class="subtitle">Scan any barcode/QR on your notebook</p>
-            
-            <div id="reader"></div>
-            
-            <p style="text-align:center; color:#555; font-size:12px; margin-top:20px;">
-                Waiting for scan... <br> No cheating allowed!
-            </p>
-        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Scanner & Stats -->
+            <div class="space-y-6 md:col-span-1">
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold mb-4 text-gray-700"><i class="fa-solid fa-chart-pie mr-2 text-indigo-500"></i>Mahine Ka Record</h2>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                            <h3 class="text-green-600 font-bold text-2xl" id="days-utilized">0</h3>
+                            <p class="text-sm text-green-800">Din Aabad (Tick)</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                            <h3 class="text-red-600 font-bold text-2xl" id="days-wasted">0</h3>
+                            <p class="text-sm text-red-800">Din Barbad (Cross)</p>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- PHASE 3: ACTIVE TASK -->
-        <div id="panel-active" class="panel">
-            <h1>Mission Locked</h1>
-            <p class="subtitle">You cannot spin until this is done</p>
-            
-            <div class="active-task-card">
-                <span class="active-label">Current Target</span>
-                <h2 id="current-task-text">Task goes here</h2>
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold mb-4 text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Live Scanner</h2>
+                    <div id="reader" class="w-full bg-black rounded-xl"></div>
+                    <div id="scan-status" class="mt-3 text-center text-sm font-semibold text-gray-600 hidden p-2 rounded-lg bg-gray-100"></div>
+                </div>
             </div>
-            
-            <button class="btn-primary btn-complete" onclick="completeTask()">✅ MISSION ACCOMPLISHED</button>
-        </div>
 
-        <!-- PHASE 4: DONE -->
-        <div id="panel-done" class="panel" style="align-items: center; justify-content: center; text-align: center;">
-            <h1 style="font-size: 50px; background: linear-gradient(45deg, #0ba360, #3cba92); -webkit-background-clip: text; margin-bottom:10px;">🏆</h1>
-            <h1 style="background: linear-gradient(45deg, #0ba360, #3cba92); -webkit-background-clip: text;">ALL DONE!</h1>
-            <p style="color:#aaa;">You crushed it today. Take a break.</p>
+            <!-- Calendar & Logs -->
+            <div class="space-y-6 md:col-span-2">
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-700"><i class="fa-regular fa-calendar-check mr-2 text-indigo-500"></i>Study Calendar</h2>
+                        <span id="month-name" class="font-bold text-indigo-600 bg-indigo-50 px-4 py-1 rounded-full"></span>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2 text-center text-sm font-bold text-gray-500 mb-2">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
+                </div>
+
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-list-check mr-2 text-indigo-500"></i>Activity Log (Entry/Exit)</h2>
+                        <button onclick="clearLogs()" class="text-sm text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash mr-1"></i>Delete All</button>
+                    </div>
+                    <div class="h-80 overflow-y-auto pr-2 space-y-4" id="activity-logs"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- SPINNER OVERLAY -->
-    <div id="spinner-overlay">
-        <p style="color: #00f2fe; letter-spacing: 4px; font-size: 14px; font-weight: 600; margin-bottom: 30px;">ROULETTE SPINNING...</p>
-        <div class="spin-text" id="spin-display">WAITING</div>
+    <!-- MAGIC MODAL: Map New Barcode -->
+    <div id="mapping-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl transform transition-all">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-2"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Naya Barcode Mila!</h2>
+            <p class="text-gray-600 mb-6 text-sm">Yeh pehli baar scan hua hai. Batao is packet/barcode se kya activity save karni hai?</p>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6" id="action-buttons">
+                <!-- Action Buttons Injected Here -->
+            </div>
+            
+            <div class="text-center">
+                <button onclick="closeMappingModal()" class="text-red-500 text-sm font-semibold hover:underline">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        let tasks = [];
-        let html5QrCode = null;
-        let audioCtx = null;
-        let isSpinning = false;
+        // Data Structure with Barcode Mappings
+        let appData = JSON.parse(localStorage.getItem('smartTrackerData')) || {
+            calendar: {}, 
+            logs: [],
+            barcodeMap: {} // Yahan random barcode numbers aur unki meaning save hogi
+        };
 
-        // --- FULL SCREEN API ---
-        function goFullScreen() {
-            let elem = document.documentElement;
-            if (elem.requestFullscreen) { elem.requestFullscreen(); }
-            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } // Safari
-            document.querySelector('.btn-fullscreen').style.display = 'none'; // Hide button after click
+        const today = new Date();
+        const currentDateStr = today.toISOString().split('T')[0];
+        let tempBarcode = "";
+        let html5QrcodeScanner;
+
+        // Sabhi Activities ki list
+        const qrActions = {
+            "STUDY_YES": { msg: "Study Completed ✅", type: "study", icon: "fa-book text-green-500", bg: "bg-green-100 text-green-700" },
+            "STUDY_NO": { msg: "Study Missed (Din Barbad) ❌", type: "nostudy", icon: "fa-book-skull text-red-500", bg: "bg-red-100 text-red-700" },
+            "ROOM_ENTRY": { msg: "Room Mein Entry Ki", type: "entry", icon: "fa-door-open text-blue-500", bg: "bg-blue-100 text-blue-700" },
+            "ROOM_EXIT": { msg: "Room Se Bahar Nikla", type: "exit", icon: "fa-person-walking-arrow-right text-gray-500", bg: "bg-gray-200 text-gray-700" },
+            "MOBILE_ON": { msg: "Mobile Chalana Shuru Kiya", type: "mobile_on", icon: "fa-mobile-screen text-orange-500", bg: "bg-orange-100 text-orange-700" },
+            "MOBILE_OFF": { msg: "Mobile Rakh Diya (Study Start)", type: "mobile_off", icon: "fa-mobile-screen-button text-green-500", bg: "bg-teal-100 text-teal-700" },
+            "HOME": { msg: "Ghar Gaya", type: "home", icon: "fa-house text-purple-500", bg: "bg-purple-100 text-purple-700" },
+            "OUTSIDE": { msg: "Bahar Padhne Gaya", type: "outside", icon: "fa-tree-city text-cyan-500", bg: "bg-cyan-100 text-cyan-700" }
+        };
+
+        // Sound on Scan (Premium Beep)
+        function playBeep() {
+            let context = new (window.AudioContext || window.webkitAudioContext)();
+            let oscillator = context.createOscillator();
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(800, context.currentTime); // Beep pitch
+            oscillator.connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.1);
         }
 
-        // --- AUDIO SYSTEM (Premium Beeps) ---
-        function initAudio() {
-            if (!audioCtx) {
-                let AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('month-name').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let utilized = 0, wasted = 0;
+
+            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="calendar-day bg-gray-50 border-none"></div>`;
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                let dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                let status = appData.calendar[dateStr];
+                
+                let content = `<span class="text-sm font-semibold text-gray-400">${i}</span>`;
+                let bgClass = "bg-white";
+
+                if (status === 'yes') { content += `<i class="fa-solid fa-check text-green-500 mt-1 text-xl"></i>`; bgClass = "bg-green-50 border-green-200"; utilized++; }
+                else if (status === 'no') { content += `<i class="fa-solid fa-xmark text-red-500 mt-1 text-xl"></i>`; bgClass = "bg-red-50 border-red-200"; wasted++; }
+                if(dateStr === currentDateStr) bgClass += " ring-2 ring-indigo-500";
+
+                grid.innerHTML += `<div class="calendar-day ${bgClass}">${content}</div>`;
             }
-        }
-        function playTick() {
-            if (!audioCtx) return;
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = 'square'; osc.frequency.value = 800;
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.03);
-        }
-        function playWin() {
-            if (!audioCtx) return;
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = 'sine'; osc.frequency.value = 600;
-            gain.gain.setValueAtTime(1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-            osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+
+            document.getElementById('days-utilized').innerText = utilized;
+            document.getElementById('days-wasted').innerText = wasted;
         }
 
-        // --- UI NAVIGATION ---
-        function showPanel(panelId) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.getElementById(panelId).classList.add('active');
-        }
+        function renderLogs() {
+            const logsContainer = document.getElementById('activity-logs');
+            logsContainer.innerHTML = '';
 
-        // --- TASK SETUP ---
-        function addTask() {
-            let input = document.getElementById('task-input');
-            let val = input.value.trim();
-            if(val === "") return;
-            tasks.push(val);
-            input.value = "";
-            renderList();
-        }
-        
-        function renderList() {
-            let list = document.getElementById('task-list');
-            list.innerHTML = "";
-            tasks.forEach((t, i) => {
-                list.innerHTML += `<li>${t} <button class="delete-btn" onclick="removeTask(${i})">×</button></li>`;
+            if (appData.logs.length === 0) {
+                logsContainer.innerHTML = `<div class="text-center text-gray-400 py-10">Scan a barcode to start logging!</div>`;
+                return;
+            }
+
+            [...appData.logs].reverse().forEach(log => {
+                const actionData = qrActions[log.type] || { msg: log.action, icon: "fa-barcode text-gray-500" };
+                logsContainer.innerHTML += `
+                    <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center mr-4">
+                            <i class="fa-solid ${actionData.icon} text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-800">${actionData.msg}</h4>
+                            <p class="text-xs text-gray-500"><i class="fa-regular fa-clock mr-1"></i>${log.date} | ${log.time}</p>
+                        </div>
+                    </div>
+                `;
             });
         }
-        function removeTask(i) { tasks.splice(i, 1); renderList(); }
 
-        // --- LOCK TASKS & SCANNER ---
-        function lockTasks() {
-            if(tasks.length === 0) { alert("Enter at least one task!"); return; }
-            initAudio(); // Init audio context on user interaction
-            showPanel('panel-scanner');
-            startScanner();
-        }
-
-        function startScanner() {
-            // Using custom setup for better mobile camera handling
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-            }
+        // Core Action Processor
+        function processAction(actionKey) {
+            const statusDiv = document.getElementById('scan-status');
+            const actionData = qrActions[actionKey];
             
-            // Start back camera
-            html5QrCode.start(
-                { facingMode: "environment" }, // Forces back camera on mobile
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
-                    if(!isSpinning) {
-                        html5QrCode.pause(true); // Pause scanner immediately
-                        startSpin();
-                    }
-                },
-                (errorMessage) => { /* ignore background errors */ }
-            ).catch(err => alert("Camera error. Please allow permissions."));
-        }
-
-        // --- SPIN ANIMATION ---
-        function startSpin() {
-            isSpinning = true;
-            let overlay = document.getElementById('spinner-overlay');
-            let display = document.getElementById('spin-display');
-            overlay.style.display = 'flex';
+            playBeep();
             
-            let spins = 0;
-            let maxSpins = 40;
-            let speed = 40;
-
-            function doSpin() {
-                let randomTask = tasks[Math.floor(Math.random() * tasks.length)];
-                display.innerText = randomTask;
-                display.classList.add('highlight');
-                setTimeout(() => display.classList.remove('highlight'), speed - 15);
-                playTick();
-                
-                spins++;
-                if (spins < maxSpins) {
-                    if (spins > 25) speed += 25; // Slow down effect
-                    setTimeout(doSpin, speed);
-                } else {
-                    // Final Selection
-                    playWin();
-                    display.classList.add('highlight');
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        lockTask(randomTask);
-                    }, 2000);
-                }
-            }
-            setTimeout(doSpin, speed);
-        }
-
-        // --- ACTIVE TASK ---
-        function lockTask(task) {
-            document.getElementById('current-task-text').innerText = task;
-            showPanel('panel-active');
-        }
-
-        function completeTask() {
-            initAudio();
-            let current = document.getElementById('current-task-text').innerText;
-            tasks = tasks.filter(t => t !== current);
-            isSpinning = false;
+            statusDiv.classList.remove('hidden');
+            statusDiv.innerHTML = `✅ <b>${actionData.msg}</b> logged!`;
+            statusDiv.className = `mt-3 text-center text-sm font-bold p-3 rounded-lg ${actionData.bg}`;
             
-            if (tasks.length === 0) {
-                html5QrCode.stop(); // Turn off camera to save battery
-                showPanel('panel-done');
-                playWin();
-            } else {
-                showPanel('panel-scanner');
-                html5QrCode.resume(); // Resume scanner for next task
+            const timeString = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            if (actionKey === "STUDY_YES") appData.calendar[currentDateStr] = "yes";
+            else if (actionKey === "STUDY_NO") appData.calendar[currentDateStr] = "no";
+
+            appData.logs.push({ type: actionKey, action: actionData.msg, time: timeString, date: currentDateStr });
+            
+            localStorage.setItem('smartTrackerData', JSON.stringify(appData));
+            renderCalendar();
+            renderLogs();
+
+            setTimeout(() => { statusDiv.classList.add('hidden'); }, 4000);
+        }
+
+        // Scanner Success Event
+        function onScanSuccess(decodedText) {
+            // Check if it's already a saved barcode
+            if (appData.barcodeMap[decodedText]) {
+                processAction(appData.barcodeMap[decodedText]);
+            } 
+            // Check if it's our old custom QR
+            else if (qrActions[decodedText]) {
+                processAction(decodedText);
+            } 
+            // Naya Barcode mila (Buiscut/Maggi wala)
+            else {
+                playBeep();
+                tempBarcode = decodedText;
+                openMappingModal();
             }
         }
+
+        // Modal Logic
+        function openMappingModal() {
+            html5QrcodeScanner.pause(); // Scanner thodi der rok do
+            const modal = document.getElementById('mapping-modal');
+            const btnContainer = document.getElementById('action-buttons');
+            btnContainer.innerHTML = '';
+
+            // Generate buttons for all actions dynamically
+            Object.keys(qrActions).forEach(key => {
+                const act = qrActions[key];
+                btnContainer.innerHTML += `
+                    <button onclick="saveMapping('${key}')" class="p-3 text-left rounded-lg border-2 border-transparent hover:border-indigo-500 hover:shadow-md transition-all ${act.bg} flex flex-col items-center justify-center text-center">
+                        <i class="fa-solid ${act.icon} text-2xl mb-2"></i>
+                        <span class="text-xs font-bold">${act.msg}</span>
+                    </button>
+                `;
+            });
+            modal.classList.remove('hidden');
+        }
+
+        function saveMapping(actionKey) {
+            appData.barcodeMap[tempBarcode] = actionKey; // Save "biscuit barcode = Entry"
+            localStorage.setItem('smartTrackerData', JSON.stringify(appData));
+            closeMappingModal();
+            processAction(actionKey); // Turant log kar do
+        }
+
+        function closeMappingModal() {
+            document.getElementById('mapping-modal').classList.add('hidden');
+            html5QrcodeScanner.resume(); // Scanner wapas chaalu
+        }
+
+        function clearLogs() {
+            if(confirm("Kya sach mein saara data aur barcode memory delete karni hai?")) {
+                appData = { calendar: {}, logs: [], barcodeMap: {} };
+                localStorage.setItem('smartTrackerData', JSON.stringify(appData));
+                renderCalendar();
+                renderLogs();
+            }
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('main-content');
+            document.getElementById('reader').style.display = 'none'; // hide camera
+            html2pdf().set({
+                margin: 0.5, filename: `Study-Report-${currentDateStr}.pdf`,
+                image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2 }, jsPDF: { format: 'a4' }
+            }).from(element).save().then(() => {
+                document.getElementById('reader').style.display = 'block'; // show camera
+            });
+        }
+
+        // Initialize App
+        renderCalendar();
+        renderLogs();
+
+        // Initialize Scanner (Supports 1D Barcode and 2D QR Code automatically)
+        html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: {width: 250, height: 150}, rememberLastUsedCamera: true }, false);
+        html5QrcodeScanner.render(onScanSuccess);
+
     </script>
 </body>
 </html>
