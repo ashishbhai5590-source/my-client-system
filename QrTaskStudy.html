@@ -48,19 +48,11 @@
         <!-- 1. DIRECT SCANNER SECTION -->
         <div class="glass-card p-6 relative mb-8">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Scan Barcode to Open Chapters</h2>
+                <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Scanner is Active...</h2>
             </div>
             <div class="relative rounded-xl overflow-hidden shadow-inner border-4 border-gray-100 bg-black min-h-[250px] flex items-center justify-center">
-                
-                <!-- CAMERA CONTAINER -->
-                <div id="reader" class="w-full hidden"></div>
-                
-                <!-- AUDIO UNLOCK & START OVERLAY -->
-                <div id="start-scanner-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-95 z-20 cursor-pointer hover:bg-gray-800 transition-colors">
-                    <i class="fa-solid fa-power-off text-6xl text-green-400 mb-4 animate-pulse"></i>
-                    <h3 class="text-white font-extrabold text-2xl tracking-wide">Tap To Start System</h3>
-                    <p class="text-gray-400 text-sm mt-2 font-medium bg-gray-800 px-4 py-1 rounded-full">Turn on Scanner & Sound</p>
-                </div>
+                <!-- CAMERA CONTAINER (Now always visible) -->
+                <div id="reader" class="w-full"></div>
             </div>
         </div>
 
@@ -107,21 +99,16 @@
 
             <!-- The 3 Cards Container -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4" id="cards-container">
-                <!-- Physics Card Space -->
                 <div id="wrapper-Physics" class="relative overflow-hidden rounded-2xl"></div>
-                <!-- Chemistry Card Space -->
                 <div id="wrapper-Chemistry" class="relative overflow-hidden rounded-2xl"></div>
-                <!-- Biology Card Space -->
                 <div id="wrapper-Biology" class="relative overflow-hidden rounded-2xl"></div>
             </div>
-
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             
-            // --- PRE-LOADED SYLLABUS DATA ---
             const defaultDB = {
                 Physics: [
                     { id: 'p1', name: '1. वैद्युत आवेश तथा क्षेत्र', status: 'pending', task1: false, task2: false },
@@ -161,7 +148,6 @@
                 ]
             };
 
-            // Init Database
             let db = JSON.parse(localStorage.getItem('PreloadedSyllabusDB_V2'));
             if(!db) {
                 db = defaultDB;
@@ -173,12 +159,22 @@
 
             // --- AUDIO SYSTEM ---
             function initAudio() {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume().catch(e => console.log("Audio unlock wait", e));
+                }
             }
 
+            // Unlock audio silently if user touches screen anywhere (Browser requirement)
+            document.body.addEventListener('touchstart', initAudio, { once: true });
+            document.body.addEventListener('click', initAudio, { once: true });
+
             function playSound(type) {
+                initAudio(); // Ensure context is running
                 if (!audioCtx) return;
+                
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 
@@ -204,34 +200,26 @@
                 osc.start();
             }
 
-            // --- START DIRECT CAMERA SYSTEM ---
-            document.getElementById('start-scanner-overlay').addEventListener('click', function() {
-                initAudio();
-                playSound('click');
-                
-                // Hide overlay
-                this.style.display = 'none';
-                document.getElementById('reader').classList.remove('hidden');
-
-                // Start Camera Directly
+            // --- DIRECT CAMERA START ON LOAD ---
+            function startDirectCamera() {
                 html5QrCode = new Html5Qrcode("reader");
                 const config = { fps: 10, qrbox: { width: 250, height: 200 } };
 
                 html5QrCode.start(
                     { facingMode: "environment" }, // Back camera
                     config,
-                    onScanSuccess, // Success callback
+                    onScanSuccess, 
                     function(errorMessage) {
-                        // ignore background searching errors
+                        // Ignore background search errors
                     }
                 ).catch(err => {
-                    console.error(err);
-                    alert("Camera start failed! Please allow permissions. Or use VS Code Live Server.");
-                    // Reset overlay
-                    document.getElementById('start-scanner-overlay').style.display = 'flex';
-                    document.getElementById('reader').classList.add('hidden');
+                    console.error("Camera access failed", err);
+                    alert("Camera Error: Please Allow Camera Permissions. (Use VS Code Live Server if on PC)");
                 });
-            });
+            }
+
+            // Start Camera immediately
+            startDirectCamera();
 
             // --- PROGRESS OVERVIEW ---
             function updateOverview() {
@@ -253,13 +241,14 @@
             function onScanSuccess(decodedText) {
                 if(!document.getElementById('flashcard-modal').classList.contains('hidden')) return; 
                 
+                // Play sound immediately on scan
                 playSound('scan');
                 
                 if(html5QrCode) {
-                    html5QrCode.pause(true); // Pause camera to save battery while modal is open
+                    html5QrCode.pause(true); // Pause camera saving battery
                 }
 
-                // Open Modal & Render Cards
+                // Show Modal & Cards
                 document.getElementById('flashcard-modal').classList.remove('hidden');
                 renderAllFlashcards();
             }
@@ -267,7 +256,7 @@
             window.closeModal = function() {
                 document.getElementById('flashcard-modal').classList.add('hidden');
                 if(html5QrCode) {
-                    html5QrCode.resume(); // Resume camera scanning
+                    html5QrCode.resume(); 
                 }
                 updateOverview();
             }
