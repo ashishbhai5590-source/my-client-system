@@ -47,13 +47,15 @@
         <!-- 1. DIRECT SCANNER SECTION -->
         <div class="glass-card p-6 relative mb-8">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Scan Barcode to Open Chapters</h2>
+                <h2 class="text-xl font-bold text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Scanning For Any Barcode...</h2>
             </div>
             <div class="relative rounded-xl overflow-hidden shadow-inner border-4 border-gray-100 bg-black min-h-[250px] flex items-center justify-center">
                 <!-- Camera will directly open here -->
                 <div id="reader" class="w-full"></div>
             </div>
-            <p class="text-center text-xs text-gray-400 mt-3"><i class="fa-solid fa-circle-info"></i> Tip: Keep the barcode slightly away (10-15cm) so camera can focus.</p>
+            <p class="text-center text-xs text-gray-400 mt-3 font-bold">
+                <i class="fa-solid fa-bolt text-yellow-500"></i> HD Mode Active: Just point at the lines!
+            </p>
         </div>
 
         <!-- 2. OVERVIEW CHART (BOTTOM) -->
@@ -199,19 +201,25 @@
                 osc.start();
             }
 
-            // --- AUTO START SCANNER (UPDATED FOR BARCODES) ---
+            // --- AUTO START SCANNER (HEAVY DUTY FOR 1D BARCODES) ---
             function startDirectCamera() {
                 html5QrCode = new Html5Qrcode("reader");
                 
-                // qrbox hata diya taaki puri screen pe kahin bhi barcode ho wo pakad le
-                // fps badha di taaki fast scan ho
                 const config = { 
-                    fps: 20,
-                    disableFlip: false 
+                    fps: 30, // MAX Scanning speed
+                    disableFlip: false
+                };
+
+                // YAHAN PE HAI MAIN MAGIC - Forcing HD Resolution & Focus
+                const cameraConstraints = {
+                    facingMode: "environment", // Back camera
+                    width: { ideal: 1920 },    // Full HD width
+                    height: { ideal: 1080 },   // Full HD height
+                    advanced: [{ focusMode: "continuous" }] // Auto-focus zaroori hai
                 };
 
                 html5QrCode.start(
-                    { facingMode: "environment" }, // Back camera
+                    cameraConstraints,
                     config,
                     onScanSuccess, 
                     function(errorMessage) {
