@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Smart POS Scanner</title>
+    <!-- Barcode/QR Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+        }
+        body {
+            margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e2e8f0; display: flex; flex-direction: column; height: 100vh;
+        }
+        header {
+            background: var(--dark); color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            display: flex; flex: 1; padding: 20px; gap: 20px; flex-wrap: wrap;
+        }
+        .scanner-section, .bill-section {
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.05); flex: 1; min-width: 300px;
+        }
+        
+        /* Scanner UI */
+        #reader-container {
+            position: relative; width: 100%; max-width: 400px; margin: 0 auto;
+            border-radius: 10px; overflow: hidden; background: black;
+        }
+        #reader { width: 100%; border: none; }
+        .laser {
+            position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+            background: #00ff00; box-shadow: 0 0 15px 2px #00ff00;
+            animation: scan 2s infinite linear; display: none; z-index: 10;
+        }
+        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        
+        /* Buttons */
+        .btn {
+            color: white; border: none; padding: 12px 15px;
+            border-radius: 8px; cursor: pointer; font-size: 16px; 
+            transition: 0.3s; display: flex; justify-content: center; gap: 8px; align-items: center;
+        }
+        .btn-primary { background: var(--primary); width: 100%; margin-top: 15px; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-success { background: var(--success); flex: 1; }
+        .btn-success:hover { background: #15803d; }
+        .btn-warning { background: var(--warning); flex: 1; }
+        .btn-warning:hover { background: #d97706; color: white; }
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+
+        /* Table UI */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px dashed #ccc; }
+        th { background: var(--light); color: var(--dark); border-bottom: 2px solid #333; }
+        .total-row { font-size: 20px; font-weight: bold; color: #000; border-top: 2px solid #333; }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+            background: #10b981; color: white; padding: 15px 30px; border-radius: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); font-weight: bold; font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000;
+        }
+        .toast.show { bottom: 30px; }
+        
+        /* Print Receipt Header - Hidden on screen */
+        .receipt-header { display: none; text-align: center; margin-bottom: 20px; }
+        .receipt-header h2 { margin: 0; font-size: 28px; }
+        .receipt-header p { margin: 5px 0; color: #555; }
+
+        /* =========================================
+           PRINT CSS - Yeh sirf print karte waqt chalega
+           ========================================= */
+        @media print {
+            body { background: white; margin: 0; padding: 0; }
+            header, .scanner-section, .action-buttons, .toast { display: none !important; } /* Hide unnecessary UI */
+            .container { padding: 0; display: block; }
+            .bill-section { box-shadow: none; width: 100%; max-width: 400px; margin: 0 auto; padding: 0; }
+            .receipt-header { display: block; } /* Show store name */
+            th { background: white !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2><i class="fa-solid fa-store"></i> Super Mart POS</h2>
+        <div><i class="fa-regular fa-clock"></i> <span id="date"></span></div>
+    </header>
+
+    <div class="container">
+        <!-- Scanner Section -->
+        <div class="scanner-section">
+            <h3 style="margin-top:0"><i class="fa-solid fa-qrcode"></i> Scan Product barcode</h3>
+            <div id="reader-container">
+                <div class="laser" id="laser"></div>
+                <div id="reader"></div>
+            </div>
+            <button class="btn btn-primary" id="start-btn" onclick="startScanner()">
+                <i class="fa-solid fa-camera"></i> Start Scanner
+            </button>
+        </div>
+
+        <!-- Billing Section -->
+        <div class="bill-section">
+            
+            <!-- Yeh receipt header sirf Parchi Print hone par dikhega -->
+            <div class="receipt-header">
+                <h2>SUPER MART</h2>
+                <p>123 Main Street, Lucknow, UP</p>
+                <p>Tax Invoice / Bill</p>
+                <p style="border-bottom: 1px dashed #000; padding-bottom:10px;">Date: <span id="print-date"></span></p>
+            </div>
+
+            <h3 style="margin-top:0" class="no-print"><i class="fa-solid fa-file-invoice-dollar"></i> Current Bill</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="bill-body">
+                    <!-- Items will appear here -->
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">Grand Total:</td>
+                        <td id="grand-total">₹0</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-warning" onclick="printBill()">
+                    <i class="fa-solid fa-print"></i> Print Bill
+                </button>
+                <button class="btn btn-success" onclick="payBill()">
+                    <i class="fa-solid fa-credit-card"></i> Pay & Clear
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Item Added!</span>
+    </div>
+
+    <script>
+        // Set Date
+        const today = new Date().toLocaleString();
+        document.getElementById("date").innerText = today;
+        document.getElementById("print-date").innerText = today;
+
+        // Badi Inventory (Multiple QR ke liye)
+        const inventory = {
+            "ITEM001": { name: "Maggi Noodles", price: 15 },
+            "ITEM002": { name: "Amul Butter", price: 55 },
+            "ITEM003": { name: "Coca Cola 500ml", price: 40 },
+            "ITEM004": { name: "Bourbon Biscuit", price: 30 },
+            "ITEM005": { name: "Dettol Soap", price: 45 },
+            "ITEM006": { name: "Lays Blue", price: 20 }
+        };
+
+        let billItems = {};
+        let totalAmount = 0;
+        let html5QrCode;
+        let audioCtx;
+
+        // Professional Beep Sound
+        function playBeep() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'square'; // Scanner wali teekhi awaj
+            oscillator.frequency.setValueAtTime(1500, audioCtx.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            document.getElementById("toast-msg").innerText = message;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2000);
+        }
+
+        function updateBillTable() {
+            const tbody = document.getElementById("bill-body");
+            tbody.innerHTML = "";
+            totalAmount = 0;
+
+            for (let code in billItems) {
+                const item = billItems[code];
+                const itemTotal = item.price * item.qty;
+                totalAmount += itemTotal;
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><b>${item.name}</b><br><small style="color:gray">${code}</small></td>
+                    <td>${item.qty}</td>
+                    <td>₹${item.price}</td>
+                    <td><b>₹${itemTotal}</b></td>
+                `;
+                tbody.appendChild(tr);
+            }
+            document.getElementById("grand-total").innerText = `₹${totalAmount}`;
+        }
+
+        let lastScanned = null;
+        function handleScan(decodedText) {
+            if (lastScanned === decodedText) return;
+            lastScanned = decodedText;
+            setTimeout(() => { lastScanned = null; }, 2000); // 2 second delay to avoid double scan
+
+            playBeep(); // BEEP Awaaz
+
+            let item = inventory[decodedText];
+            if (!item) {
+                item = { name: "Unknown Item", price: 10 }; // Agar koi bahar ka QR scan kiya
+            }
+
+            if (billItems[decodedText]) {
+                billItems[decodedText].qty++;
+            } else {
+                billItems[decodedText] = { name: item.name, price: item.price, qty: 1 };
+            }
+
+            updateBillTable();
+            showToast(`${item.name} Added to Bill!`);
+        }
+
+        function startScanner() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtx.resume();
+
+            document.getElementById('laser').style.display = 'block';
+            document.getElementById('start-btn').style.display = 'none';
+
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            html5QrCode.start({ facingMode: "environment" }, config, handleScan)
+            .catch(err => alert("Camera permission chahiye QR scan karne ke liye!"));
+        }
+
+        // --- PRINT BILL FEATURE ---
+        function printBill() {
+            if(totalAmount === 0) {
+                alert("Please scan an item first to print the bill!");
+                return;
+            }
+            window.print(); // Yeh browser ka print feature khol dega receipt style mein
+        }
+
+        // --- CLEAR BILL FEATURE ---
+        function payBill() {
+            if(totalAmount === 0) {
+                alert("Bill is empty!");
+                return;
+            }
+            playBeep();
+            alert(`Payment of ₹${totalAmount} Successful!\nSystem will clear the bill now.`);
+            billItems = {};
+            updateBillTable();
+        }
+    </script>
+</body>
+</html>
