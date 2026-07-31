@@ -4,25 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Study & Activity Tracker</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (Fast Load) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
+    <!-- Font Awesome (Icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- HTML5 QR & Barcode Scanner -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- HTML5 QR & Barcode Scanner (GitHub Friendly CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <!-- PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
         .glass-card { background: rgba(255, 255, 255, 0.95); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border-radius: 1rem; }
         .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0.5rem; border: 1px solid #e5e7eb; transition: all 0.2s; }
-        #reader { border: none !important; border-radius: 1rem; overflow: hidden; background: #000; }
-        #reader__dashboard_section_csr button { background-color: #4f46e5; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
-        /* Custom Scrollbar */
+        #reader { border: none !important; border-radius: 1rem; overflow: hidden; background: #000; width: 100%; min-height: 250px; }
+        #reader__dashboard_section_csr button { background-color: #4f46e5; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; margin-top: 10px;}
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        /* Home Screen Animation Base */
         @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
@@ -32,11 +30,9 @@
 </head>
 <body class="text-gray-800 p-4 md:p-8 relative">
 
-    <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
 
     <div class="max-w-6xl mx-auto" id="main-content">
-        <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 glass-card p-6 border-t-4 border-indigo-500">
             <div class="mb-4 md:mb-0 text-center md:text-left">
                 <h1 class="text-3xl font-bold text-indigo-700"><i class="fa-solid fa-crosshairs mr-2"></i>Ultimate Tracker</h1>
@@ -48,7 +44,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Scanner & Stats -->
             <div class="space-y-6 md:col-span-1">
                 <div class="glass-card p-6">
                     <h2 class="text-xl font-bold mb-4 text-gray-700"><i class="fa-solid fa-chart-pie mr-2 text-indigo-500"></i>Monthly Status</h2>
@@ -66,11 +61,7 @@
 
                 <div class="glass-card p-6 relative">
                     <h2 class="text-xl font-bold mb-4 text-gray-700"><i class="fa-solid fa-camera mr-2 text-indigo-500"></i>Live Scanner</h2>
-                    
-                    <!-- Scanner Container -->
                     <div id="reader" class="w-full rounded-xl"></div>
-                    
-                    <!-- Cooldown Overlay -->
                     <div id="cooldown-overlay" class="absolute inset-0 bg-white bg-opacity-90 hidden flex-col items-center justify-center rounded-xl z-10 m-6">
                         <i class="fa-solid fa-hourglass-half text-4xl text-yellow-500 animate-spin mb-3"></i>
                         <h3 class="font-bold text-gray-700">Scanner Resting...</h3>
@@ -79,7 +70,6 @@
                 </div>
             </div>
 
-            <!-- Calendar & Logs -->
             <div class="space-y-6 md:col-span-2">
                 <div class="glass-card p-6">
                     <div class="flex justify-between items-center mb-4">
@@ -103,16 +93,12 @@
         </div>
     </div>
 
-    <!-- MAGIC MODAL: Map New Barcode -->
+    <!-- MAGIC MODAL -->
     <div id="mapping-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl transform transition-all animate-pop">
             <h2 class="text-2xl font-bold text-indigo-700 mb-2"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Naya Barcode!</h2>
-            <p class="text-gray-600 mb-6 text-sm">Yeh product pehli baar scan hua hai. Is barcode ko kis activity ke sath save karna hai?</p>
-            
-            <div class="grid grid-cols-1 gap-3 mb-6" id="action-buttons">
-                <!-- Action Buttons Injected Here -->
-            </div>
-            
+            <p class="text-gray-600 mb-6 text-sm">Yeh product pehli baar scan hua hai. Isko kis activity ke liye set karna hai?</p>
+            <div class="grid grid-cols-1 gap-3 mb-6" id="action-buttons"></div>
             <div class="text-center">
                 <button onclick="closeMappingModal()" class="text-red-500 text-sm font-bold hover:underline">Cancel & Close</button>
             </div>
@@ -120,258 +106,235 @@
     </div>
 
     <script>
-        // --- DATA & SETUP ---
-        let appData = JSON.parse(localStorage.getItem('smartTrackerData2')) || {
-            calendar: {}, logs: [], barcodeMap: {}
-        };
-        const today = new Date();
-        const currentDateStr = today.toISOString().split('T')[0];
-        let tempBarcode = "";
-        let html5QrcodeScanner;
-        let isScannerPaused = false; // To prevent multiple quick scans
-
-        // --- SIRF 5 ACTIVITIES ---
-        const qrActions = {
-            "STUDY_YES": { msg: "Study Completed", type: "study", icon: "fa-book-open text-green-500", bg: "bg-green-100 hover:bg-green-200 text-green-800" },
-            "STUDY_NO": { msg: "Study Missed (Din Barbad)", type: "nostudy", icon: "fa-book-skull text-red-500", bg: "bg-red-100 hover:bg-red-200 text-red-800" },
-            "ROOM_ENTRY": { msg: "Room Mein Entry Ki", type: "entry", icon: "fa-door-open text-blue-500", bg: "bg-blue-100 hover:bg-blue-200 text-blue-800" },
-            "ROOM_EXIT": { msg: "Room Se Bahar Nikla", type: "exit", icon: "fa-person-walking-arrow-right text-gray-500", bg: "bg-gray-100 hover:bg-gray-200 text-gray-800" },
-            "HOME": { msg: "Ghar Gaya (Chhutti!) 🏡", type: "home", icon: "fa-house-chimney-window text-purple-500", bg: "bg-purple-100 hover:bg-purple-200 text-purple-800" }
-        };
-
-        // --- SOUND EFFECTS ---
-        function playBeep(type = 'success') {
-            let context = new (window.AudioContext || window.webkitAudioContext)();
-            let oscillator = context.createOscillator();
-            oscillator.type = type === 'error' ? "square" : "sine";
-            oscillator.frequency.setValueAtTime(type === 'error' ? 300 : 800, context.currentTime);
-            if(type === 'error') {
-                oscillator.frequency.exponentialRampToValueAtTime(150, context.currentTime + 0.3);
-            }
-            oscillator.connect(context.destination);
-            oscillator.start();
-            oscillator.stop(context.currentTime + (type === 'error' ? 0.3 : 0.1));
-        }
-
-        // --- TOAST NOTIFICATIONS ---
-        function showToast(message, isError = false) {
-            const toast = document.createElement('div');
-            toast.className = `p-4 rounded-xl shadow-xl font-bold text-white transform transition-all duration-300 translate-x-full flex items-center ${isError ? 'bg-red-500' : 'bg-green-500'}`;
-            toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-triangle-exclamation' : 'fa-circle-check'} text-xl mr-3"></i> ${message}`;
+        // Use a safe wrapper to ensure DOM is fully loaded before running JS
+        document.addEventListener("DOMContentLoaded", function() {
             
-            const container = document.getElementById('toast-container');
-            container.appendChild(toast);
-            
-            setTimeout(() => { toast.classList.remove('translate-x-full'); }, 10);
-            setTimeout(() => {
-                toast.classList.add('translate-x-full');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // --- SPECIAL HOME ANIMATION ---
-        function showHomeAnimation() {
-            const overlay = document.createElement('div');
-            overlay.className = "fixed inset-0 z-[100] flex items-center justify-center bg-purple-900 bg-opacity-95 transition-opacity duration-500";
-            overlay.innerHTML = `
-                <div class="text-center animate-pop">
-                    <i class="fa-solid fa-house-chimney text-8xl text-white mb-6 drop-shadow-lg"></i>
-                    <h1 class="text-5xl font-extrabold text-white drop-shadow-lg tracking-wide mb-2">Ghar Ja Rahe Ho!</h1>
-                    <p class="text-2xl text-purple-200 font-medium">Journey Safe, Enjoy your time! 🎉</p>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            setTimeout(() => {
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.remove(), 500);
-            }, 3000);
-        }
-
-        // --- RENDER UI ---
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            const year = today.getFullYear();
-            const month = today.getMonth();
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            document.getElementById('month-name').innerText = `${monthNames[month]} ${year}`;
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            let utilized = 0, wasted = 0;
-
-            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="calendar-day bg-transparent border-none"></div>`;
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                let dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                let status = appData.calendar[dateStr];
-                
-                let content = `<span class="text-sm font-semibold text-gray-400">${i}</span>`;
-                let bgClass = "bg-white";
-
-                if (status === 'yes') { content += `<i class="fa-solid fa-check text-green-500 mt-1 text-2xl"></i>`; bgClass = "bg-green-50 border-green-200 shadow-sm"; utilized++; }
-                else if (status === 'no') { content += `<i class="fa-solid fa-xmark text-red-500 mt-1 text-2xl"></i>`; bgClass = "bg-red-50 border-red-200 shadow-sm"; wasted++; }
-                if(dateStr === currentDateStr) bgClass += " ring-2 ring-indigo-500 shadow-md";
-
-                grid.innerHTML += `<div class="calendar-day ${bgClass}">${content}</div>`;
+            // Safe Local Storage Fetch for GitHub Pages
+            let appData;
+            try {
+                appData = JSON.parse(localStorage.getItem('smartTrackerData2'));
+                if(!appData) throw new Error("No data");
+            } catch (e) {
+                appData = { calendar: {}, logs: [], barcodeMap: {} };
             }
 
-            document.getElementById('days-utilized').innerText = utilized;
-            document.getElementById('days-wasted').innerText = wasted;
-        }
+            const today = new Date();
+            const currentDateStr = today.toISOString().split('T')[0];
+            let tempBarcode = "";
+            let html5QrcodeScanner = null;
+            let isScannerPaused = false;
 
-        function renderLogs() {
-            const logsContainer = document.getElementById('activity-logs');
-            logsContainer.innerHTML = '';
+            const qrActions = {
+                "STUDY_YES": { msg: "Study Completed", type: "study", icon: "fa-book-open text-green-500", bg: "bg-green-100 hover:bg-green-200 text-green-800" },
+                "STUDY_NO": { msg: "Study Missed (Din Barbad)", type: "nostudy", icon: "fa-book-skull text-red-500", bg: "bg-red-100 hover:bg-red-200 text-red-800" },
+                "ROOM_ENTRY": { msg: "Room Mein Entry Ki", type: "entry", icon: "fa-door-open text-blue-500", bg: "bg-blue-100 hover:bg-blue-200 text-blue-800" },
+                "ROOM_EXIT": { msg: "Room Se Bahar Nikla", type: "exit", icon: "fa-person-walking-arrow-right text-gray-500", bg: "bg-gray-100 hover:bg-gray-200 text-gray-800" },
+                "HOME": { msg: "Ghar Gaya (Chhutti!) 🏡", type: "home", icon: "fa-house-chimney-window text-purple-500", bg: "bg-purple-100 hover:bg-purple-200 text-purple-800" }
+            };
 
-            if (appData.logs.length === 0) {
-                logsContainer.innerHTML = `<div class="text-center text-gray-400 py-10 mt-10"><i class="fa-solid fa-barcode text-4xl mb-3 block"></i>Scan anything to start!</div>`;
-                return;
-            }
+            // Global functions (Attached to window so buttons can call them)
+            window.playBeep = function(type = 'success') {
+                try {
+                    let context = new (window.AudioContext || window.webkitAudioContext)();
+                    let oscillator = context.createOscillator();
+                    oscillator.type = type === 'error' ? "square" : "sine";
+                    oscillator.frequency.setValueAtTime(type === 'error' ? 300 : 800, context.currentTime);
+                    if(type === 'error') oscillator.frequency.exponentialRampToValueAtTime(150, context.currentTime + 0.3);
+                    oscillator.connect(context.destination);
+                    oscillator.start();
+                    oscillator.stop(context.currentTime + (type === 'error' ? 0.3 : 0.1));
+                } catch(e) { console.log("Audio not supported"); }
+            };
 
-            [...appData.logs].reverse().forEach(log => {
-                const actionData = qrActions[log.type] || { msg: log.action, icon: "fa-barcode text-gray-500" };
-                logsContainer.innerHTML += `
-                    <div class="flex items-center p-3 bg-white rounded-lg border border-gray-100 hover:shadow-md transition-all">
-                        <div class="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center mr-4 border border-gray-100">
-                            <i class="fa-solid ${actionData.icon} text-lg"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-gray-800">${actionData.msg}</h4>
-                            <p class="text-xs text-gray-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>${log.date} | ${log.time}</p>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+            window.showToast = function(message, isError = false) {
+                const toast = document.createElement('div');
+                toast.className = `p-4 rounded-xl shadow-xl font-bold text-white transform transition-all duration-300 translate-x-full flex items-center ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+                toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-triangle-exclamation' : 'fa-circle-check'} text-xl mr-3"></i> ${message}`;
+                document.getElementById('toast-container').appendChild(toast);
+                setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            };
 
-        // --- SCANNER LOGIC ---
-        function onScanSuccess(decodedText) {
-            // Agar scanner rest (cooldown) par hai, toh scan mat karo
-            if (isScannerPaused) return;
+            window.showHomeAnimation = function() {
+                const overlay = document.createElement('div');
+                overlay.className = "fixed inset-0 z-[100] flex items-center justify-center bg-purple-900 bg-opacity-95 transition-opacity duration-500";
+                overlay.innerHTML = `<div class="text-center animate-pop"><i class="fa-solid fa-house-chimney text-8xl text-white mb-6 drop-shadow-lg"></i><h1 class="text-5xl font-extrabold text-white drop-shadow-lg tracking-wide mb-2">Ghar Ja Rahe Ho!</h1><p class="text-2xl text-purple-200 font-medium">Journey Safe, Enjoy your time! 🎉</p></div>`;
+                document.body.appendChild(overlay);
+                setTimeout(() => {
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.remove(), 500);
+                }, 3000);
+            };
 
-            if (appData.barcodeMap[decodedText]) {
-                processAction(appData.barcodeMap[decodedText]);
-            } else if (qrActions[decodedText]) {
-                processAction(decodedText);
-            } else {
-                tempBarcode = decodedText;
-                openMappingModal();
-            }
-        }
+            window.renderCalendar = function() {
+                const grid = document.getElementById('calendar-grid');
+                grid.innerHTML = '';
+                const year = today.getFullYear();
+                const month = today.getMonth();
+                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                document.getElementById('month-name').innerText = `${monthNames[month]} ${year}`;
 
-        function processAction(actionKey) {
-            // 1. Ek din mein sirf ek baar Study scan (Validation)
-            if (actionKey === "STUDY_YES" || actionKey === "STUDY_NO") {
-                if (appData.calendar[currentDateStr]) {
-                    playBeep('error');
-                    showToast("Alert: Aaj ka Padhai Status pehle hi lag chuka hai!", true);
-                    applyScannerCooldown(4000); // 4 second rest
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                let utilized = 0, wasted = 0;
+
+                for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="calendar-day bg-transparent border-none"></div>`;
+
+                for (let i = 1; i <= daysInMonth; i++) {
+                    let dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                    let status = appData.calendar[dateStr];
+                    let content = `<span class="text-sm font-semibold text-gray-400">${i}</span>`;
+                    let bgClass = "bg-white";
+
+                    if (status === 'yes') { content += `<i class="fa-solid fa-check text-green-500 mt-1 text-2xl"></i>`; bgClass = "bg-green-50 border-green-200 shadow-sm"; utilized++; }
+                    else if (status === 'no') { content += `<i class="fa-solid fa-xmark text-red-500 mt-1 text-2xl"></i>`; bgClass = "bg-red-50 border-red-200 shadow-sm"; wasted++; }
+                    if(dateStr === currentDateStr) bgClass += " ring-2 ring-indigo-500 shadow-md";
+
+                    grid.innerHTML += `<div class="calendar-day ${bgClass}">${content}</div>`;
+                }
+                document.getElementById('days-utilized').innerText = utilized;
+                document.getElementById('days-wasted').innerText = wasted;
+            };
+
+            window.renderLogs = function() {
+                const logsContainer = document.getElementById('activity-logs');
+                logsContainer.innerHTML = '';
+                if (appData.logs.length === 0) {
+                    logsContainer.innerHTML = `<div class="text-center text-gray-400 py-10 mt-10"><i class="fa-solid fa-barcode text-4xl mb-3 block"></i>Scan anything to start!</div>`;
                     return;
                 }
-                appData.calendar[currentDateStr] = (actionKey === "STUDY_YES") ? "yes" : "no";
-            }
+                [...appData.logs].reverse().forEach(log => {
+                    const actionData = qrActions[log.type] || { msg: log.action, icon: "fa-barcode text-gray-500" };
+                    logsContainer.innerHTML += `
+                        <div class="flex items-center p-3 bg-white rounded-lg border border-gray-100 hover:shadow-md transition-all">
+                            <div class="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center mr-4 border border-gray-100">
+                                <i class="fa-solid ${actionData.icon} text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-800">${actionData.msg}</h4>
+                                <p class="text-xs text-gray-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>${log.date} | ${log.time}</p>
+                            </div>
+                        </div>`;
+                });
+            };
 
-            // 2. Normal Action Process
-            const actionData = qrActions[actionKey];
-            
-            if (actionKey === "HOME") {
-                showHomeAnimation();
-                playBeep();
-            } else {
-                playBeep();
-                showToast(`${actionData.msg} recorded successfully!`, false);
-            }
-
-            const timeString = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            appData.logs.push({ type: actionKey, action: actionData.msg, time: timeString, date: currentDateStr });
-            
-            localStorage.setItem('smartTrackerData2', JSON.stringify(appData));
-            renderCalendar();
-            renderLogs();
-
-            // 3. Scanner Rest (Cooldown) Taki 10 baar entry na ho
-            applyScannerCooldown(5000); 
-        }
-
-        // --- COOLDOWN (REST) SYSTEM ---
-        function applyScannerCooldown(ms) {
-            isScannerPaused = true;
-            if(html5QrcodeScanner.getState() === 2) { // if scanning
-                html5QrcodeScanner.pause(true); // Freeze camera frame
-            }
-            document.getElementById('cooldown-overlay').classList.remove('hidden');
-            document.getElementById('cooldown-overlay').classList.add('flex');
-
-            setTimeout(() => {
-                isScannerPaused = false;
-                document.getElementById('cooldown-overlay').classList.add('hidden');
-                document.getElementById('cooldown-overlay').classList.remove('flex');
-                if(html5QrcodeScanner.getState() === 3) { // if paused
-                    html5QrcodeScanner.resume();
+            window.processAction = function(actionKey) {
+                if (actionKey === "STUDY_YES" || actionKey === "STUDY_NO") {
+                    if (appData.calendar[currentDateStr]) {
+                        playBeep('error');
+                        showToast("Alert: Aaj ka Padhai Status pehle hi lag chuka hai!", true);
+                        applyScannerCooldown(4000);
+                        return;
+                    }
+                    appData.calendar[currentDateStr] = (actionKey === "STUDY_YES") ? "yes" : "no";
                 }
-            }, ms);
-        }
 
-        // --- MODAL LOGIC ---
-        function openMappingModal() {
-            if(html5QrcodeScanner.getState() === 2) html5QrcodeScanner.pause(); 
-            const modal = document.getElementById('mapping-modal');
-            const btnContainer = document.getElementById('action-buttons');
-            btnContainer.innerHTML = '';
+                const actionData = qrActions[actionKey];
+                if (actionKey === "HOME") { showHomeAnimation(); playBeep(); } 
+                else { playBeep(); showToast(`${actionData.msg} recorded successfully!`, false); }
 
-            Object.keys(qrActions).forEach(key => {
-                const act = qrActions[key];
-                btnContainer.innerHTML += `
-                    <button onclick="saveMapping('${key}')" class="p-4 text-left rounded-xl border-2 border-transparent transition-all ${act.bg} flex items-center">
-                        <i class="fa-solid ${act.icon} text-2xl mr-4 w-8 text-center"></i>
-                        <span class="text-sm font-bold">${act.msg}</span>
-                    </button>
-                `;
-            });
-            modal.classList.remove('hidden');
-        }
-
-        function saveMapping(actionKey) {
-            appData.barcodeMap[tempBarcode] = actionKey;
-            localStorage.setItem('smartTrackerData2', JSON.stringify(appData));
-            closeMappingModal();
-            processAction(actionKey); 
-        }
-
-        function closeMappingModal() {
-            document.getElementById('mapping-modal').classList.add('hidden');
-            if(html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
-        }
-
-        function clearLogs() {
-            if(confirm("Warning! Kya sach mein poori history delete karni hai?")) {
-                appData = { calendar: {}, logs: [], barcodeMap: {} };
-                localStorage.setItem('smartTrackerData2', JSON.stringify(appData));
+                const timeString = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                appData.logs.push({ type: actionKey, action: actionData.msg, time: timeString, date: currentDateStr });
+                
+                try { localStorage.setItem('smartTrackerData2', JSON.stringify(appData)); } catch(e) {}
                 renderCalendar();
                 renderLogs();
-                showToast("All data cleared!", false);
+                applyScannerCooldown(5000);
+            };
+
+            window.applyScannerCooldown = function(ms) {
+                isScannerPaused = true;
+                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.pause(true);
+                document.getElementById('cooldown-overlay').classList.remove('hidden');
+                document.getElementById('cooldown-overlay').classList.add('flex');
+
+                setTimeout(() => {
+                    isScannerPaused = false;
+                    document.getElementById('cooldown-overlay').classList.add('hidden');
+                    document.getElementById('cooldown-overlay').classList.remove('flex');
+                    if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
+                }, ms);
+            };
+
+            window.openMappingModal = function() {
+                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.pause(); 
+                const modal = document.getElementById('mapping-modal');
+                const btnContainer = document.getElementById('action-buttons');
+                btnContainer.innerHTML = '';
+
+                Object.keys(qrActions).forEach(key => {
+                    const act = qrActions[key];
+                    btnContainer.innerHTML += `
+                        <button onclick="saveMapping('${key}')" class="p-4 text-left rounded-xl border-2 border-transparent transition-all ${act.bg} flex items-center">
+                            <i class="fa-solid ${act.icon} text-2xl mr-4 w-8 text-center"></i>
+                            <span class="text-sm font-bold">${act.msg}</span>
+                        </button>`;
+                });
+                modal.classList.remove('hidden');
+            };
+
+            window.saveMapping = function(actionKey) {
+                appData.barcodeMap[tempBarcode] = actionKey;
+                try { localStorage.setItem('smartTrackerData2', JSON.stringify(appData)); } catch(e) {}
+                closeMappingModal();
+                processAction(actionKey); 
+            };
+
+            window.closeMappingModal = function() {
+                document.getElementById('mapping-modal').classList.add('hidden');
+                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
+            };
+
+            window.clearLogs = function() {
+                if(confirm("Warning! Kya sach mein poori history delete karni hai?")) {
+                    appData = { calendar: {}, logs: [], barcodeMap: {} };
+                    try { localStorage.setItem('smartTrackerData2', JSON.stringify(appData)); } catch(e) {}
+                    renderCalendar();
+                    renderLogs();
+                    showToast("All data cleared!", false);
+                }
+            };
+
+            window.downloadPDF = function() {
+                const element = document.getElementById('main-content');
+                document.getElementById('reader').style.display = 'none'; 
+                html2pdf().set({
+                    margin: 0.5, filename: `Track-Report-${currentDateStr}.pdf`,
+                    image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2 }, jsPDF: { format: 'a4' }
+                }).from(element).save().then(() => {
+                    document.getElementById('reader').style.display = 'block';
+                });
+            };
+
+            // SCANNER INITIALIZATION
+            function onScanSuccess(decodedText) {
+                if (isScannerPaused) return;
+                if (appData.barcodeMap[decodedText]) {
+                    processAction(appData.barcodeMap[decodedText]);
+                } else if (qrActions[decodedText]) {
+                    processAction(decodedText);
+                } else {
+                    tempBarcode = decodedText;
+                    openMappingModal();
+                }
             }
-        }
 
-        function downloadPDF() {
-            const element = document.getElementById('main-content');
-            document.getElementById('reader').style.display = 'none'; 
-            html2pdf().set({
-                margin: 0.5, filename: `Track-Report-${currentDateStr}.pdf`,
-                image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2 }, jsPDF: { format: 'a4' }
-            }).from(element).save().then(() => {
-                document.getElementById('reader').style.display = 'block';
-            });
-        }
+            // Start everything
+            renderCalendar();
+            renderLogs();
+            
+            try {
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150}, rememberLastUsedCamera: true }, false);
+                html5QrcodeScanner.render(onScanSuccess);
+            } catch (err) {
+                console.error("Scanner failed to start:", err);
+                document.getElementById('reader').innerHTML = '<p class="text-red-500 text-center p-4">Camera could not be loaded. Please ensure you are on HTTPS and camera permissions are granted.</p>';
+            }
 
-        // Initialize App
-        renderCalendar();
-        renderLogs();
-
-        // Initialize Scanner
-        html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { fps: 10, qrbox: {width: 250, height: 150}, rememberLastUsedCamera: true }, false);
-        html5QrcodeScanner.render(onScanSuccess);
-
-        
+        });
+    </script>
+</body>
+</html>
