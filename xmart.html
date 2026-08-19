@@ -3,510 +3,516 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperMart POS Software & Thermal Billing</title>
-    <!-- Barcode Camera Scanner CDN -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <title>Super Mart POS Software - Professional</title>
+    <!-- Barcode Scanner Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: #0f172a; color: #333; min-height: 100vh; }
-
-        /* Top Navbar */
-        .navbar {
-            background: #1e293b;
-            color: #fff;
-            padding: 12px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #334155;
+        :root {
+            --primary: #1e272e;
+            --secondary: #0fb9b1;
+            --light: #f1f2f6;
+            --dark: #2f3640;
+            --danger: #eb3b5a;
+            --warning: #fa8231;
         }
-        .navbar h2 { font-size: 20px; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
-        .nav-tabs { display: flex; gap: 10px; }
-        .tab-btn {
-            background: #334155;
-            color: #fff;
-            border: none;
-            padding: 10px 18px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .tab-btn.active { background: #38bdf8; color: #0f172a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--light); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Main Container */
-        .main-content { padding: 20px; max-width: 1350px; margin: auto; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+        /* Sidebar Navigation */
+        .sidebar { width: 250px; background-color: var(--primary); color: white; display: flex; flex-direction: column; }
+        .sidebar h2 { padding: 20px; text-align: center; border-bottom: 1px solid var(--dark); background: #11151a; color: var(--secondary); font-weight: 800; letter-spacing: 1px;}
+        .nav-btn { background: none; border: none; color: white; padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; transition: 0.3s; border-bottom: 1px solid var(--dark); }
+        .nav-btn:hover, .nav-btn.active { background-color: var(--secondary); color: #fff;}
 
-        /* ================= 1. INVENTORY STYLES ================= */
-        .inv-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
-        .card { background: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .card h3 { margin-bottom: 15px; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
-        .form-group input { width: 100%; padding: 9px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; }
+        /* Main Content */
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .section { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .section.active { display: block; }
         
-        .btn { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-green { background: #10b981; color: white; width: 100%; }
-        .btn-green:hover { background: #059669; }
-        .btn-blue { background: #2563eb; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
+        h3 { margin-bottom: 20px; color: var(--primary); border-bottom: 3px solid var(--secondary); padding-bottom: 10px; display: inline-block;}
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table th, table td { padding: 9px 12px; border: 1px solid #e2e8f0; font-size: 13px; text-align: left; }
-        table th { background: #f8fafc; color: #334155; }
-
-        /* ================= 2. BILLING + PARCHI STYLES ================= */
-        .billing-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
-        .scan-box {
-            background: #1e293b;
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .scan-box input {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
-            border: 2px solid #38bdf8;
-            outline: none;
-        }
-        .scan-box input:focus { background: #fffbeb; }
-
-        /* ================= THERMAL RECEIPT (PARCHI) ================= */
-        .parchi-wrapper {
-            background: #fff;
-            padding: 15px 12px;
-            border-radius: 6px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.15);
-            font-family: 'Courier New', Courier, monospace;
-            color: #000;
-            font-size: 12px;
-            line-height: 1.3;
-        }
-        .parchi-header { text-align: center; margin-bottom: 8px; }
-        .parchi-header h2 { font-size: 16px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px; }
-        .parchi-header p { font-size: 11px; margin: 1px 0; }
-        .parchi-line { border-top: 1px dashed #000; margin: 6px 0; }
+        /* Form & Tables */
+        .form-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex: 1; min-width: 150px; font-size: 15px;}
+        input:focus, select:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 5px rgba(15, 185, 177, 0.4); }
         
-        .parchi-table { width: 100%; border: none; margin: 6px 0; }
-        .parchi-table th, .parchi-table td { border: none; padding: 3px 0; font-family: inherit; font-size: 11px; }
-        .parchi-table th { background: none; color: #000; border-bottom: 1px dashed #000; }
-        .text-right { text-align: right !important; }
-        .text-center { text-align: center !important; }
+        button.btn { padding: 10px 20px; background-color: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s;}
+        button.btn:hover { background-color: #0b9b94; }
+        button.btn-danger { background-color: var(--danger); }
+        button.btn-danger:hover { background-color: #c0304a; }
 
-        .parchi-total { margin-top: 6px; font-size: 12px; font-weight: bold; }
-        .parchi-total div { display: flex; justify-content: space-between; padding: 2px 0; }
-        .grand-parchi { font-size: 14px; font-weight: 900; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0; margin-top: 4px; }
-        .parchi-footer { text-align: center; margin-top: 12px; font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 15px;}
+        table, th, td { border: 1px solid #e1e1e1; }
+        th, td { padding: 12px; text-align: left; }
+        th { background-color: var(--primary); color: white; }
 
-        /* ================= PRINT RULES (58mm / 80mm PARCHI) ================= */
+        /* POS Billing Area */
+        .pos-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        #reader { width: 100%; max-width: 400px; margin-bottom: 15px; border-radius: 8px; overflow: hidden; border: 2px solid var(--primary); }
+        .bill-area { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);}
+        .total-box { font-size: 26px; font-weight: bold; text-align: right; margin-top: 20px; color: var(--danger); background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px dashed #ccc;}
+        
+        .customer-info { background: #f4f6f7; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd;}
+        .customer-info h4 { margin-bottom: 10px; color: var(--dark); }
+
+        /* Thermal Print Styles (Only visible during Print) */
+        #thermal-bill { display: none; }
         @media print {
-            body { background: white; padding: 0; }
-            .navbar, .billing-left, .no-print { display: none !important; }
-            .billing-layout { display: block; margin: 0; }
-            .parchi-wrapper {
-                box-shadow: none;
-                width: 72mm; /* Standard 80mm/58mm thermal roll */
-                margin: 0;
-                padding: 0;
-                border-radius: 0;
+            body * { visibility: hidden; }
+            #thermal-bill, #thermal-bill * { visibility: visible; }
+            #thermal-bill {
+                display: block;
+                position: absolute;
+                left: 0; top: 0;
+                width: 58mm; /* Standard Thermal Printer Width */
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 12px;
+                color: black;
+                padding: 5px;
             }
-            @page { margin: 0; size: 80mm auto; }
+            .t-center { text-align: center; }
+            .t-bold { font-weight: bold; }
+            .t-title { font-size: 18px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px;}
+            .t-table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 11px;}
+            .t-table th, .t-table td { border-bottom: 1px dotted #000; padding: 5px 0; text-align: left;}
+            .t-right { text-align: right !important; }
+            .t-line { border-top: 1px dashed #000; margin: 8px 0; }
+            .t-line-thick { border-top: 2px dashed #000; margin: 8px 0; }
+            .t-customer-box { margin: 8px 0; font-size: 11px;}
         }
     </style>
 </head>
 <body>
 
-    <!-- TOP BAR -->
-    <div class="navbar no-print">
-        <h2>🏪 APNA MART POS</h2>
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('billing')">🛒 Billing Counter</button>
-            <button class="tab-btn" onclick="switchTab('inventory')">📦 Product Management (Save Items)</button>
-        </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>🛒 POS SYSTEM</h2>
+        <button class="nav-btn active" onclick="switchTab('pos')" id="tab-pos">🧾 Billing (POS)</button>
+        <button class="nav-btn" onclick="switchTab('inventory')" id="tab-inventory">📦 Inventory</button>
+        <button class="nav-btn" onclick="switchTab('settings')" id="tab-settings">⚙️ Mart Settings</button>
     </div>
 
+    <!-- Main Content -->
     <div class="main-content">
         
-        <!-- ================= TAB 1: PRODUCT MANAGEMENT / INVENTORY ================= -->
-        <div id="tab-inventory" class="tab-panel">
-            <div class="inv-layout">
-                <!-- Add Product Form -->
-                <div class="card">
-                    <h3>➕ Save New Product</h3>
-                    <div class="form-group">
-                        <label>Barcode / EAN Number (Scan or Type):</label>
-                        <input type="text" id="invBarcode" placeholder="e.g. 8901058852461">
+        <!-- POS Billing Section -->
+        <div id="pos" class="section active">
+            <h3>Billing Dashboard</h3>
+            <div class="pos-grid">
+                
+                <!-- Scanner Left Side -->
+                <div>
+                    <div id="reader"></div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <input type="text" id="manual_barcode" placeholder="Scan or Type Barcode + Enter" onkeypress="handleManualEntry(event)">
+                        <button class="btn" onclick="manualAdd()">Add</button>
                     </div>
-                    <div class="form-group">
-                        <label>Product Name:</label>
-                        <input type="text" id="invName" placeholder="e.g. Maggi Masala 70g">
-                    </div>
-                    <div class="form-group">
-                        <label>Selling Price (₹):</label>
-                        <input type="number" id="invPrice" placeholder="e.g. 14">
-                    </div>
-                    <div class="form-group">
-                        <label>Stock Qty:</label>
-                        <input type="number" id="invStock" value="100">
-                    </div>
-                    <button class="btn btn-green" onclick="saveProductToDB()">💾 Save Product</button>
                 </div>
 
-                <!-- Product List View -->
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3>📋 Saved Products Database</h3>
-                        <input type="text" id="searchInv" onkeyup="filterInventory()" placeholder="🔍 Search Product..." style="padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; width: 220px;">
+                <!-- Cart Right Side -->
+                <div class="bill-area">
+                    
+                    <!-- Customer Details Entry -->
+                    <div class="customer-info">
+                        <h4>👤 Customer Details (Optional)</h4>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="text" id="cust_name" placeholder="Customer Name">
+                            <input type="tel" id="cust_mobile" placeholder="Mobile Number" maxlength="10">
+                        </div>
                     </div>
-                    <div style="max-height: 480px; overflow-y: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Barcode</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
-                                    <th>Stock</th>
-                                    <th style="width: 50px;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTableBody"></tbody>
-                        </table>
+
+                    <table id="cartTable">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    
+                    <div class="total-box">Grand Total: ₹<span id="grandTotal">0.00</span></div>
+                    
+                    <div style="text-align: right; margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearCart()">🗑️ Clear Bill</button>
+                        <button class="btn" onclick="printBill()" style="font-size: 18px; margin-left: 10px;">🖨️ Print Professional Bill</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ================= TAB 2: BILLING COUNTER ================= -->
-        <div id="tab-billing" class="tab-panel active">
-            <div class="billing-layout">
-                
-                <!-- Left Screen: Billing & Items List -->
-                <div class="billing-left">
-                    <div class="scan-box">
-                        <input type="text" id="posBarcodeScanner" placeholder="⚡ Scan Barcode Here (Press Enter)..." autofocus>
-                        <button class="btn btn-danger" onclick="clearCurrentBill()">🗑️ New Bill</button>
-                    </div>
-
-                    <div class="card" style="margin-bottom: 15px;">
-                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <input type="text" id="custName" oninput="updateReceipt()" placeholder="Customer Name" style="padding: 7px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
-                            <input type="text" id="custPhone" oninput="updateReceipt()" placeholder="Phone No." style="padding: 7px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
-                        </div>
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Item</th>
-                                    <th class="text-right">Price</th>
-                                    <th class="text-center">Qty</th>
-                                    <th class="text-right">Total</th>
-                                    <th class="text-center">Del</th>
-                                </tr>
-                            </thead>
-                            <tbody id="posBillTable"></tbody>
-                        </table>
-
-                        <div style="display: flex; justify-content: space-between; margin-top: 15px; align-items: center;">
-                            <div>
-                                <label style="font-size: 13px; font-weight: bold;">Discount (₹): </label>
-                                <input type="number" id="billDiscount" value="0" style="width: 80px; padding: 5px;" oninput="updateReceipt()">
-                            </div>
-                            <button class="btn btn-blue" style="font-size: 16px; padding: 12px 25px;" onclick="window.print()">🖨️ Print Small Parchi</button>
-                        </div>
-                    </div>
+        <!-- Inventory Section -->
+        <div id="inventory" class="section">
+            <h3>Add New Product</h3>
+            <form id="addProductForm" onsubmit="addProduct(event)" style="background: #f4f6f7; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+                <div class="form-group">
+                    <input type="text" id="p_barcode" placeholder="Barcode Number" required autofocus>
+                    <input type="text" id="p_name" placeholder="Product Name" required>
                 </div>
-
-                <!-- Right Screen: REALTIME THERMAL PARCHI PREVIEW -->
-                <div class="card" style="padding: 10px;">
-                    <div class="parchi-wrapper" id="thermalParchi">
-                        <div class="parchi-header">
-                            <h2>APNA SUPER MART</h2>
-                            <p>Main Market, Shop #12, City</p>
-                            <p>GSTIN: 07AAAAA0000A1Z5 | Ph: 9876543210</p>
-                        </div>
-                        <div class="parchi-line"></div>
-                        <p>Date: <span id="parchiDate"></span> | Time: <span id="parchiTime"></span></p>
-                        <p>Bill No: <span id="parchiBillNo">INV-1001</span></p>
-                        <p>Cust: <span id="parchiCust">Cash</span></p>
-                        <div class="parchi-line"></div>
-
-                        <!-- Thermal Table -->
-                        <table class="parchi-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50%;">Item</th>
-                                    <th class="text-center" style="width: 15%;">Qty</th>
-                                    <th class="text-right" style="width: 15%;">Rate</th>
-                                    <th class="text-right" style="width: 20%;">Amt</th>
-                                </tr>
-                            </thead>
-                            <tbody id="parchiItems">
-                                <!-- Dynamic items for receipt -->
-                            </tbody>
-                        </table>
-
-                        <div class="parchi-line"></div>
-                        <div class="parchi-total">
-                            <div><span>Total Items:</span> <span id="parchiTotalItems">0</span></div>
-                            <div><span>Sub Total:</span> ₹<span id="parchiSubTotal">0.00</span></div>
-                            <div><span>Discount:</span> -₹<span id="parchiDiscount">0.00</span></div>
-                            <div class="grand-parchi"><span>GRAND TOTAL:</span> ₹<span id="parchiGrandTotal">0.00</span></div>
-                        </div>
-
-                        <div class="parchi-footer">
-                            <p>*** THANK YOU VISIT AGAIN ***</p>
-                            <p style="font-size: 9px; margin-top: 2px;">Software By Apna Mart POS</p>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <input type="number" id="p_price" placeholder="Price (₹)" step="0.01" required>
+                    <input type="number" id="p_qty" placeholder="Opening Stock Qty" step="0.01" required>
+                    <select id="p_unit">
+                        <option value="Pcs">Pcs (Pieces)</option>
+                        <option value="Kg">Kg (Kilograms)</option>
+                        <option value="Ltr">Ltr (Liters)</option>
+                        <option value="Pkt">Pkt (Packets)</option>
+                        <option value="Gm">Gm (Grams)</option>
+                    </select>
                 </div>
+                <button type="submit" class="btn">➕ Save Product</button>
+            </form>
 
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Product Name</th>
+                        <th>Price (₹)</th>
+                        <th>Stock Qty</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+            <h3>Mart Profile Setup</h3>
+            <div style="max-width: 500px; background: #f4f6f7; padding: 20px; border-radius: 5px; border: 1px solid #ddd;">
+                <div class="form-group">
+                    <label style="width: 100%; font-weight: bold; color: var(--dark);">Mart Name:</label>
+                    <input type="text" id="s_mart_name" placeholder="e.g. SHARMA SUPER MART">
+                </div>
+                <div class="form-group">
+                    <label style="width: 100%; font-weight: bold; color: var(--dark);">Mart Address:</label>
+                    <input type="text" id="s_mart_address" placeholder="e.g. Gomti Nagar, Lucknow">
+                </div>
+                <div class="form-group">
+                    <label style="width: 100%; font-weight: bold; color: var(--dark);">Contact Number:</label>
+                    <input type="text" id="s_mart_phone" placeholder="e.g. +91 9876543210">
+                </div>
+                <button class="btn" onclick="saveSettings()" style="width: 100%;">💾 Save Profile</button>
             </div>
         </div>
 
     </div>
 
-<script>
-    // Audio Beep
-    function playBeep() {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(1400, ctx.currentTime);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.08);
-    }
-
-    // Default Saved Products
-    const defaultProducts = [
-        { barcode: "8901058852461", name: "Maggi Masala 70g", price: 14, stock: 100 },
-        { barcode: "8901725181222", name: "Parle-G 250g", price: 20, stock: 50 },
-        { barcode: "8901030383701", name: "Dettol Soap 75g", price: 38, stock: 80 },
-        { barcode: "8901491101837", name: "Tata Salt 1kg", price: 28, stock: 60 }
-    ];
-
-    let inventory = JSON.parse(localStorage.getItem('my_mart_inventory')) || defaultProducts;
-    let currentBill = [];
-
-    // Init Page
-    window.onload = function() {
-        renderInventoryTable();
-        updateReceipt();
-    };
-
-    // Tab Switcher
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-
-        if(tabName === 'inventory') {
-            document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            document.getElementById('tab-inventory').classList.add('active');
-        } else {
-            document.querySelectorAll('.tab-btn')[0].classList.add('active');
-            document.getElementById('tab-billing').classList.add('active');
-            document.getElementById('posBarcodeScanner').focus();
-        }
-    }
-
-    // Save Product to Inventory
-    function saveProductToDB() {
-        const barcode = document.getElementById('invBarcode').value.trim();
-        const name = document.getElementById('invName').value.trim();
-        const price = parseFloat(document.getElementById('invPrice').value);
-        const stock = parseInt(document.getElementById('invStock').value) || 0;
-
-        if(!barcode || !name || isNaN(price)) {
-            alert('Kripya Barcode, Product Name aur Price zaroor bharein!');
-            return;
-        }
-
-        const existingIndex = inventory.findIndex(p => p.barcode === barcode);
-        if(existingIndex > -1) {
-            inventory[existingIndex] = { barcode, name, price, stock };
-        } else {
-            inventory.push({ barcode, name, price, stock });
-        }
-
-        localStorage.setItem('my_mart_inventory', JSON.stringify(inventory));
-        renderInventoryTable();
+    <!-- Thermal Bill Template (Hidden) -->
+    <div id="thermal-bill">
+        <!-- Dynamic Header -->
+        <div class="t-center t-title" id="t_mart_name">SUPER MART</div>
+        <div class="t-center" id="t_mart_address">City, State</div>
+        <div class="t-center" id="t_mart_contact">Mob: 0000000000</div>
         
-        // Reset Inputs
-        document.getElementById('invBarcode').value = '';
-        document.getElementById('invName').value = '';
-        document.getElementById('invPrice').value = '';
-        alert(`✅ Product "${name}" successfully save ho gaya!`);
-    }
+        <div class="t-line-thick"></div>
+        
+        <!-- Bill Info -->
+        <div>Date: <span id="b_date"></span></div>
+        <div>Invoice No: <span id="b_no" class="t-bold"></span></div>
+        
+        <!-- Customer Info (Will hide if empty) -->
+        <div id="t_customer_section" class="t-customer-box" style="display: none;">
+            <div class="t-line"></div>
+            <div><span class="t-bold">Customer:</span> <span id="t_cust_name"></span></div>
+            <div><span class="t-bold">Mobile:</span> <span id="t_cust_mobile"></span></div>
+        </div>
 
-    // Render Inventory Table
-    function renderInventoryTable(filteredList = null) {
-        const list = filteredList || inventory;
-        const tbody = document.getElementById('inventoryTableBody');
-        tbody.innerHTML = '';
-
-        list.forEach((item, index) => {
-            tbody.innerHTML += `
+        <div class="t-line-thick"></div>
+        
+        <!-- Items Table -->
+        <table class="t-table">
+            <thead>
                 <tr>
-                    <td><code>${item.barcode}</code></td>
-                    <td><strong>${item.name}</strong></td>
-                    <td>₹${item.price.toFixed(2)}</td>
-                    <td>${item.stock}</td>
-                    <td><button class="btn btn-danger" style="padding: 2px 6px; font-size: 11px;" onclick="deleteProduct('${item.barcode}')">✕</button></td>
+                    <th>Item</th>
+                    <th class="t-right">Qty</th>
+                    <th class="t-right">Amt(₹)</th>
                 </tr>
-            `;
-        });
-    }
+            </thead>
+            <tbody id="b_items"></tbody>
+        </table>
+        
+        <div class="t-line"></div>
+        
+        <!-- Total -->
+        <div class="t-bold t-right" style="font-size: 15px;">Grand Total: ₹<span id="b_total"></span></div>
+        
+        <div class="t-line-thick"></div>
+        <div class="t-center t-bold">Thank You! Visit Again.</div>
+        <div class="t-center" style="font-size: 10px; margin-top: 5px;">Software by POS System</div>
+        <div class="t-center" style="margin-top:20px;">.</div> <!-- Printer paper feed margin -->
+    </div>
 
-    function deleteProduct(barcode) {
-        if(confirm("Kya aap is product ko database se hatana chahte hain?")) {
-            inventory = inventory.filter(p => p.barcode !== barcode);
-            localStorage.setItem('my_mart_inventory', JSON.stringify(inventory));
-            renderInventoryTable();
+    <script>
+        // Data Initialization from LocalStorage
+        let inventory = JSON.parse(localStorage.getItem('mart_inventory')) || [];
+        let martProfile = JSON.parse(localStorage.getItem('mart_profile')) || {
+            name: "APNA SUPER MART",
+            address: "Main Market, City",
+            phone: "+91 9876543210"
+        };
+        let cart = [];
+        let scanPaused = false;
+
+        // Populate Settings on Load
+        document.getElementById('s_mart_name').value = martProfile.name;
+        document.getElementById('s_mart_address').value = martProfile.address;
+        document.getElementById('s_mart_phone').value = martProfile.phone;
+
+        // Beep Sound for Success Scan
+        function playBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'square'; // Sharper beep sound
+                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); 
+                
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } catch(e) { console.log("Audio not supported"); }
         }
-    }
 
-    function filterInventory() {
-        const query = document.getElementById('searchInv').value.toLowerCase();
-        const filtered = inventory.filter(p => p.name.toLowerCase().includes(query) || p.barcode.includes(query));
-        renderInventoryTable(filtered);
-    }
+        // --- Tabs Navigation ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            if(tabName === 'inventory') renderInventory();
+        }
 
-    // Barcode Scanning at POS
-    const barcodeInput = document.getElementById('posBarcodeScanner');
-    barcodeInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
+        // --- Mart Profile Settings Logic ---
+        function saveSettings() {
+            martProfile.name = document.getElementById('s_mart_name').value || "SUPER MART";
+            martProfile.address = document.getElementById('s_mart_address').value || "City, State";
+            martProfile.phone = document.getElementById('s_mart_phone').value || "0000000000";
+            
+            localStorage.setItem('mart_profile', JSON.stringify(martProfile));
+            alert("✅ Mart Profile Saved Successfully!");
+        }
+
+        // --- Inventory Logic ---
+        function addProduct(e) {
             e.preventDefault();
-            const code = this.value.trim();
-            if (code) {
-                scanProduct(code);
-                this.value = '';
-            }
-        }
-    });
+            const barcode = document.getElementById('p_barcode').value.trim();
+            const name = document.getElementById('p_name').value;
+            const price = parseFloat(document.getElementById('p_price').value);
+            const qty = parseFloat(document.getElementById('p_qty').value);
+            const unit = document.getElementById('p_unit').value;
 
-    function scanProduct(barcode) {
-        const product = inventory.find(p => p.barcode === barcode);
-
-        if (product) {
-            playBeep();
-            const existing = currentBill.find(i => i.barcode === product.barcode);
-            if (existing) {
-                existing.qty += 1;
-                existing.amount = existing.qty * existing.price;
+            const existingIndex = inventory.findIndex(p => p.barcode === barcode);
+            if(existingIndex >= 0) {
+                inventory[existingIndex].qty += qty;
+                inventory[existingIndex].price = price;
+                alert("Product pehle se hai! Stock Update ho gaya.");
             } else {
-                currentBill.push({
-                    barcode: product.barcode,
-                    name: product.name,
-                    price: product.price,
-                    qty: 1,
-                    amount: product.price
-                });
+                inventory.push({ barcode, name, price, qty, unit });
             }
-            renderBillingTable();
-        } else {
-            alert(`⚠️ Barcode '${barcode}' Database me save nahi hai!\nPehle 'Product Management' tab me jakar ise save karein.`);
+
+            localStorage.setItem('mart_inventory', JSON.stringify(inventory));
+            e.target.reset();
+            document.getElementById('p_barcode').focus();
+            renderInventory();
+            playBeep();
         }
-    }
 
-    function renderBillingTable() {
-        const tbody = document.getElementById('posBillTable');
-        tbody.innerHTML = '';
-
-        currentBill.forEach((item, index) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td><strong>${item.name}</strong></td>
-                    <td class="text-right">₹${item.price.toFixed(2)}</td>
-                    <td class="text-center">
-                        <button class="btn btn-sm" style="padding: 2px 6px;" onclick="changeQty(${index}, -1)">-</button>
-                        <strong style="margin: 0 4px;">${item.qty}</strong>
-                        <button class="btn btn-sm" style="padding: 2px 6px;" onclick="changeQty(${index}, 1)">+</button>
-                    </td>
-                    <td class="text-right">₹${item.amount.toFixed(2)}</td>
-                    <td class="text-center"><button class="btn btn-danger" style="padding: 2px 6px;" onclick="removeBillItem(${index})">✕</button></td>
-                </tr>
-            `;
-        });
-
-        updateReceipt();
-    }
-
-    function changeQty(index, delta) {
-        currentBill[index].qty += delta;
-        if (currentBill[index].qty <= 0) currentBill.splice(index, 1);
-        else currentBill[index].amount = currentBill[index].qty * currentBill[index].price;
-        renderBillingTable();
-    }
-
-    function removeBillItem(index) {
-        currentBill.splice(index, 1);
-        renderBillingTable();
-    }
-
-    // Live Parchi (Receipt) Sync
-    function updateReceipt() {
-        const now = new Date();
-        document.getElementById('parchiDate').innerText = now.toLocaleDateString();
-        document.getElementById('parchiTime').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        const cust = document.getElementById('custName').value.trim();
-        document.getElementById('parchiCust').innerText = cust ? cust : 'Cash';
-
-        const parchiBody = document.getElementById('parchiItems');
-        parchiBody.innerHTML = '';
-
-        let subtotal = 0;
-        let totalItemsCount = 0;
-
-        currentBill.forEach(item => {
-            subtotal += item.amount;
-            totalItemsCount += item.qty;
-            parchiBody.innerHTML += `
-                <tr>
-                    <td>${item.name}</td>
-                    <td class="text-center">${item.qty}</td>
-                    <td class="text-right">${item.price.toFixed(0)}</td>
-                    <td class="text-right">${item.amount.toFixed(0)}</td>
-                </tr>
-            `;
-        });
-
-        const discount = parseFloat(document.getElementById('billDiscount').value) || 0;
-        const grandTotal = Math.max(0, subtotal - discount);
-
-        document.getElementById('parchiTotalItems').innerText = totalItemsCount;
-        document.getElementById('parchiSubTotal').innerText = subtotal.toFixed(2);
-        document.getElementById('parchiDiscount').innerText = discount.toFixed(2);
-        document.getElementById('parchiGrandTotal').innerText = grandTotal.toFixed(2);
-    }
-
-    function clearCurrentBill() {
-        if(confirm("New bill shuru karein?")) {
-            currentBill = [];
-            renderBillingTable();
-            document.getElementById('custName').value = '';
-            document.getElementById('custPhone').value = '';
-            document.getElementById('billDiscount').value = '0';
-            // Increment Bill No
-            const num = parseInt(document.getElementById('parchiBillNo').innerText.replace(/\D/g, '')) + 1;
-            document.getElementById('parchiBillNo').innerText = 'INV-' + num;
-            barcodeInput.focus();
+        function renderInventory() {
+            const tbody = document.querySelector('#inventoryTable tbody');
+            tbody.innerHTML = '';
+            inventory.forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.barcode}</td>
+                        <td style="font-weight:bold;">${item.name}</td>
+                        <td>₹${item.price.toFixed(2)}</td>
+                        <td>${item.qty} ${item.unit}</td>
+                        <td><button onclick="deleteProduct(${index})" class="btn btn-danger" style="padding:6px 12px; font-size:12px;">🗑️ Delete</button></td>
+                    </tr>
+                `;
+            });
         }
-    }
-</script>
 
+        function deleteProduct(index) {
+            if(confirm("Kya aap sach me ye product delete karna chahte hain?")) {
+                inventory.splice(index, 1);
+                localStorage.setItem('mart_inventory', JSON.stringify(inventory));
+                renderInventory();
+            }
+        }
+
+        // --- POS / Cart Logic ---
+        function addToCart(barcode) {
+            const product = inventory.find(p => p.barcode === barcode);
+            if (!product) {
+                alert("❌ Product nahi mila! Kripya pehle isko Inventory me add karein.");
+                return;
+            }
+
+            const cartItem = cart.find(c => c.barcode === barcode);
+            if (cartItem) {
+                cartItem.cartQty += 1; 
+            } else {
+                cart.push({ ...product, cartQty: 1 });
+            }
+            
+            playBeep();
+            renderCart();
+        }
+
+        function handleManualEntry(e) {
+            if (e.key === 'Enter') {
+                manualAdd();
+            }
+        }
+
+        function manualAdd() {
+            const code = document.getElementById('manual_barcode').value.trim();
+            if(code) {
+                addToCart(code);
+                document.getElementById('manual_barcode').value = "";
+                document.getElementById('manual_barcode').focus();
+            }
+        }
+
+        function updateCartQty(index, val) {
+            let newQty = parseFloat(val);
+            if(newQty > 0) {
+                cart[index].cartQty = newQty;
+            } else {
+                cart.splice(index, 1);
+            }
+            renderCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function clearCart() {
+            cart = [];
+            document.getElementById('cust_name').value = "";
+            document.getElementById('cust_mobile').value = "";
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.querySelector('#cartTable tbody');
+            tbody.innerHTML = '';
+            let grandTotal = 0;
+
+            cart.forEach((item, index) => {
+                const total = item.price * item.cartQty;
+                grandTotal += total;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong style="color:var(--dark);">${item.name}</strong><br><small style="color:gray;">${item.barcode}</small></td>
+                        <td>₹${item.price.toFixed(2)}</td>
+                        <td>
+                            <input type="number" value="${item.cartQty}" style="width:70px; padding:4px; text-align:center;" 
+                            onchange="updateCartQty(${index}, this.value)" step="0.01"> <span style="font-size:12px; font-weight:bold;">${item.unit}</span>
+                        </td>
+                        <td style="font-weight:bold; color:var(--secondary);">₹${total.toFixed(2)}</td>
+                        <td><button onclick="removeFromCart(${index})" style="background:none;border:none;cursor:pointer; font-size:18px;">❌</button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+        }
+
+        // --- Barcode Scanner Initialization ---
+        function onScanSuccess(decodedText, decodedResult) {
+            if (scanPaused) return; 
+            
+            addToCart(decodedText);
+            scanPaused = true;
+            
+            // Resume scanning after 1.5 seconds so same item is not scanned 10 times instantly
+            setTimeout(() => {
+                scanPaused = false;
+            }, 1500);
+        }
+
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150} }, false);
+        html5QrcodeScanner.render(onScanSuccess);
+
+        // --- Professional Thermal Printing Logic ---
+        function printBill() {
+            if(cart.length === 0) {
+                alert("⚠️ Cart khali hai! Pehle product add karein.");
+                return;
+            }
+
+            // 1. Set Mart Header (From Settings)
+            document.getElementById('t_mart_name').innerText = martProfile.name;
+            document.getElementById('t_mart_address').innerText = martProfile.address;
+            document.getElementById('t_mart_contact').innerText = "Mob: " + martProfile.phone;
+
+            // 2. Set Bill Details
+            const now = new Date();
+            const dateString = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('b_date').innerText = dateString;
+            document.getElementById('b_no').innerText = "INV-" + Math.floor(10000 + Math.random() * 90000); // 5 digit random bill no
+
+            // 3. Set Customer Details (Hide if empty)
+            const cName = document.getElementById('cust_name').value.trim();
+            const cMobile = document.getElementById('cust_mobile').value.trim();
+            const custSection = document.getElementById('t_customer_section');
+
+            if (cName || cMobile) {
+                custSection.style.display = "block";
+                document.getElementById('t_cust_name').innerText = cName ? cName : "N/A";
+                document.getElementById('t_cust_mobile').innerText = cMobile ? cMobile : "N/A";
+            } else {
+                custSection.style.display = "none";
+            }
+            
+            // 4. Populate Items
+            const tbody = document.getElementById('b_items');
+            tbody.innerHTML = '';
+            let grandTotal = 0;
+
+            cart.forEach(item => {
+                const total = item.price * item.cartQty;
+                grandTotal += total;
+                // Clean formatting for thermal printer
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="t-bold">${item.name} <br> <span style="font-weight:normal; font-size:10px;">₹${item.price} x ${item.cartQty}</span></td>
+                        <td class="t-right">${item.cartQty}${item.unit}</td>
+                        <td class="t-right t-bold">${total.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('b_total').innerText = grandTotal.toFixed(2);
+
+            // 5. Execute Print
+            window.print();
+            
+            // 6. Clear after print
+            setTimeout(() => {
+                if(confirm("Bill print ho gaya? Kya cart clear kar diya jaye?")) {
+                    clearCart();
+                }
+            }, 1000);
+        }
+
+        // Initialize Display
+        renderInventory();
+        renderCart();
+
+    </script>
 </body>
 </html>
