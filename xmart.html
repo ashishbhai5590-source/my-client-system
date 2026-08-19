@@ -3,82 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Mart POS Software - Professional</title>
-    <!-- Barcode Scanner Library -->
+    <title>Advanced Super Mart POS - A4 Billing</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         :root {
-            --primary: #1e272e;
-            --secondary: #0fb9b1;
-            --light: #f1f2f6;
-            --dark: #2f3640;
-            --danger: #eb3b5a;
-            --warning: #fa8231;
+            --primary: #1e3799; --secondary: #4a69bd; --success: #079992; 
+            --danger: #e55039; --light: #f8f9fa; --dark: #2f3542; --border: #dcdde1;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--light); display: flex; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        body { background-color: #eef2f5; display: flex; height: 100vh; overflow: hidden; }
 
-        /* Sidebar Navigation */
-        .sidebar { width: 250px; background-color: var(--primary); color: white; display: flex; flex-direction: column; }
-        .sidebar h2 { padding: 20px; text-align: center; border-bottom: 1px solid var(--dark); background: #11151a; color: var(--secondary); font-weight: 800; letter-spacing: 1px;}
-        .nav-btn { background: none; border: none; color: white; padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; transition: 0.3s; border-bottom: 1px solid var(--dark); }
-        .nav-btn:hover, .nav-btn.active { background-color: var(--secondary); color: #fff;}
+        /* Sidebar */
+        .sidebar { width: 260px; background-color: var(--primary); color: white; display: flex; flex-direction: column; }
+        .sidebar h2 { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 22px; }
+        .nav-btn { background: none; border: none; color: white; padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent;}
+        .nav-btn:hover, .nav-btn.active { background-color: rgba(255,255,255,0.1); border-left: 4px solid #fff; }
 
         /* Main Content */
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .section { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .section { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-height: 90%; }
         .section.active { display: block; }
+        h3 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; margin-bottom: 20px; }
+
+        /* Forms & Inputs */
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 150px; }
+        label { display: block; font-size: 13px; font-weight: bold; color: var(--dark); margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 5px; font-size: 15px; }
+        input:focus { border-color: var(--secondary); outline: none; }
         
-        h3 { margin-bottom: 20px; color: var(--primary); border-bottom: 3px solid var(--secondary); padding-bottom: 10px; display: inline-block;}
+        button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; color: white; }
+        .btn-primary { background-color: var(--primary); } .btn-primary:hover { background-color: var(--secondary); }
+        .btn-success { background-color: var(--success); } .btn-success:hover { background-color: #38ada9; }
+        .btn-danger { background-color: var(--danger); } .btn-danger:hover { background-color: #eb2f06; }
 
-        /* Form & Tables */
-        .form-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex: 1; min-width: 150px; font-size: 15px;}
-        input:focus, select:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 5px rgba(15, 185, 177, 0.4); }
-        
-        button.btn { padding: 10px 20px; background-color: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s;}
-        button.btn:hover { background-color: #0b9b94; }
-        button.btn-danger { background-color: var(--danger); }
-        button.btn-danger:hover { background-color: #c0304a; }
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+        th { background-color: var(--light); color: var(--dark); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 15px;}
-        table, th, td { border: 1px solid #e1e1e1; }
-        th, td { padding: 12px; text-align: left; }
-        th { background-color: var(--primary); color: white; }
+        /* Scanner Modal */
+        #scanner-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .scanner-container { background: white; padding: 20px; border-radius: 10px; width: 400px; text-align: center; }
+        #reader { width: 100%; }
 
-        /* POS Billing Area */
-        .pos-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        #reader { width: 100%; max-width: 400px; margin-bottom: 15px; border-radius: 8px; overflow: hidden; border: 2px solid var(--primary); }
-        .bill-area { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);}
-        .total-box { font-size: 26px; font-weight: bold; text-align: right; margin-top: 20px; color: var(--danger); background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px dashed #ccc;}
-        
-        .customer-info { background: #f4f6f7; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd;}
-        .customer-info h4 { margin-bottom: 10px; color: var(--dark); }
+        /* Billing Dashboard specific */
+        .billing-grid { display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px; }
+        .barcode-bar { display: flex; gap: 10px; background: #f1f2f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; align-items: center; }
+        .summary-box { background: var(--light); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; }
+        .summary-total { font-size: 22px; font-weight: bold; color: var(--danger); border-top: 2px dashed #ccc; padding-top: 10px; margin-top: 10px; }
 
-        /* Thermal Print Styles (Only visible during Print) */
-        #thermal-bill { display: none; }
+        /* A4 Print Styles */
+        #a4-bill { display: none; }
         @media print {
             body * { visibility: hidden; }
-            #thermal-bill, #thermal-bill * { visibility: visible; }
-            #thermal-bill {
-                display: block;
-                position: absolute;
-                left: 0; top: 0;
-                width: 58mm; /* Standard Thermal Printer Width */
-                font-family: 'Courier New', Courier, monospace;
-                font-size: 12px;
-                color: black;
-                padding: 5px;
+            #a4-bill, #a4-bill * { visibility: visible; }
+            #a4-bill {
+                display: block; position: absolute; left: 0; top: 0; width: 100%; max-width: 210mm;
+                padding: 20mm; font-family: Arial, sans-serif; background: white;
             }
-            .t-center { text-align: center; }
-            .t-bold { font-weight: bold; }
-            .t-title { font-size: 18px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px;}
-            .t-table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 11px;}
-            .t-table th, .t-table td { border-bottom: 1px dotted #000; padding: 5px 0; text-align: left;}
-            .t-right { text-align: right !important; }
-            .t-line { border-top: 1px dashed #000; margin: 8px 0; }
-            .t-line-thick { border-top: 2px dashed #000; margin: 8px 0; }
-            .t-customer-box { margin: 8px 0; font-size: 11px;}
+            .a4-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .a4-title { font-size: 24px; font-weight: bold; text-transform: uppercase; }
+            .a4-invoice-title { text-align: center; font-size: 18px; font-weight: bold; margin: 10px 0; border: 1px solid #000; padding: 5px; }
+            .a4-info-table { width: 100%; margin-bottom: 20px; border: none; font-size: 14px; }
+            .a4-info-table td { border: none; padding: 3px; }
+            .a4-items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .a4-items th, .a4-items td { border: 1px solid #000; padding: 8px; font-size: 13px; text-align: left; }
+            .a4-items th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+            .a4-right { text-align: right !important; }
+            .a4-summary-box { width: 40%; float: right; border-collapse: collapse; margin-top: 10px; }
+            .a4-summary-box td { border: 1px solid #000; padding: 5px 10px; }
+            .a4-footer { margin-top: 80px; text-align: right; font-weight: bold; border-top: 1px solid #000; width: 30%; float: right; padding-top: 10px; }
+            .clear { clear: both; }
         }
     </style>
 </head>
@@ -86,39 +83,32 @@
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <h2>🛒 POS SYSTEM</h2>
-        <button class="nav-btn active" onclick="switchTab('pos')" id="tab-pos">🧾 Billing (POS)</button>
-        <button class="nav-btn" onclick="switchTab('inventory')" id="tab-inventory">📦 Inventory</button>
-        <button class="nav-btn" onclick="switchTab('settings')" id="tab-settings">⚙️ Mart Settings</button>
+        <h2>🛍️ A-One Mart</h2>
+        <button class="nav-btn active" onclick="switchTab('pos')" id="tab-pos">🧾 Billing</button>
+        <button class="nav-btn" onclick="switchTab('inventory')" id="tab-inventory">📦 Add Items</button>
+        <button class="nav-btn" onclick="switchTab('stock')" id="tab-stock">📊 Stock Status</button>
+        <button class="nav-btn" onclick="switchTab('history')" id="tab-history">📖 Sales History</button>
+        <button class="nav-btn" onclick="switchTab('settings')" id="tab-settings">⚙️ Settings</button>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        
+
         <!-- POS Billing Section -->
         <div id="pos" class="section active">
-            <h3>Billing Dashboard</h3>
-            <div class="pos-grid">
-                
-                <!-- Scanner Left Side -->
-                <div>
-                    <div id="reader"></div>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <input type="text" id="manual_barcode" placeholder="Scan or Type Barcode + Enter" onkeypress="handleManualEntry(event)">
-                        <button class="btn" onclick="manualAdd()">Add</button>
-                    </div>
-                </div>
+            <h3>🧾 New Bill Generation</h3>
+            
+            <div class="barcode-bar">
+                <input type="text" id="manual_barcode" placeholder="Scan Barcode via Machine or Type here..." onkeypress="if(event.key === 'Enter') manualAdd()" style="flex:1; font-size: 18px; padding: 12px;">
+                <button class="btn-success" onclick="manualAdd()" style="padding: 12px 20px; font-size:16px;">Add</button>
+                <button class="btn-primary" onclick="openScanner()" style="padding: 12px 20px; font-size:16px;" title="Open Camera">📷 Camera</button>
+            </div>
 
-                <!-- Cart Right Side -->
-                <div class="bill-area">
-                    
-                    <!-- Customer Details Entry -->
-                    <div class="customer-info">
-                        <h4>👤 Customer Details (Optional)</h4>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <input type="text" id="cust_name" placeholder="Customer Name">
-                            <input type="tel" id="cust_mobile" placeholder="Mobile Number" maxlength="10">
-                        </div>
+            <div class="billing-grid">
+                <div>
+                    <div class="form-row" style="background:#f8f9fa; padding:15px; border:1px solid #ddd; border-radius:5px;">
+                        <div class="form-group"><label>Customer Name</label><input type="text" id="c_name" placeholder="Name"></div>
+                        <div class="form-group"><label>Mobile No.</label><input type="tel" id="c_mobile" placeholder="Mobile" maxlength="10"></div>
                     </div>
 
                     <table id="cartTable">
@@ -126,393 +116,446 @@
                             <tr>
                                 <th>Item Name</th>
                                 <th>Price</th>
-                                <th>Qty</th>
+                                <th>Qty / Kg</th>
+                                <th>GST</th>
                                 <th>Total</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
+                </div>
+
+                <!-- Summary Side -->
+                <div class="summary-box">
+                    <h4 style="margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:5px;">Bill Summary</h4>
+                    <div class="summary-row"><span>Subtotal:</span> <span>₹<span id="sum_subtotal">0.00</span></span></div>
+                    <div class="summary-row"><span>SGST:</span> <span>₹<span id="sum_sgst">0.00</span></span></div>
+                    <div class="summary-row"><span>CGST:</span> <span>₹<span id="sum_cgst">0.00</span></span></div>
                     
-                    <div class="total-box">Grand Total: ₹<span id="grandTotal">0.00</span></div>
-                    
-                    <div style="text-align: right; margin-top: 20px;">
-                        <button class="btn btn-danger" onclick="clearCart()">🗑️ Clear Bill</button>
-                        <button class="btn" onclick="printBill()" style="font-size: 18px; margin-left: 10px;">🖨️ Print Professional Bill</button>
+                    <div class="summary-row" style="margin-top: 15px; align-items:center;">
+                        <span>Discount (₹):</span> 
+                        <input type="number" id="bill_discount" value="0" step="1" style="width: 80px; text-align:right;" oninput="renderCart()">
                     </div>
+                    
+                    <div class="summary-row"><span>Round Off:</span> <span>₹<span id="sum_round">0.00</span></span></div>
+                    <div class="summary-total">Net Pay: ₹<span id="sum_net">0</span></div>
+
+                    <button class="btn-success" style="width:100%; margin-top:20px; font-size:18px; padding:15px;" onclick="checkoutAndPrint()">🖨️ Checkout & Print</button>
+                    <button class="btn-danger" style="width:100%; margin-top:10px;" onclick="clearCart()">🗑️ Clear Bill</button>
                 </div>
             </div>
         </div>
 
         <!-- Inventory Section -->
         <div id="inventory" class="section">
-            <h3>Add New Product</h3>
-            <form id="addProductForm" onsubmit="addProduct(event)" style="background: #f4f6f7; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
-                <div class="form-group">
-                    <input type="text" id="p_barcode" placeholder="Barcode Number" required autofocus>
-                    <input type="text" id="p_name" placeholder="Product Name" required>
+            <h3>📦 Product Inventory Management</h3>
+            <form id="addProductForm" onsubmit="addProduct(event)" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                <div class="form-row">
+                    <div class="form-group"><label>Barcode Number</label><input type="text" id="p_barcode" required></div>
+                    <div class="form-group" style="flex: 2;"><label>Product Name</label><input type="text" id="p_name" required></div>
                 </div>
-                <div class="form-group">
-                    <input type="number" id="p_price" placeholder="Price (₹)" step="0.01" required>
-                    <input type="number" id="p_qty" placeholder="Opening Stock Qty" step="0.01" required>
-                    <select id="p_unit">
-                        <option value="Pcs">Pcs (Pieces)</option>
-                        <option value="Kg">Kg (Kilograms)</option>
-                        <option value="Ltr">Ltr (Liters)</option>
-                        <option value="Pkt">Pkt (Packets)</option>
-                        <option value="Gm">Gm (Grams)</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group"><label>Price (₹)</label><input type="number" id="p_price" step="0.01" required></div>
+                    <div class="form-group"><label>Opening Qty</label><input type="number" id="p_qty" step="0.001" required></div>
+                    <div class="form-group"><label>Unit (Ikai)</label>
+                        <select id="p_unit">
+                            <option value="Pcs">Pieces (Pcs)</option>
+                            <option value="Kg">Kilograms (Kg)</option>
+                            <option value="Ltr">Liters (Ltr)</option>
+                            <option value="Pkt">Packets (Pkt)</option>
+                            <option value="Gm">Grams (Gm)</option>
+                        </select>
+                    </div>
                 </div>
-                <button type="submit" class="btn">➕ Save Product</button>
+                <div class="form-row">
+                    <div class="form-group"><label>SGST (%)</label><input type="number" id="p_sgst" value="0" step="0.1"></div>
+                    <div class="form-group"><label>CGST (%)</label><input type="number" id="p_cgst" value="0" step="0.1"></div>
+                    <div class="form-group" style="display:flex; align-items:flex-end;">
+                        <button type="submit" class="btn-primary" style="width:100%;">➕ Save Product</button>
+                    </div>
+                </div>
             </form>
 
             <table id="inventoryTable">
-                <thead>
-                    <tr>
-                        <th>Barcode</th>
-                        <th>Product Name</th>
-                        <th>Price (₹)</th>
-                        <th>Stock Qty</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Barcode</th><th>Name</th><th>Price</th><th>Stock</th><th>Tax %</th><th>Action</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Stock Status Section -->
+        <div id="stock" class="section">
+            <h3>📊 Stock Status (Low & High)</h3>
+            <p style="margin-bottom: 10px;">(Stock kam hone par Red dikhega)</p>
+            <table id="stockTable">
+                <thead><tr><th>Product Name</th><th>Barcode</th><th>Current Stock</th><th>Status</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Sales History Section -->
+        <div id="history" class="section">
+            <h3>📖 Sales Report & History</h3>
+            <div class="form-row" style="background:#f1f2f6; padding:15px; border-radius:5px;">
+                <div class="form-group">
+                    <label>Filter By Time</label>
+                    <select id="history_filter" onchange="renderHistory()">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+            </div>
+            <table id="historyTable">
+                <thead><tr><th>Date & Time</th><th>Invoice No</th><th>Customer</th><th>Amount</th><th>Discount</th><th>Net Total</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
 
         <!-- Settings Section -->
         <div id="settings" class="section">
-            <h3>Mart Profile Setup</h3>
-            <div style="max-width: 500px; background: #f4f6f7; padding: 20px; border-radius: 5px; border: 1px solid #ddd;">
-                <div class="form-group">
-                    <label style="width: 100%; font-weight: bold; color: var(--dark);">Mart Name:</label>
-                    <input type="text" id="s_mart_name" placeholder="e.g. SHARMA SUPER MART">
-                </div>
-                <div class="form-group">
-                    <label style="width: 100%; font-weight: bold; color: var(--dark);">Mart Address:</label>
-                    <input type="text" id="s_mart_address" placeholder="e.g. Gomti Nagar, Lucknow">
-                </div>
-                <div class="form-group">
-                    <label style="width: 100%; font-weight: bold; color: var(--dark);">Contact Number:</label>
-                    <input type="text" id="s_mart_phone" placeholder="e.g. +91 9876543210">
-                </div>
-                <button class="btn" onclick="saveSettings()" style="width: 100%;">💾 Save Profile</button>
+            <h3>⚙️ Mart Setup & Settings</h3>
+            <div style="max-width: 600px; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                <div class="form-group" style="margin-bottom:15px;"><label>Mart Name:</label><input type="text" id="s_name"></div>
+                <div class="form-group" style="margin-bottom:15px;"><label>Address:</label><input type="text" id="s_address"></div>
+                <div class="form-group" style="margin-bottom:15px;"><label>Mobile Number:</label><input type="text" id="s_phone"></div>
+                <div class="form-group" style="margin-bottom:20px;"><label>GSTIN (Optional):</label><input type="text" id="s_gstin"></div>
+                <button class="btn-success" onclick="saveSettings()" style="width: 100%;">💾 Save Settings</button>
             </div>
         </div>
 
     </div>
 
-    <!-- Thermal Bill Template (Hidden) -->
-    <div id="thermal-bill">
-        <!-- Dynamic Header -->
-        <div class="t-center t-title" id="t_mart_name">SUPER MART</div>
-        <div class="t-center" id="t_mart_address">City, State</div>
-        <div class="t-center" id="t_mart_contact">Mob: 0000000000</div>
-        
-        <div class="t-line-thick"></div>
-        
-        <!-- Bill Info -->
-        <div>Date: <span id="b_date"></span></div>
-        <div>Invoice No: <span id="b_no" class="t-bold"></span></div>
-        
-        <!-- Customer Info (Will hide if empty) -->
-        <div id="t_customer_section" class="t-customer-box" style="display: none;">
-            <div class="t-line"></div>
-            <div><span class="t-bold">Customer:</span> <span id="t_cust_name"></span></div>
-            <div><span class="t-bold">Mobile:</span> <span id="t_cust_mobile"></span></div>
+    <!-- Camera Modal -->
+    <div id="scanner-modal">
+        <div class="scanner-container">
+            <h3 style="margin-bottom: 10px;">📷 Scan Barcode</h3>
+            <div id="reader"></div>
+            <button class="btn-danger" onclick="closeScanner()" style="margin-top: 15px; width:100%;">❌ Cancel & Close</button>
         </div>
+    </div>
 
-        <div class="t-line-thick"></div>
+    <!-- A4 Thermal / Paper Print Template (Hidden) -->
+    <div id="a4-bill">
+        <div class="a4-header">
+            <div class="a4-title" id="t_m_name">A-ONE MART</div>
+            <div id="t_m_addr">City, State</div>
+            <div>Mob: <span id="t_m_phone"></span> <span id="t_m_gst_wrap" style="display:none;">| GSTIN: <span id="t_m_gst"></span></span></div>
+        </div>
         
-        <!-- Items Table -->
-        <table class="t-table">
+        <div class="a4-invoice-title">TAX INVOICE</div>
+
+        <table class="a4-info-table">
+            <tr>
+                <td style="width: 50%;">
+                    <strong>Bill No:</strong> <span id="t_b_no"></span><br>
+                    <strong>Date:</strong> <span id="t_b_date"></span><br>
+                    <strong>Time:</strong> <span id="t_b_time"></span>
+                </td>
+                <td style="width: 50%; text-align: right;">
+                    <strong>Customer Name:</strong> <span id="t_c_name">N/A</span><br>
+                    <strong>Mobile No:</strong> <span id="t_c_mob">N/A</span>
+                </td>
+            </tr>
+        </table>
+
+        <table class="a4-items">
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th class="t-right">Qty</th>
-                    <th class="t-right">Amt(₹)</th>
+                    <th>S.No</th>
+                    <th>Item Description</th>
+                    <th class="a4-right">Qty</th>
+                    <th class="a4-right">Rate(₹)</th>
+                    <th class="a4-right">Taxable Amt</th>
+                    <th class="a4-right">SGST</th>
+                    <th class="a4-right">CGST</th>
+                    <th class="a4-right">Total(₹)</th>
                 </tr>
             </thead>
-            <tbody id="b_items"></tbody>
+            <tbody id="t_b_items"></tbody>
+        </table>
+
+        <table class="a4-summary-box">
+            <tr><td>Subtotal</td><td class="a4-right" id="t_sub">0.00</td></tr>
+            <tr><td>Total Taxes (SGST+CGST)</td><td class="a4-right" id="t_tax">0.00</td></tr>
+            <tr><td>Discount</td><td class="a4-right" id="t_disc">0.00</td></tr>
+            <tr><td>Round Off</td><td class="a4-right" id="t_round">0.00</td></tr>
+            <tr><td><strong>Grand Total</strong></td><td class="a4-right" style="font-size:16px;"><strong>₹<span id="t_net"></span></strong></td></tr>
         </table>
         
-        <div class="t-line"></div>
-        
-        <!-- Total -->
-        <div class="t-bold t-right" style="font-size: 15px;">Grand Total: ₹<span id="b_total"></span></div>
-        
-        <div class="t-line-thick"></div>
-        <div class="t-center t-bold">Thank You! Visit Again.</div>
-        <div class="t-center" style="font-size: 10px; margin-top: 5px;">Software by POS System</div>
-        <div class="t-center" style="margin-top:20px;">.</div> <!-- Printer paper feed margin -->
+        <div class="clear"></div>
+        <div class="a4-footer">Authorized Signatory</div>
     </div>
 
     <script>
-        // Data Initialization from LocalStorage
-        let inventory = JSON.parse(localStorage.getItem('mart_inventory')) || [];
-        let martProfile = JSON.parse(localStorage.getItem('mart_profile')) || {
-            name: "APNA SUPER MART",
-            address: "Main Market, City",
-            phone: "+91 9876543210"
+        // Data Structures
+        let inventory = JSON.parse(localStorage.getItem('pos_inventory')) || [];
+        let salesHistory = JSON.parse(localStorage.getItem('pos_history')) || [];
+        let martProfile = JSON.parse(localStorage.getItem('pos_profile')) || {
+            name: "A-ONE MART", address: "Main Road, City", phone: "9876543210", gstin: ""
         };
         let cart = [];
-        let scanPaused = false;
+        let html5QrcodeScanner = null;
 
-        // Populate Settings on Load
-        document.getElementById('s_mart_name').value = martProfile.name;
-        document.getElementById('s_mart_address').value = martProfile.address;
-        document.getElementById('s_mart_phone').value = martProfile.phone;
+        // Initialize App
+        document.getElementById('s_name').value = martProfile.name;
+        document.getElementById('s_address').value = martProfile.address;
+        document.getElementById('s_phone').value = martProfile.phone;
+        document.getElementById('s_gstin').value = martProfile.gstin;
 
-        // Beep Sound for Success Scan
         function playBeep() {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                oscillator.type = 'square'; // Sharper beep sound
-                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); 
-                
-                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.1);
-            } catch(e) { console.log("Audio not supported"); }
+                let ctx = new (window.AudioContext || window.webkitAudioContext)();
+                let osc = ctx.createOscillator();
+                let gain = ctx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(800, ctx.currentTime);
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
         }
 
-        // --- Tabs Navigation ---
-        function switchTab(tabName) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
-            document.getElementById('tab-' + tabName).classList.add('active');
-            if(tabName === 'inventory') renderInventory();
-        }
-
-        // --- Mart Profile Settings Logic ---
-        function saveSettings() {
-            martProfile.name = document.getElementById('s_mart_name').value || "SUPER MART";
-            martProfile.address = document.getElementById('s_mart_address').value || "City, State";
-            martProfile.phone = document.getElementById('s_mart_phone').value || "0000000000";
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
             
-            localStorage.setItem('mart_profile', JSON.stringify(martProfile));
-            alert("✅ Mart Profile Saved Successfully!");
+            if(tab === 'inventory') renderInventory();
+            if(tab === 'stock') renderStock();
+            if(tab === 'history') renderHistory();
+            if(tab === 'pos') document.getElementById('manual_barcode').focus();
         }
 
-        // --- Inventory Logic ---
+        // --- Inventory & Settings ---
+        function saveSettings() {
+            martProfile.name = document.getElementById('s_name').value || "Mart";
+            martProfile.address = document.getElementById('s_address').value;
+            martProfile.phone = document.getElementById('s_phone').value;
+            martProfile.gstin = document.getElementById('s_gstin').value;
+            localStorage.setItem('pos_profile', JSON.stringify(martProfile));
+            alert("Settings Saved!");
+        }
+
         function addProduct(e) {
             e.preventDefault();
-            const barcode = document.getElementById('p_barcode').value.trim();
-            const name = document.getElementById('p_name').value;
-            const price = parseFloat(document.getElementById('p_price').value);
-            const qty = parseFloat(document.getElementById('p_qty').value);
-            const unit = document.getElementById('p_unit').value;
-
-            const existingIndex = inventory.findIndex(p => p.barcode === barcode);
-            if(existingIndex >= 0) {
-                inventory[existingIndex].qty += qty;
-                inventory[existingIndex].price = price;
-                alert("Product pehle se hai! Stock Update ho gaya.");
+            const p = {
+                barcode: document.getElementById('p_barcode').value.trim(),
+                name: document.getElementById('p_name').value,
+                price: parseFloat(document.getElementById('p_price').value),
+                qty: parseFloat(document.getElementById('p_qty').value),
+                unit: document.getElementById('p_unit').value,
+                sgst: parseFloat(document.getElementById('p_sgst').value) || 0,
+                cgst: parseFloat(document.getElementById('p_cgst').value) || 0
+            };
+            const idx = inventory.findIndex(i => i.barcode === p.barcode);
+            if(idx >= 0) {
+                inventory[idx].qty += p.qty; // Update stock
+                inventory[idx].price = p.price;
+                alert("Stock Updated!");
             } else {
-                inventory.push({ barcode, name, price, qty, unit });
+                inventory.push(p);
             }
-
-            localStorage.setItem('mart_inventory', JSON.stringify(inventory));
-            e.target.reset();
-            document.getElementById('p_barcode').focus();
-            renderInventory();
-            playBeep();
+            localStorage.setItem('pos_inventory', JSON.stringify(inventory));
+            e.target.reset(); document.getElementById('p_barcode').focus();
+            renderInventory(); playBeep();
         }
 
         function renderInventory() {
-            const tbody = document.querySelector('#inventoryTable tbody');
-            tbody.innerHTML = '';
-            inventory.forEach((item, index) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.barcode}</td>
-                        <td style="font-weight:bold;">${item.name}</td>
-                        <td>₹${item.price.toFixed(2)}</td>
-                        <td>${item.qty} ${item.unit}</td>
-                        <td><button onclick="deleteProduct(${index})" class="btn btn-danger" style="padding:6px 12px; font-size:12px;">🗑️ Delete</button></td>
-                    </tr>
-                `;
+            const tb = document.querySelector('#inventoryTable tbody'); tb.innerHTML = '';
+            inventory.forEach((i, idx) => {
+                tb.innerHTML += `<tr>
+                    <td>${i.barcode}</td><td><strong>${i.name}</strong></td><td>₹${i.price}</td>
+                    <td>${i.qty} ${i.unit}</td><td>${i.sgst + i.cgst}%</td>
+                    <td><button class="btn-danger" onclick="delProduct(${idx})">🗑️</button></td>
+                </tr>`;
+            });
+        }
+        function delProduct(idx) { if(confirm("Delete Product?")) { inventory.splice(idx,1); localStorage.setItem('pos_inventory', JSON.stringify(inventory)); renderInventory(); } }
+
+        // --- Stock Status ---
+        function renderStock() {
+            const tb = document.querySelector('#stockTable tbody'); tb.innerHTML = '';
+            // Sort by qty
+            let sorted = [...inventory].sort((a,b) => a.qty - b.qty);
+            sorted.forEach(i => {
+                let status = i.qty <= 5 ? '<span style="color:red;font-weight:bold;">Low Stock 🚨</span>' : '<span style="color:green;font-weight:bold;">Available ✅</span>';
+                tb.innerHTML += `<tr style="${i.qty <= 5 ? 'background:#ffeaa7;' : ''}">
+                    <td>${i.name}</td><td>${i.barcode}</td>
+                    <td style="font-weight:bold; font-size:16px;">${i.qty} ${i.unit}</td><td>${status}</td>
+                </tr>`;
             });
         }
 
-        function deleteProduct(index) {
-            if(confirm("Kya aap sach me ye product delete karna chahte hain?")) {
-                inventory.splice(index, 1);
-                localStorage.setItem('mart_inventory', JSON.stringify(inventory));
-                renderInventory();
-            }
-        }
-
-        // --- POS / Cart Logic ---
-        function addToCart(barcode) {
-            const product = inventory.find(p => p.barcode === barcode);
-            if (!product) {
-                alert("❌ Product nahi mila! Kripya pehle isko Inventory me add karein.");
-                return;
-            }
-
-            const cartItem = cart.find(c => c.barcode === barcode);
-            if (cartItem) {
-                cartItem.cartQty += 1; 
-            } else {
-                cart.push({ ...product, cartQty: 1 });
-            }
-            
-            playBeep();
-            renderCart();
-        }
-
-        function handleManualEntry(e) {
-            if (e.key === 'Enter') {
+        // --- Scanner Logic ---
+        function openScanner() {
+            document.getElementById('scanner-modal').style.display = 'flex';
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150} }, false);
+            html5QrcodeScanner.render((decodedText) => {
+                document.getElementById('manual_barcode').value = decodedText;
+                closeScanner();
                 manualAdd();
-            }
+            });
+        }
+        function closeScanner() {
+            document.getElementById('scanner-modal').style.display = 'none';
+            if(html5QrcodeScanner) { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }
         }
 
+        // --- POS Logic ---
         function manualAdd() {
-            const code = document.getElementById('manual_barcode').value.trim();
-            if(code) {
-                addToCart(code);
-                document.getElementById('manual_barcode').value = "";
-                document.getElementById('manual_barcode').focus();
-            }
+            let code = document.getElementById('manual_barcode').value.trim();
+            if(!code) return;
+            let item = inventory.find(i => i.barcode === code);
+            if(!item) { alert("Barcode not found in Inventory!"); return; }
+            
+            let cItem = cart.find(c => c.barcode === code);
+            if(cItem) { cItem.cQty += 1; } else { cart.push({...item, cQty: 1}); }
+            
+            document.getElementById('manual_barcode').value = "";
+            playBeep(); renderCart();
         }
 
-        function updateCartQty(index, val) {
-            let newQty = parseFloat(val);
-            if(newQty > 0) {
-                cart[index].cartQty = newQty;
-            } else {
-                cart.splice(index, 1);
-            }
-            renderCart();
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            renderCart();
-        }
-
-        function clearCart() {
-            cart = [];
-            document.getElementById('cust_name').value = "";
-            document.getElementById('cust_mobile').value = "";
+        function updateCartQty(idx, val) {
+            let q = parseFloat(val);
+            if(q > 0) cart[idx].cQty = q; else cart.splice(idx, 1);
             renderCart();
         }
 
         function renderCart() {
-            const tbody = document.querySelector('#cartTable tbody');
-            tbody.innerHTML = '';
-            let grandTotal = 0;
+            const tb = document.querySelector('#cartTable tbody'); tb.innerHTML = '';
+            let subtotal = 0, totalSgst = 0, totalCgst = 0;
 
-            cart.forEach((item, index) => {
-                const total = item.price * item.cartQty;
-                grandTotal += total;
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong style="color:var(--dark);">${item.name}</strong><br><small style="color:gray;">${item.barcode}</small></td>
-                        <td>₹${item.price.toFixed(2)}</td>
-                        <td>
-                            <input type="number" value="${item.cartQty}" style="width:70px; padding:4px; text-align:center;" 
-                            onchange="updateCartQty(${index}, this.value)" step="0.01"> <span style="font-size:12px; font-weight:bold;">${item.unit}</span>
-                        </td>
-                        <td style="font-weight:bold; color:var(--secondary);">₹${total.toFixed(2)}</td>
-                        <td><button onclick="removeFromCart(${index})" style="background:none;border:none;cursor:pointer; font-size:18px;">❌</button></td>
-                    </tr>
-                `;
+            cart.forEach((c, idx) => {
+                let taxable = c.price * c.cQty;
+                let sTax = taxable * (c.sgst/100);
+                let cTax = taxable * (c.cgst/100);
+                let itemTotal = taxable + sTax + cTax;
+                
+                subtotal += taxable; totalSgst += sTax; totalCgst += cTax;
+
+                tb.innerHTML += `<tr>
+                    <td><strong>${c.name}</strong><br><small>${c.barcode}</small></td>
+                    <td>₹${c.price.toFixed(2)}</td>
+                    <td><input type="number" value="${c.cQty}" step="0.001" onchange="updateCartQty(${idx}, this.value)" style="width:70px; padding:3px;"> ${c.unit}</td>
+                    <td><small>S:${c.sgst}% C:${c.cgst}%</small></td>
+                    <td><strong>₹${itemTotal.toFixed(2)}</strong></td>
+                    <td><button onclick="cart.splice(${idx},1); renderCart();" style="background:none;border:none;cursor:pointer;color:red;font-size:18px;">❌</button></td>
+                </tr>`;
             });
-            document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+
+            let discount = parseFloat(document.getElementById('bill_discount').value) || 0;
+            let preNet = subtotal + totalSgst + totalCgst - discount;
+            let net = Math.round(preNet);
+            let roundOff = net - preNet;
+
+            document.getElementById('sum_subtotal').innerText = subtotal.toFixed(2);
+            document.getElementById('sum_sgst').innerText = totalSgst.toFixed(2);
+            document.getElementById('sum_cgst').innerText = totalCgst.toFixed(2);
+            document.getElementById('sum_round').innerText = roundOff.toFixed(2);
+            document.getElementById('sum_net').innerText = net;
         }
 
-        // --- Barcode Scanner Initialization ---
-        function onScanSuccess(decodedText, decodedResult) {
-            if (scanPaused) return; 
-            
-            addToCart(decodedText);
-            scanPaused = true;
-            
-            // Resume scanning after 1.5 seconds so same item is not scanned 10 times instantly
-            setTimeout(() => {
-                scanPaused = false;
-            }, 1500);
-        }
+        function clearCart() { cart = []; document.getElementById('c_name').value = ""; document.getElementById('c_mobile').value = ""; document.getElementById('bill_discount').value = 0; renderCart(); }
 
-        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150} }, false);
-        html5QrcodeScanner.render(onScanSuccess);
+        // --- Checkout & A4 Print ---
+        function checkoutAndPrint() {
+            if(cart.length === 0) { alert("Cart empty!"); return; }
 
-        // --- Professional Thermal Printing Logic ---
-        function printBill() {
-            if(cart.length === 0) {
-                alert("⚠️ Cart khali hai! Pehle product add karein.");
-                return;
-            }
-
-            // 1. Set Mart Header (From Settings)
-            document.getElementById('t_mart_name').innerText = martProfile.name;
-            document.getElementById('t_mart_address').innerText = martProfile.address;
-            document.getElementById('t_mart_contact').innerText = "Mob: " + martProfile.phone;
-
-            // 2. Set Bill Details
-            const now = new Date();
-            const dateString = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('b_date').innerText = dateString;
-            document.getElementById('b_no').innerText = "INV-" + Math.floor(10000 + Math.random() * 90000); // 5 digit random bill no
-
-            // 3. Set Customer Details (Hide if empty)
-            const cName = document.getElementById('cust_name').value.trim();
-            const cMobile = document.getElementById('cust_mobile').value.trim();
-            const custSection = document.getElementById('t_customer_section');
-
-            if (cName || cMobile) {
-                custSection.style.display = "block";
-                document.getElementById('t_cust_name').innerText = cName ? cName : "N/A";
-                document.getElementById('t_cust_mobile').innerText = cMobile ? cMobile : "N/A";
-            } else {
-                custSection.style.display = "none";
-            }
-            
-            // 4. Populate Items
-            const tbody = document.getElementById('b_items');
-            tbody.innerHTML = '';
-            let grandTotal = 0;
-
-            cart.forEach(item => {
-                const total = item.price * item.cartQty;
-                grandTotal += total;
-                // Clean formatting for thermal printer
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="t-bold">${item.name} <br> <span style="font-weight:normal; font-size:10px;">₹${item.price} x ${item.cartQty}</span></td>
-                        <td class="t-right">${item.cartQty}${item.unit}</td>
-                        <td class="t-right t-bold">${total.toFixed(2)}</td>
-                    </tr>
-                `;
+            // Deduct from Inventory
+            cart.forEach(c => {
+                let i = inventory.find(inv => inv.barcode === c.barcode);
+                if(i) i.qty -= c.cQty;
             });
-            document.getElementById('b_total').innerText = grandTotal.toFixed(2);
+            localStorage.setItem('pos_inventory', JSON.stringify(inventory));
 
-            // 5. Execute Print
+            // Generate Bill Data
+            let now = new Date();
+            let bNo = "INV" + Math.floor(100000 + Math.random() * 900000);
+            let bDate = now.toLocaleDateString(); let bTime = now.toLocaleTimeString();
+            let cName = document.getElementById('c_name').value || "Cash Customer";
+            let cMob = document.getElementById('c_mobile').value || "N/A";
+            let discount = parseFloat(document.getElementById('bill_discount').value) || 0;
+
+            // Fill Print Template
+            document.getElementById('t_m_name').innerText = martProfile.name;
+            document.getElementById('t_m_addr').innerText = martProfile.address;
+            document.getElementById('t_m_phone').innerText = martProfile.phone;
+            if(martProfile.gstin) { document.getElementById('t_m_gst_wrap').style.display = "inline"; document.getElementById('t_m_gst').innerText = martProfile.gstin; }
+
+            document.getElementById('t_b_no').innerText = bNo;
+            document.getElementById('t_b_date').innerText = bDate;
+            document.getElementById('t_b_time').innerText = bTime;
+            document.getElementById('t_c_name').innerText = cName;
+            document.getElementById('t_c_mob').innerText = cMob;
+
+            let tbody = document.getElementById('t_b_items'); tbody.innerHTML = '';
+            let subtotal = 0, totalSgst = 0, totalCgst = 0;
+
+            cart.forEach((c, i) => {
+                let taxable = c.price * c.cQty;
+                let sTax = taxable * (c.sgst/100); let cTax = taxable * (c.cgst/100);
+                let itemTotal = taxable + sTax + cTax;
+                subtotal += taxable; totalSgst += sTax; totalCgst += cTax;
+
+                tbody.innerHTML += `<tr>
+                    <td>${i+1}</td><td>${c.name}</td>
+                    <td class="a4-right">${c.cQty} ${c.unit}</td>
+                    <td class="a4-right">${c.price.toFixed(2)}</td>
+                    <td class="a4-right">${taxable.toFixed(2)}</td>
+                    <td class="a4-right">${sTax > 0 ? sTax.toFixed(2) + '<br><small>('+c.sgst+'%)</small>' : '-'}</td>
+                    <td class="a4-right">${cTax > 0 ? cTax.toFixed(2) + '<br><small>('+c.cgst+'%)</small>' : '-'}</td>
+                    <td class="a4-right"><strong>${itemTotal.toFixed(2)}</strong></td>
+                </tr>`;
+            });
+
+            let preNet = subtotal + totalSgst + totalCgst - discount;
+            let net = Math.round(preNet);
+            let roundOff = net - preNet;
+
+            document.getElementById('t_sub').innerText = subtotal.toFixed(2);
+            document.getElementById('t_tax').innerText = (totalSgst + totalCgst).toFixed(2);
+            document.getElementById('t_disc').innerText = discount.toFixed(2);
+            document.getElementById('t_round').innerText = roundOff.toFixed(2);
+            document.getElementById('t_net').innerText = net;
+
+            // Save to History
+            salesHistory.push({ billNo: bNo, date: bDate, time: bTime, timestamp: now.getTime(), customer: cName, amount: preNet.toFixed(2), discount: discount, net: net });
+            localStorage.setItem('pos_history', JSON.stringify(salesHistory));
+
             window.print();
-            
-            // 6. Clear after print
-            setTimeout(() => {
-                if(confirm("Bill print ho gaya? Kya cart clear kar diya jaye?")) {
-                    clearCart();
-                }
-            }, 1000);
+            clearCart();
         }
 
-        // Initialize Display
-        renderInventory();
-        renderCart();
+        // --- History Logic ---
+        function renderHistory() {
+            const filter = document.getElementById('history_filter').value;
+            const tb = document.querySelector('#historyTable tbody'); tb.innerHTML = '';
+            
+            let now = new Date();
+            let filtered = salesHistory.filter(h => {
+                let hDate = new Date(h.timestamp);
+                if(filter === 'today') return hDate.toDateString() === now.toDateString();
+                if(filter === 'month') return hDate.getMonth() === now.getMonth() && hDate.getFullYear() === now.getFullYear();
+                if(filter === 'year') return hDate.getFullYear() === now.getFullYear();
+                return true;
+            });
 
+            filtered.reverse().forEach(h => {
+                tb.innerHTML += `<tr>
+                    <td>${h.date} ${h.time}</td>
+                    <td><strong>${h.billNo}</strong></td>
+                    <td>${h.customer}</td>
+                    <td>₹${parseFloat(h.amount).toFixed(2)}</td>
+                    <td style="color:red;">₹${parseFloat(h.discount).toFixed(2)}</td>
+                    <td style="color:green;font-weight:bold;">₹${h.net}</td>
+                </tr>`;
+            });
+        }
+
+        renderInventory();
     </script>
 </body>
 </html>
