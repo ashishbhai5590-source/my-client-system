@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>My Study Diary</title>
+  
+  <!-- Embedded PWA Manifest (Data URI) -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"My Study Diary","short_name":"StudyDiary","start_url":".","display":"standalone","background_color":"%230d0f13","theme_color":"%230d0f13","orientation":"portrait"}' />
+  <meta name="theme-color" content="#0d0f13" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <style>
+    /* ─────────────────────────────────────────────────────────
+       THEME & VARIABLES (Minimal Dark Diary Aesthetic)
+       ───────────────────────────────────────────────────────── */
+    :root {
+      --bg: #0d0f13;
+      --card-bg: rgba(22, 27, 34, 0.8);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f0f3f6;
+      --text-muted: #8b949e;
+      --text-faint: #484f58;
+      
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-red: #f85149;
+      --accent-gold: #d29922;
+
+      --font-serif: "Newsreader", "Charter", "Georgia", serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+      --radius: 16px;
+      --bottom-nav-height: 68px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: calc(var(--bottom-nav-height) + 24px);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    input, textarea, select {
+      user-select: text;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       TOP HEADER (Clean Paper Title)
+       ───────────────────────────────────────────────────────── */
+    header.diary-header {
+      padding: 30px 20px 18px 20px;
+      border-bottom: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(22, 27, 34, 0.8) 0%, rgba(13, 15, 19, 0) 100%);
+    }
+
+    h1.diary-title {
+      font-family: var(--font-serif);
+      font-size: 1.7rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .diary-meta-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .diary-date {
+      font-family: var(--font-serif);
+      font-style: italic;
+      color: #c9d1d9;
+    }
+
+    .planned-total {
+      font-size: 0.82rem;
+      background: rgba(88, 166, 255, 0.1);
+      color: var(--accent-blue);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(88, 166, 255, 0.2);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       VIEWS / SECTIONS
+       ───────────────────────────────────────────────────────── */
+    .view-container {
+      display: none;
+      padding: 20px 20px 0 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+
+    .view-container.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       VERTICAL TIMETABLE
+       ───────────────────────────────────────────────────────── */
+    .timetable {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 8px;
+    }
+
+    .empty-timetable {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-serif);
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .time-slot {
+      position: relative;
+    }
+
+    .time-header-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      margin-bottom: 10px;
+    }
+
+    .time-header-line::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--card-border);
+    }
+
+    .study-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .study-subject {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .study-topic {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      color: #c9d1d9;
+      margin-bottom: 12px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 12px;
+    }
+
+    .status-upcoming {
+      background: rgba(139, 148, 158, 0.12);
+      color: #8b949e;
+      border: 1px solid rgba(139, 148, 158, 0.2);
+    }
+
+    .status-active {
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(88, 166, 255, 0.35);
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.25);
+    }
+
+    .status-completed {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+    }
+
+    .status-rejected {
+      background: rgba(248, 81, 73, 0.12);
+      color: var(--accent-red);
+      border: 1px solid rgba(248, 81, 73, 0.28);
+    }
+
+    .btn-retry {
+      background: transparent;
+      border: 1px solid rgba(248, 81, 73, 0.4);
+      color: var(--accent-red);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-retry:active {
+      background: rgba(248, 81, 73, 0.15);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       TODAY'S NOTE (Paper-like Writing Area)
+       ───────────────────────────────────────────────────────── */
+    .note-section {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .note-title {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #e6edf3;
+    }
+
+    .note-saved-hint {
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      color: var(--text-faint);
+    }
+
+    .diary-paper {
+      width: 100%;
+      min-height: 140px;
+      background: rgba(22, 27, 34, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      color: #e6edf3;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+    }
+
+    .diary-paper:focus {
+      border-color: rgba(88, 166, 255, 0.35);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       FORMS & BUTTONS
+       ───────────────────────────────────────────────────────── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background: rgba(22, 27, 34, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #ffffff;
+      font-size: 1rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-main {
+      width: 100%;
+      padding: 16px;
+      background: #1f6feb;
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-main:active {
+      background: #388bfd;
+      transform: scale(0.98);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       ACTIVE TIMER SCREEN
+       ───────────────────────────────────────────────────────── */
+    .timer-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 30px 10px;
+    }
+
+    .timer-subject-badge {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .timer-topic {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .timer-range {
+      font-size: 0.88rem;
+      color: var(--accent-blue);
+      background: rgba(88, 166, 255, 0.1);
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 36px;
+    }
+
+    .timer-label-sub {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .timer-digits {
+      font-variant-numeric: tabular-nums;
+      font-size: 4.8rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      text-shadow: 0 0 30px rgba(88, 166, 255, 0.25);
+      margin-bottom: 40px;
+    }
+
+    .timer-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .btn-timer-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #ffffff;
+      border: 1px solid var(--card-border);
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .btn-timer-complete {
+      background: rgba(63, 185, 80, 0.18);
+      color: #3fb950;
+      border: 1px solid rgba(63, 185, 80, 0.4);
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       SETTINGS SCREEN
+       ───────────────────────────────────────────────────────── */
+    .setting-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .setting-title {
+      font-size: 0.96rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .setting-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Switch toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 28px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: 0.25s;
+      border-radius: 34px;
+    }
+
+    .slider::before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #1f6feb;
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       MODAL & POPUP CHALLENGE (Overlay)
+       ───────────────────────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-out;
+    }
+
+    .modal-backdrop.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .challenge-box {
+      background: #161b22;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      box-shadow: 0 0 35px rgba(88, 166, 255, 0.15), 0 20px 40px rgba(0, 0, 0, 0.6);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 360px;
+      padding: 26px 22px;
+      text-align: center;
+      transform: scale(0.95);
+      transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    .modal-backdrop.show .challenge-box {
+      transform: scale(1);
+    }
+
+    .challenge-tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .challenge-subject {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .challenge-topic {
+      font-family: var(--font-serif);
+      font-size: 1.12rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .challenge-time {
+      font-size: 0.85rem;
+      color: var(--accent-gold);
+      background: rgba(210, 153, 34, 0.1);
+      padding: 4px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+
+    .challenge-question {
+      font-size: 0.95rem;
+      color: #e6edf3;
+      margin-bottom: 20px;
+      font-style: italic;
+      font-family: var(--font-serif);
+    }
+
+    .challenge-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-accept {
+      background: #238636;
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-accept:active {
+      background: #2ea043;
+      transform: scale(0.98);
+    }
+
+    .btn-reject {
+      background: transparent;
+      color: var(--accent-red);
+      border: 1px solid rgba(248, 81, 73, 0.3);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .trans-box {
+      background: #161b22;
+      border-radius: 20px;
+      padding: 30px 24px;
+      text-align: center;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .trans-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       BOTTOM NAVIGATION (Minimal & Clean)
+       ───────────────────────────────────────────────────────── */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--bottom-nav-height);
+      background: rgba(13, 15, 19, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 500;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-faint);
+      font-size: 0.72rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 6px 12px;
+      transition: color 0.2s;
+    }
+
+    .nav-item .nav-icon {
+      font-size: 1.25rem;
+    }
+
+    .nav-item.active {
+      color: #ffffff;
+    }
+
+    .active-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      box-shadow: 0 0 6px var(--accent-blue);
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="diary-header">
+    <h1 class="diary-title">📖 My Study Diary</h1>
+    <div class="diary-meta-row">
+      <div class="diary-date" id="currentDateLabel">Loading date...</div>
+      <div class="planned-total" id="plannedStudyTotal">0m Planned</div>
+    </div>
+  </header>
+
+  <!-- 1. DIARY HOME -->
+  <main class="view-container active" id="view-diary">
+    <div class="timetable" id="timetableContainer"></div>
+
+    <section class="note-section">
+      <div class="note-title">
+        <span>✍️ Today's Note</span>
+        <span class="note-saved-hint" id="noteSaveStatus">Auto-saved</span>
+      </div>
+      <textarea
+        class="diary-paper"
+        id="dailyNoteArea"
+        placeholder="Write anything about your study day... What you learned, what to revise tomorrow..."
+      ></textarea>
+    </section>
+  </main>
+
+  <!-- 2. ADD STUDY -->
+  <section class="view-container" id="view-add">
+    <form id="addStudyForm" onsubmit="handleAddStudy(event)">
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <select class="form-select" id="formSubject" onchange="handleSubjectChange(this)">
+          <option value="📘 Biology">📘 Biology</option>
+          <option value="⚗️ Chemistry">⚗️ Chemistry</option>
+          <option value="📐 Mathematics">📐 Mathematics</option>
+          <option value="⚡ Physics">⚡ Physics</option>
+          <option value="📚 English">📚 English</option>
+          <option value="📙 Hindi">📙 Hindi</option>
+          <option value="CUSTOM">✏️ Custom...</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="customSubjectGroup" style="display: none;">
+        <label class="form-label">Custom Subject Name</label>
+        <input type="text" class="form-input" id="formCustomSubject" placeholder="e.g. History" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Topic</label>
+        <input type="text" class="form-input" id="formTopic" placeholder="e.g. Human Reproduction" required />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Start Time</label>
+          <input type="time" class="form-input" id="formStartTime" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Time</label>
+          <input type="time" class="form-input" id="formEndTime" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-main">
+        <span>+ Add to Diary</span>
+      </button>
+    </form>
+  </section>
+
+  <!-- 3. ACTIVE TIMER -->
+  <section class="view-container" id="view-timer">
+    <div class="timer-screen" id="timerScreenContent"></div>
+  </section>
+
+  <!-- 4. SETTINGS -->
+  <section class="view-container" id="view-settings">
+    <div class="setting-card">
+      <div>
+        <div class="setting-title">🔊 Sound Effects</div>
+        <div class="setting-desc">Pleasant synthesized chimes</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="settingSoundToggle" onchange="toggleSound(this.checked)" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-card">
+      <div>
+        <div class="setting-title">🔔 System Notifications</div>
+        <div class="setting-desc" id="notifStatusDesc">Enable background alerts</div>
+      </div>
+      <button class="btn-retry" style="color: var(--accent-blue); border-color: rgba(88, 166, 255, 0.4);" onclick="requestNotificationAccess()">
+        Enable
+      </button>
+    </div>
+
+    <div class="setting-card" style="margin-top: 14px;">
+      <div>
+        <div class="setting-title" style="color: var(--text-faint);">Reset Today's Diary</div>
+        <div class="setting-desc">Clears timetable entries</div>
+      </div>
+      <button class="btn-retry" onclick="resetDayData()">Reset</button>
+    </div>
+  </section>
+
+  <!-- POPUP CHALLENGE -->
+  <div class="modal-backdrop" id="challengeModal">
+    <div class="challenge-box">
+      <div class="challenge-tag">🔔 STUDY TIME</div>
+      <div class="challenge-subject" id="popSubject">📘 BIOLOGY</div>
+      <div class="challenge-topic" id="popTopic">Human Reproduction</div>
+      <div class="challenge-time" id="popTimeRange">7:00 PM — 8:00 PM</div>
+      <div class="challenge-question">Are you ready?</div>
+      <div class="challenge-btns">
+        <button class="btn-accept" onclick="acceptCurrentChallenge()">🚀 ACCEPT CHALLENGE</button>
+        <button class="btn-reject" onclick="rejectCurrentChallenge()">❌ REJECT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP SHORT TRANSITION -->
+  <div class="modal-backdrop" id="transitionModal">
+    <div class="trans-box" id="transBoxContent"></div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchNav('diary')" id="nav-diary">
+      <span class="nav-icon">📖</span>
+      <span>Diary</span>
+    </div>
+    <div class="nav-item" onclick="switchNav('add')" id="nav-add">
+      <span class="nav-icon">➕</span>
+      <span>Add Study</span>
+    </div>
+    <div class="nav-item" onclick="switchNav('timer')" id="nav-timer">
+      <span class="nav-icon">⏱️</span>
+      <span>Active Study<span id="activeTimerBadge"></span></span>
+    </div>
+    <div class="nav-item" onclick="switchNav('settings')" id="nav-settings">
+      <span class="nav-icon">⚙️</span>
+      <span>Settings</span>
+    </div>
+  </nav>
+
+  <script>
+    /* =========================================================
+       1. SYNTHESIZED AUDIO (NO EXTERNAL MP3 REQUIRED)
+       ========================================================= */
+    class DiaryAudio {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playTone(freq, duration, type = 'sine', delay = 0, gainLevel = 0.15) {
+        if (!state.settings.sound) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+          gain.gain.setValueAtTime(gainLevel, this.ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + delay + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + delay);
+          osc.stop(this.ctx.currentTime + delay + duration);
+        } catch (e) {}
+      }
+      playChallenge() {
+        this.playTone(587.33, 0.2, 'sine', 0, 0.18);
+        this.playTone(880.00, 0.4, 'triangle', 0.1, 0.2);
+      }
+      playAccept() {
+        this.playTone(523.25, 0.15, 'sine', 0, 0.15);
+        this.playTone(659.25, 0.28, 'triangle', 0.1, 0.2);
+      }
+      playComplete() {
+        this.playTone(523.25, 0.18, 'sine', 0);
+        this.playTone(659.25, 0.18, 'sine', 0.1);
+        this.playTone(783.99, 0.18, 'sine', 0.2);
+        this.playTone(1046.50, 0.5, 'triangle', 0.3);
+      }
+      playReject() {
+        this.playTone(260, 0.15, 'triangle', 0, 0.12);
+        this.playTone(220, 0.22, 'triangle', 0.1, 0.12);
+      }
+    }
+    const audio = new DiaryAudio();
+
+    /* =========================================================
+       2. STATE & STORAGE
+       ========================================================= */
+    const STORAGE_KEY = 'my_study_diary_single_store';
+    let state = {
+      studies: [],
+      activeChallenge: null,
+      dailyNote: '',
+      settings: { sound: true }
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) state = Object.assign(state, JSON.parse(raw));
+      } catch (err) {}
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {}
+    }
+
+    /* =========================================================
+       3. TIME HELPERS
+       ========================================================= */
+    function formatTime12(time24) {
+      if (!time24) return '';
+      const [h, m] = time24.split(':').map(Number);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+    }
+
+    function parseTodayTimestamp(time24) {
+      const [hours, minutes] = time24.split(':').map(Number);
+      const d = new Date();
+      d.setHours(hours, minutes, 0, 0);
+      return d.getTime();
+    }
+
+    function getMinutesBetween(startTime24, endTime24) {
+      const s = parseTodayTimestamp(startTime24);
+      let e = parseTodayTimestamp(endTime24);
+      if (e <= s) e += 24 * 60 * 60 * 1000;
+      return Math.round((e - s) / 60000);
+    }
+
+    function updateDateHeader() {
+      const now = new Date();
+      document.getElementById('currentDateLabel').textContent = now.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    /* =========================================================
+       4. SYSTEM NOTIFICATION API (DIRECT BROWSER)
+       ========================================================= */
+    async function requestNotificationAccess() {
+      if (!('Notification' in window)) {
+        alert('This browser does not support Web Notifications.');
+        return;
+      }
+      try {
+        const perm = await Notification.requestPermission();
+        updateNotificationUI();
+        if (perm === 'granted') {
+          new Notification('🔔 Notifications Enabled', {
+            body: 'Study challenge alerts will appear right on time.'
+          });
+        }
+      } catch (e) {}
+    }
+
+    function updateNotificationUI() {
+      const desc = document.getElementById('notifStatusDesc');
+      if (!('Notification' in window)) {
+        desc.textContent = 'Not supported in this browser';
+      } else if (Notification.permission === 'granted') {
+        desc.textContent = 'Active (System alerts ready)';
+      } else {
+        desc.textContent = 'Disabled (Tap Enable to allow)';
+      }
+    }
+
+    function triggerSystemNotification(study) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          const n = new Notification('🔔 Study Time', {
+            body: `${study.subject} — ${study.topic}\nYour study challenge is ready.`,
+            tag: `study-${study.id}`
+          });
+          n.onclick = () => {
+            window.focus();
+            triggerChallengeModal(study.id);
+          };
+        } catch (e) {}
+      }
+    }
+
+    /* =========================================================
+       5. AUTOMATIC CHALLENGE TRIGGER
+       ========================================================= */
+    let currentPromptingStudy = null;
+
+    function checkScheduledStudies() {
+      const now = Date.now();
+      state.studies.forEach((study) => {
+        if (study.status === 'UPCOMING') {
+          const startMs = parseTodayTimestamp(study.startTime);
+          // If start time has arrived (within 4 hours threshold)
+          if (now >= startMs && (now - startMs) < 4 * 60 * 60 * 1000) {
+            triggerChallengeModal(study.id);
+          }
+        }
+      });
+    }
+
+    function triggerChallengeModal(studyId) {
+      const study = state.studies.find((s) => s.id === studyId);
+      if (!study || study.status === 'ACTIVE' || study.status === 'COMPLETED') return;
+
+      currentPromptingStudy = study;
+      document.getElementById('popSubject').textContent = study.subject;
+      document.getElementById('popTopic').textContent = study.topic;
+      document.getElementById('popTimeRange').textContent = `${formatTime12(study.startTime)} — ${formatTime12(study.endTime)}`;
+
+      audio.playChallenge();
+      triggerSystemNotification(study);
+
+      document.getElementById('challengeModal').classList.add('show');
+    }
+
+    function acceptCurrentChallenge() {
+      if (!currentPromptingStudy) return;
+      const study = currentPromptingStudy;
+
+      document.getElementById('challengeModal').classList.remove('show');
+      study.status = 'ACTIVE';
+
+      const durationMins = getMinutesBetween(study.startTime, study.endTime);
+      const durationMs = durationMins * 60 * 1000;
+
+      state.activeChallenge = {
+        studyId: study.id,
+        targetEndMs: Date.now() + durationMs,
+        isPaused: false,
+        pausedRemainingMs: null
+      };
+
+      saveState();
+      renderTimetable();
+      audio.playAccept();
+
+      showShortTransition('🚀', 'CHALLENGE ACCEPTED', `${study.subject} • ${durationMins} minutes`, () => {
+        switchNav('timer');
+      });
+    }
+
+    function rejectCurrentChallenge() {
+      if (!currentPromptingStudy) return;
+      const study = currentPromptingStudy;
+
+      document.getElementById('challengeModal').classList.remove('show');
+      study.status = 'REJECTED';
+      saveState();
+      renderTimetable();
+
+      audio.playReject();
+
+      showShortTransition('❌', 'Challenge Rejected', 'No problem. You can retry whenever ready.', () => {
+        switchNav('diary');
+      }, '#f85149');
+
+      currentPromptingStudy = null;
+    }
+
+    function retryStudy(studyId) {
+      const study = state.studies.find((s) => s.id === studyId);
+      if (study) {
+        study.status = 'UPCOMING';
+        saveState();
+        renderTimetable();
+        triggerChallengeModal(studyId);
+      }
+    }
+
+    /* =========================================================
+       6. REAL TIMESTAMP ACTIVE TIMER
+       ========================================================= */
+    let timerInterval = null;
+
+    function startTimerLoop() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!state.activeChallenge) {
+          updateTimerUI();
+          return;
+        }
+
+        const active = state.activeChallenge;
+        if (active.isPaused) {
+          updateTimerUI();
+          return;
+        }
+
+        const remainingMs = active.targetEndMs - Date.now();
+        if (remainingMs <= 0) {
+          completeActiveStudy();
+        } else {
+          updateTimerUI();
+        }
+      }, 500);
+    }
+
+    function updateTimerUI() {
+      const container = document.getElementById('timerScreenContent');
+      const badge = document.getElementById('activeTimerBadge');
+
+      if (!state.activeChallenge) {
+        badge.innerHTML = '';
+        container.innerHTML = `
+          <div style="margin: auto; color: var(--text-muted); font-family: var(--font-serif); font-style: italic;">
+            No study currently in progress.<br>Accept a scheduled challenge from your diary.
+          </div>
+        `;
+        return;
+      }
+
+      badge.innerHTML = '<span class="active-dot"></span>';
+      const study = state.studies.find((s) => s.id === state.activeChallenge.studyId);
+      if (!study) {
+        state.activeChallenge = null;
+        saveState();
+        return;
+      }
+
+      let remainingMs = state.activeChallenge.isPaused
+        ? state.activeChallenge.pausedRemainingMs
+        : Math.max(0, state.activeChallenge.targetEndMs - Date.now());
+
+      const totalSec = Math.floor(remainingMs / 1000);
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      container.innerHTML = `
+        <div class="timer-subject-badge">${study.subject}</div>
+        <div class="timer-topic">${study.topic}</div>
+        <div class="timer-range">${formatTime12(study.startTime)} — ${formatTime12(study.endTime)}</div>
+        <div class="timer-label-sub">TIME REMAINING</div>
+        <div class="timer-digits">${formattedTime}</div>
+        <div class="timer-actions">
+          <button class="btn-timer-secondary" onclick="togglePauseTimer()">
+            ${state.activeChallenge.isPaused ? '▶ RESUME' : '⏸ PAUSE'}
+          </button>
+          <button class="btn-timer-complete" onclick="completeActiveStudy()">
+            ✓ COMPLETE
+          </button>
+        </div>
+      `;
+    }
+
+    function togglePauseTimer() {
+      if (!state.activeChallenge) return;
+      const active = state.activeChallenge;
+
+      if (active.isPaused) {
+        active.targetEndMs = Date.now() + active.pausedRemainingMs;
+        active.isPaused = false;
+        active.pausedRemainingMs = null;
+      } else {
+        active.pausedRemainingMs = Math.max(0, active.targetEndMs - Date.now());
+        active.isPaused = true;
+      }
+      saveState();
+      updateTimerUI();
+    }
+
+    function completeActiveStudy() {
+      if (!state.activeChallenge) return;
+      const study = state.studies.find((s) => s.id === state.activeChallenge.studyId);
+      const totalMinutes = study ? getMinutesBetween(study.startTime, study.endTime) : 60;
+
+      if (study) study.status = 'COMPLETED';
+
+      state.activeChallenge = null;
+      saveState();
+      renderTimetable();
+      updateTimerUI();
+      audio.playComplete();
+
+      showShortTransition(
+        '✨',
+        'STUDY COMPLETE!',
+        `${study ? study.subject : 'Study'} • ${totalMinutes} minutes completed.`,
+        () => {
+          switchNav('diary');
+        },
+        '#3fb950'
+      );
+    }
+
+    /* =========================================================
+       7. TIMETABLE
+       ========================================================= */
+    function renderTimetable() {
+      const container = document.getElementById('timetableContainer');
+      const totalPlannedElem = document.getElementById('plannedStudyTotal');
+
+      if (!state.studies.length) {
+        container.innerHTML = `
+          <div class="empty-timetable">
+            Your diary timetable is empty today.<br>Tap "+ Add Study" below to plan your sessions.
+          </div>
+        `;
+        totalPlannedElem.textContent = '0m Planned';
+        return;
+      }
+
+      state.studies.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+      let totalMinutes = 0;
+      let html = '';
+
+      state.studies.forEach((study) => {
+        totalMinutes += getMinutesBetween(study.startTime, study.endTime);
+
+        let statusClass = 'status-upcoming';
+        let statusText = '⏳ UPCOMING';
+        let retryBtn = '';
+
+        if (study.status === 'ACTIVE') {
+          statusClass = 'status-active';
+          statusText = '🔵 ACTIVE';
+        } else if (study.status === 'COMPLETED') {
+          statusClass = 'status-completed';
+          statusText = '🟢 COMPLETED';
+        } else if (study.status === 'REJECTED') {
+          statusClass = 'status-rejected';
+          statusText = '🔴 REJECTED';
+          retryBtn = `<button class="btn-retry" onclick="retryStudy('${study.id}')">↻ Try Again</button>`;
+        }
+
+        html += `
+          <div class="time-slot">
+            <div class="time-header-line">${formatTime12(study.startTime)}</div>
+            <div class="study-card">
+              <div class="card-top">
+                <div class="study-subject">${escapeHtml(study.subject)}</div>
+                <div class="status-badge ${statusClass}">${statusText}</div>
+              </div>
+              <div class="study-topic">${escapeHtml(study.topic)}</div>
+              <div class="card-footer">
+                <span>${formatTime12(study.startTime)} — ${formatTime12(study.endTime)}</span>
+                ${retryBtn}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      const hrs = Math.floor(totalMinutes / 60);
+      const mins = totalMinutes % 60;
+      totalPlannedElem.textContent = hrs > 0 ? `${hrs}h ${mins}m Planned` : `${mins}m Planned`;
+    }
+
+    /* =========================================================
+       8. ADD STUDY & DIARY NOTE
+       ========================================================= */
+    function handleSubjectChange(select) {
+      const customGroup = document.getElementById('customSubjectGroup');
+      customGroup.style.display = select.value === 'CUSTOM' ? 'block' : 'none';
+      if (select.value === 'CUSTOM') document.getElementById('formCustomSubject').focus();
+    }
+
+    function handleAddStudy(e) {
+      e.preventDefault();
+      let subject = document.getElementById('formSubject').value;
+      if (subject === 'CUSTOM') {
+        const customVal = document.getElementById('formCustomSubject').value.trim();
+        subject = customVal ? `📖 ${customVal}` : '📖 Study';
+      }
+
+      const topic = document.getElementById('formTopic').value.trim();
+      const startTime = document.getElementById('formStartTime').value;
+      const endTime = document.getElementById('formEndTime').value;
+
+      if (!topic || !startTime || !endTime) return;
+
+      state.studies.push({
+        id: 'study_' + Date.now(),
+        subject,
+        topic,
+        startTime,
+        endTime,
+        status: 'UPCOMING'
+      });
+
+      saveState();
+      document.getElementById('addStudyForm').reset();
+      document.getElementById('customSubjectGroup').style.display = 'none';
+
+      renderTimetable();
+      switchNav('diary');
+      checkScheduledStudies();
+    }
+
+    const noteArea = document.getElementById('dailyNoteArea');
+    const noteSaveStatus = document.getElementById('noteSaveStatus');
+    let saveTimeout = null;
+
+    noteArea.addEventListener('input', () => {
+      noteSaveStatus.textContent = 'Saving...';
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        state.dailyNote = noteArea.value;
+        saveState();
+        noteSaveStatus.textContent = 'Saved';
+      }, 400);
+    });
+
+    /* =========================================================
+       9. TRANSITIONS & NAVIGATION
+       ========================================================= */
+    function showShortTransition(icon, title, message, callback, titleColor = '#ffffff') {
+      const modal = document.getElementById('transitionModal');
+      const box = document.getElementById('transBoxContent');
+      box.innerHTML = `
+        <span class="trans-icon">${icon}</span>
+        <h3 style="color:${titleColor}; font-size:1.25rem; font-weight:600; margin-bottom:6px;">${title}</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem;">${message}</p>
+      `;
+      modal.classList.add('show');
+      setTimeout(() => {
+        modal.classList.remove('show');
+        if (callback) callback();
+      }, 1000);
+    }
+
+    function switchNav(viewId) {
+      document.querySelectorAll('.view-container').forEach((el) => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach((el) => el.classList.remove('active'));
+
+      const activeView = document.getElementById(`view-${viewId}`);
+      const activeNav = document.getElementById(`nav-${viewId}`);
+
+      if (activeView) activeView.classList.add('active');
+      if (activeNav) activeNav.classList.add('active');
+
+      if (viewId === 'diary') renderTimetable();
+      if (viewId === 'timer') updateTimerUI();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleSound(enabled) {
+      state.settings.sound = enabled;
+      saveState();
+    }
+
+    function resetDayData() {
+      if (confirm("Clear today's study timetable?")) {
+        state.studies = [];
+        state.activeChallenge = null;
+        saveState();
+        renderTimetable();
+        updateTimerUI();
+        switchNav('diary');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* =========================================================
+       10. STARTUP
+       ========================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      updateDateHeader();
+      updateNotificationUI();
+
+      if (state.dailyNote) noteArea.value = state.dailyNote;
+      document.getElementById('settingSoundToggle').checked = state.settings.sound;
+
+      renderTimetable();
+      startTimerLoop();
+
+      if (state.activeChallenge) switchNav('timer');
+
+      // Schedule watcher every 5 seconds
+      setInterval(checkScheduledStudies, 5000);
+
+      // Tab regain focus watcher
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          checkScheduledStudies();
+          updateTimerUI();
+        }
+      });
+      window.addEventListener('focus', () => {
+        checkScheduledStudies();
+        updateTimerUI();
+      });
+    });
+  </script>
+</body>
+</html>
