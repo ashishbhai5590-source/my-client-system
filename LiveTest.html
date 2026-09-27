@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>StudyDuel 1v1 — Battle & Chat</title>
+  <title>StudyDuel — 1v1 Live Exam Arena</title>
 
   <!-- Firebase v9 Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -18,7 +18,7 @@
       --accent-amber: #f59e0b;
       --accent-red: #ef4444;
 
-      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-bg: rgba(255, 255, 255, 0.95);
       --card-border: rgba(255, 255, 255, 0.95);
       --shadow-soft: 0 10px 25px -5px rgba(99, 102, 241, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
       --shadow-elevated: 0 20px 35px -8px rgba(99, 102, 241, 0.22);
@@ -44,7 +44,7 @@
       color: var(--text-main);
       min-height: 100vh;
       overflow-x: hidden;
-      padding-bottom: 85px; /* bottom nav space */
+      padding-bottom: 30px;
       background: linear-gradient(135deg, #fdf4ff 0%, #ede9fe 25%, #e0f2fe 55%, #fef3c7 85%, #ffe4e6 100%);
       background-attachment: fixed;
     }
@@ -54,32 +54,10 @@
     .app-wrapper {
       max-width: 520px;
       margin: 0 auto;
-      padding: 14px 16px;
+      padding: 12px 16px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-    }
-
-    /* RECONNECTING FLOATING ALERT BAR */
-    .reconnecting-bar {
-      background: #f59e0b;
-      color: #ffffff;
-      padding: 6px 14px;
-      border-radius: var(--radius-pill);
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      animation: pulseAlert 1s infinite alternate;
-    }
-    @keyframes pulseAlert {
-      from { opacity: 0.85; transform: scale(0.99); }
-      to { opacity: 1; transform: scale(1); }
     }
 
     /* Top Sticky Status Bar */
@@ -88,15 +66,15 @@
       justify-content: space-between;
       align-items: center;
       padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.9);
       border-radius: var(--radius-md);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
       position: sticky;
       top: 10px;
       z-index: 100;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .brand-title {
@@ -127,11 +105,6 @@
       color: #059669;
       border-color: #a7f3d0;
     }
-    .status-badge.reconnecting {
-      background: #fef3c7;
-      color: #b45309;
-      border-color: #fde68a;
-    }
     .status-dot {
       width: 8px;
       height: 8px;
@@ -142,11 +115,61 @@
       background: #10b981;
       box-shadow: 0 0 6px #10b981;
     }
-    .status-badge.reconnecting .status-dot {
-      background: #f59e0b;
-      box-shadow: 0 0 6px #f59e0b;
+
+    /* Top SMS Alert Toast */
+    .top-sms-banner {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-60px);
+      background: #1e1b4b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      font-size: 0.85rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none;
+      max-width: 90%;
+    }
+    .top-sms-banner.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
 
+    /* Anti-Cheat Warning Toast */
+    .cheat-warning-toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #dc2626;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 900;
+      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.5);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      animation: shakeAlert 0.4s ease;
+    }
+    @keyframes shakeAlert {
+      0%, 100% { transform: translateX(-50%); }
+      20%, 60% { transform: translateX(-54%); }
+      40%, 80% { transform: translateX(-46%); }
+    }
+
+    /* Cards & Form Styles */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -186,7 +209,7 @@
       padding: 14px;
       border-radius: var(--radius-md);
       font-size: 0.95rem;
-      font-weight: 800;
+      font-weight: 900;
       border: none;
       cursor: pointer;
       display: flex;
@@ -207,100 +230,85 @@
       color: #334155;
       margin-top: 8px;
     }
-
-    .chip-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 14px;
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
     }
-    .subject-chip {
-      padding: 8px 14px;
+
+    /* Live 30s Timer Badge */
+    .timer-badge-big {
+      font-size: 1.4rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      padding: 6px 18px;
       border-radius: var(--radius-pill);
-      background: #f1f5f9;
-      border: 1.5px solid #cbd5e1;
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: #475569;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .subject-chip.selected {
-      background: #e0e7ff;
-      border-color: #6366f1;
-      color: #4338ca;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
-    }
-
-    /* Scoreboard */
-    .scoreboard-box {
-      background: #ffffff;
-      border: 1.5px solid rgba(99, 102, 241, 0.2);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 14px;
-    }
-    .player-col { text-align: center; }
-    .player-name {
-      font-size: 0.85rem;
-      font-weight: 900;
-      color: #334155;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .player-score {
-      font-size: 2.2rem;
-      font-weight: 900;
+      background: #eef2ff;
+      border: 2px solid #818cf8;
       color: #4f46e5;
-      line-height: 1.1;
-    }
-    .score-p2 { color: #db2777; }
-    .vs-divider { font-size: 0.8rem; font-weight: 900; color: #94a3b8; }
-
-    .progress-bar-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: #64748b;
-    }
-
-    .timer-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 1.1rem;
-      font-weight: 900;
-      color: #4f46e5;
-      background: #eef2ff;
-      border: 1.5px solid #c7d2fe;
-      padding: 5px 16px;
-      border-radius: var(--radius-pill);
+      gap: 6px;
     }
-    .timer-badge.urgent {
-      color: #ef4444;
+    .timer-badge-big.danger {
       background: #fee2e2;
       border-color: #fca5a5;
-      animation: pulseUrgent 0.7s infinite alternate;
+      color: #dc2626;
+      animation: alertPulse 0.7s infinite alternate;
     }
-    @keyframes pulseUrgent {
+    @keyframes alertPulse {
       from { transform: scale(1); }
-      to { transform: scale(1.08); }
+      to { transform: scale(1.06); }
     }
 
+    /* Drafting Cards */
+    .draft-q-box {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    /* Evaluating Question Check Cards */
+    .eval-card-item {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .eval-choice-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-choice {
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      font-weight: 800;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .btn-choice.selected-right {
+      background: #dcfce7;
+      border-color: #10b981;
+      color: #15803d;
+    }
+    .btn-choice.selected-wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
+
+    /* 3-2-1 Overlay */
     .countdown-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.88);
       backdrop-filter: blur(8px);
       z-index: 500;
       display: none;
@@ -320,278 +328,29 @@
       50% { transform: scale(1.3); opacity: 1; }
       100% { transform: scale(1); opacity: 1; }
     }
-
-    .sms-toast {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-30px);
-      background: #1e1b4b;
-      color: #ffffff;
-      padding: 10px 18px;
-      border-radius: var(--radius-pill);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 0.82rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 600;
-      opacity: 0;
-      transition: all 0.25s ease-out;
-      pointer-events: none;
-    }
-    .sms-toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-
-    .question-display-box {
-      background: #ffffff;
-      border: 2px solid #818cf8;
-      border-radius: var(--radius-md);
-      padding: 18px 16px;
-      margin: 12px 0;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
-    }
-    .question-subject-tag {
-      font-size: 0.72rem;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: #ede9fe;
-      color: #6d28d9;
-      display: inline-block;
-      margin-bottom: 6px;
-    }
-
-    .eval-btn-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .btn-right {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #ffffff;
-      border: none;
-      padding: 14px;
-      border-radius: var(--radius-md);
-      font-size: 0.95rem;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    .btn-wrong {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: #ffffff;
-      border: none;
-      padding: 14px;
-      border-radius: var(--radius-md);
-      font-size: 0.95rem;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .victory-box {
-      text-align: center;
-      padding: 30px 18px;
-      background: #ffffff;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       CHAT SECTION & PHOTO SHARING (DEDICATED TAB)
-       ───────────────────────────────────────────────────────── */
-    #viewChat {
-      display: none;
-      flex-direction: column;
-      height: calc(100vh - 170px);
-      margin-bottom: 10px;
-    }
-
-    .chat-messages-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.03);
-    }
-
-    .chat-bubble {
-      max-width: 80%;
-      padding: 10px 14px;
-      border-radius: 16px;
-      font-size: 0.88rem;
-      word-break: break-word;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .chat-bubble.mine {
-      align-self: flex-end;
-      background: var(--primary-grad);
-      color: #ffffff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .chat-bubble.theirs {
-      align-self: flex-start;
-      background: #ffffff;
-      color: #1e293b;
-      border: 1px solid #e2e8f0;
-      border-bottom-left-radius: 4px;
-    }
-
-    .chat-sender-name {
-      font-size: 0.68rem;
-      font-weight: 800;
-      opacity: 0.75;
-      text-transform: uppercase;
-    }
-
-    .chat-img-thumb {
-      max-width: 210px;
-      max-height: 210px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 4px;
-      object-fit: cover;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .chat-input-bar {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    .btn-photo-pick {
-      width: 46px;
-      height: 46px;
-      border-radius: 12px;
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.35rem;
-      cursor: pointer;
-      color: #475569;
-      flex-shrink: 0;
-    }
-    .btn-photo-pick:active { transform: scale(0.95); background: #f1f5f9; }
-
-    .btn-send-msg {
-      width: 48px;
-      height: 46px;
-      border-radius: 12px;
-      background: var(--primary-grad);
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      color: #ffffff;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       BOTTOM NAVIGATION BAR (ARENA vs CHAT)
-       ───────────────────────────────────────────────────────── */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 64px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(0, 0, 0, 0.08);
-      display: none; /* Shows after room is active */
-      justify-content: space-around;
-      align-items: center;
-      z-index: 200;
-    }
-
-    .nav-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      font-size: 0.75rem;
-      font-weight: 800;
-      cursor: pointer;
-      padding: 6px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      position: relative;
-    }
-    .nav-btn.active { color: #4f46e5; }
-
-    .nav-badge-dot {
-      position: absolute;
-      top: 4px;
-      right: 18px;
-      width: 9px;
-      height: 9px;
-      background: #ef4444;
-      border-radius: 50%;
-      border: 2px solid #ffffff;
-      display: none;
-    }
-
-    /* Image Fullscreen Modal */
-    .img-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-    .img-modal-backdrop img {
-      max-width: 100%;
-      max-height: 85vh;
-      border-radius: 12px;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Reconnecting Alert Banner -->
-  <div class="reconnecting-bar" id="reconnectingBar">
-    <span>🔄</span> <span>इंटरनेट कट गया है... दोबारा कनेक्ट कर रहे हैं (Reconnecting)...</span>
+  <!-- Top In-App SMS Toast -->
+  <div class="top-sms-banner" id="topSmsBanner">
+    <span>🔔</span> <span id="topSmsText">नया मैसेज आया!</span>
   </div>
 
-  <!-- Floating SMS Notification -->
-  <div class="sms-toast" id="smsToast">
-    <span>🔔</span> <span id="smsToastText">नया सवाल आ गया!</span>
+  <!-- Anti-Cheat Strike Alert -->
+  <div class="cheat-warning-toast" id="cheatToast">
+    <span>🚨</span> <span>चीटिंग अलर्ट: टैब बदला गया!</span>
   </div>
 
-  <!-- 3-2-1 Countdown Overlay -->
+  <!-- 3-2-1 Overlay -->
   <div class="countdown-overlay" id="countdownOverlay">
     <div class="countdown-num" id="countdownNumber">3</div>
     <div style="font-size: 1.1rem; color: #ffffff; font-weight: 800; margin-top: 10px;">मुकाबला शुरू हो रहा है!</div>
   </div>
 
-  <!-- Fullscreen Image Viewer Modal -->
-  <div class="img-modal-backdrop" id="imgModal" onclick="closeImgModal()">
-    <img id="imgModalTarget" src="" />
-  </div>
-
   <div class="app-wrapper">
 
-    <!-- Top Status Header -->
+    <!-- Header -->
     <header class="app-header">
       <div class="brand-title">
         <span>⚔️</span> StudyDuel
@@ -606,9 +365,9 @@
          SCREEN 1: LOBBY
          ───────────────────────────────────────── -->
     <div id="viewLobby" class="card">
-      <h2 style="font-size: 1.35rem; font-weight: 900; margin-bottom: 4px; text-align: center;">1v1 Subject Duel</h2>
+      <h2 style="font-size: 1.35rem; font-weight: 900; margin-bottom: 4px; text-align: center;">1v1 Battle Arena</h2>
       <p style="font-size: 0.8rem; color: #64748b; text-align: center; margin-bottom: 20px;">
-        Firebase रीयल-टाइम पावर्ड • कभी कनेक्शन नहीं टूटेगा!
+        दोनों अपने सवाल पहले लिखेंगे ➔ 30s में उत्तर ➔ दोनों चेक करेंगे!
       </p>
 
       <div class="form-group">
@@ -628,218 +387,154 @@
         </button>
       </div>
 
-      <!-- Room Waiting Card -->
       <div id="roomWaitCard" style="display: none; margin-top: 18px; text-align: center; background: #eef2ff; border: 1.5px dashed #818cf8; padding: 16px; border-radius: var(--radius-md);">
         <div style="font-size: 0.78rem; font-weight: 800; color: #4338ca;">ROOM CODE (WhatsApp पर भेजो):</div>
         <div style="font-size: 2.6rem; font-weight: 900; color: #312e81; font-family: monospace; margin: 4px 0;" id="displayRoomCode">----</div>
         <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">दोस्त के जुड़ने का इंतज़ार हो रहा है...</div>
         <button class="btn btn-primary" style="background: #25D366; box-shadow: none;" onclick="shareOnWhatsApp()">
-          <span>💬</span> WhatsApp पर डायरेक्ट लिंक भेजो
+          <span>💬</span> WhatsApp पर लिंक भेजो
         </button>
       </div>
     </div>
 
     <!-- ─────────────────────────────────────────
-         SCREEN 2: MATCH SETUP
+         SCREEN 2: QUESTION COUNT SELECT (CONFIG)
          ───────────────────────────────────────── -->
     <div id="viewConfig" class="card" style="display: none;">
-      <h3 style="font-size: 1.2rem; font-weight: 900; margin-bottom: 4px;">🎯 मैच की सेटिंग</h3>
+      <h3 style="font-size: 1.2rem; font-weight: 900; margin-bottom: 4px;">🎯 कितने-कितने सवाल पूछने हैं?</h3>
       <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">
-        किन-किन विषयों से सवाल पूछेंगे? विषय चुनें:
+        सवालों की संख्या तय करें:
       </p>
 
-      <div class="form-label">5 विषय (Subject Select करें):</div>
-      <div class="chip-grid" id="subjectChipsContainer">
-        <div class="subject-chip selected" onclick="toggleSubjectSelect(this, 'Biology')">📘 Biology</div>
-        <div class="subject-chip selected" onclick="toggleSubjectSelect(this, 'Chemistry')">⚗️ Chemistry</div>
-        <div class="subject-chip selected" onclick="toggleSubjectSelect(this, 'Physics')">⚡ Physics</div>
-        <div class="subject-chip selected" onclick="toggleSubjectSelect(this, 'English')">📚 English</div>
-        <div class="subject-chip selected" onclick="toggleSubjectSelect(this, 'Hindi')">📙 Hindi</div>
-      </div>
-
-      <div class="form-group" style="margin-top: 16px;">
-        <label class="form-label">प्रति खिलाड़ी कितने सवाल? (Questions per person)</label>
-        <select class="form-input" id="qCountSelect" onchange="updateQuestionCount()">
-          <option value="5">5 सवाल (कुल 10 सवाल होंगे)</option>
-          <option value="10" selected>10 सवाल (कुल 20 सवाल होंगे)</option>
-          <option value="15">15 सवाल (कुल 30 सवाल होंगे)</option>
+      <div class="form-group">
+        <label class="form-label">Questions per player</label>
+        <select class="form-input" id="qCountSelect">
+          <option value="3">3 सवाल (कुल 6 सवाल - टेस्ट के लिए)</option>
+          <option value="5" selected>5 सवाल (कुल 10 सवाल)</option>
+          <option value="10">10 सवाल (कुल 20 सवाल)</option>
         </select>
       </div>
 
       <div id="hostLaunchWrap">
-        <button class="btn btn-primary" onclick="launchMatch()">
-          <span>🚀</span> मुकाबला शुरू करो (Start 3-2-1)
+        <button class="btn btn-primary" onclick="confirmQuestionCount()">
+          <span>📝</span> सवाल लिखना शुरू करो (Next)
         </button>
       </div>
       <div id="guestWaitWrap" style="display: none; text-align: center; color: #64748b; font-size: 0.85rem; font-weight: 800; padding: 10px;">
-        ⏳ होस्ट (दोस्त) मैच शुरू कर रहा है... इंतज़ार करें!
+        ⏳ होस्ट सवालों की संख्या चुन रहा है... इंतज़ार करें!
       </div>
     </div>
 
     <!-- ─────────────────────────────────────────
-         SCREEN 3: LIVE BATTLE ARENA (TAB 1)
+         SCREEN 3: DRAFTING QUESTIONS (WRITE IN PEACE)
          ───────────────────────────────────────── -->
-    <div id="viewBattle" style="display: none;">
+    <div id="viewDraft" class="card" style="display: none;">
+      <h3 style="font-size: 1.2rem; font-weight: 900; margin-bottom: 4px;">✍️ अपने सवाल तैयार करें</h3>
+      <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">
+        आराम से अपने सभी सवाल लिख लें। जब दोनों तैयार होंगे तब मैच शुरू होगा!
+      </p>
 
-      <div class="scoreboard-box">
-        <div class="player-col">
-          <div class="player-name" id="sbNameP1">Player 1</div>
-          <div class="player-score" id="sbScoreP1">0</div>
-        </div>
-        <div class="vs-divider">VS</div>
-        <div class="player-col">
-          <div class="player-name" id="sbNameP2">Player 2</div>
-          <div class="player-score score-p2" id="sbScoreP2">0</div>
-        </div>
+      <div id="draftQuestionsList">
+        <!-- Rendered inputs for N questions -->
       </div>
 
-      <div class="progress-bar-container">
-        <span id="roundCounterText">Question 1 of 20</span>
-        <div class="timer-badge" id="liveTimerBadge">
-          <span>⏱️</span> <span id="timerSecondsText">30</span>s
-        </div>
-      </div>
+      <button class="btn btn-success" id="btnSubmitDraft" onclick="submitDraftQuestions()">
+        <span>✅</span> मैंने सभी सवाल लिख लिए (Ready)
+      </button>
 
-      <!-- Phase A: Writing Question (Asker) -->
-      <div id="phaseWriteQuestion" class="card" style="display: none;">
-        <div style="font-size: 0.85rem; font-weight: 900; color: #4f46e5; margin-bottom: 8px;">
-          ✍️ तुम्हारी बारी है सवाल पूछने की!
-        </div>
-        <div class="form-group">
-          <label class="form-label">विषय (Subject)</label>
-          <select class="form-input" id="currentWriteSubject"></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">सवाल लिखें (Type Question)</label>
-          <textarea class="form-input" id="questionTextInput" rows="3" placeholder="उदा. DNA का पूरा नाम क्या है? या विकल्प लिखें..."></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="submitQuestion()">
-          <span>📤</span> सवाल दोस्त को भेजो (Send)
-        </button>
-      </div>
-
-      <!-- Phase B: Waiting for Question (Answerer) -->
-      <div id="phaseWaitQuestion" class="card" style="display: none; text-align: center; padding: 36px 18px;">
-        <div style="font-size: 3rem; margin-bottom: 8px;">💭</div>
-        <div style="font-size: 1.1rem; font-weight: 900; color: #1e1b4b;" id="waitAskerNameText">दोस्त सवाल लिख रहा है...</div>
-        <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">जैसे ही वो भेजेगा, आपके फोन पर 30s का टाइमर शुरू होगा!</div>
-      </div>
-
-      <!-- Phase C: Answering Question (Answerer) -->
-      <div id="phaseAnswerQuestion" class="card" style="display: none;">
-        <div class="question-display-box">
-          <span class="question-subject-tag" id="ansQuestionSubject">Biology</span>
-          <div style="font-size: 1.15rem; font-weight: 900; color: #0f172a; margin-top: 4px;" id="ansQuestionText">
-            सवाल लोड हो रहा है...
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">तुम्हारा उत्तर (Type your Answer):</label>
-          <input type="text" class="form-input" id="answerTextInput" placeholder="यहाँ उत्तर लिखें..." />
-        </div>
-        <button class="btn btn-primary" onclick="submitAnswer()">
-          <span>⚡</span> उत्तर भेजो (Submit Answer)
-        </button>
-      </div>
-
-      <!-- Phase D: Evaluating Answer (Asker) -->
-      <div id="phaseEvaluateAnswer" class="card" style="display: none;">
-        <div style="font-size: 0.85rem; font-weight: 900; color: #4338ca; margin-bottom: 6px;">
-          🔎 दोस्त का उत्तर आया! चेक करें:
-        </div>
-        <div class="question-display-box" style="border-color: #cbd5e1; background: #f8fafc;">
-          <div style="font-size: 0.78rem; font-weight: 800; color: #64748b;">आपका सवाल:</div>
-          <div style="font-weight: 800; font-size: 0.95rem; margin-top: 2px;" id="evalQuestionText">...</div>
-        </div>
-        <div style="background: #eef2ff; border: 1.5px solid #818cf8; border-radius: 12px; padding: 14px; margin: 10px 0;">
-          <div style="font-size: 0.75rem; font-weight: 800; color: #4338ca;">दोस्त का उत्तर:</div>
-          <div style="font-size: 1.2rem; font-weight: 900; color: #1e1b4b; margin-top: 3px;" id="evalAnswerGivenText">...</div>
-        </div>
-        <div class="eval-btn-row">
-          <button class="btn-right" onclick="evaluateAnswer(true)">
-            <span>✅</span> सही है (+5 अंक)
-          </button>
-          <button class="btn-wrong" onclick="evaluateAnswer(false)">
-            <span>❌</span> गलत है (0 अंक)
-          </button>
-        </div>
-      </div>
-
-      <!-- Phase E: Answerer Waiting for Eval -->
-      <div id="phaseWaitEval" class="card" style="display: none; text-align: center; padding: 36px 18px;">
-        <div style="font-size: 3rem; margin-bottom: 8px;">⏳</div>
-        <div style="font-size: 1.1rem; font-weight: 900; color: #1e1b4b;">उत्तर भेज दिया गया है!</div>
-        <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">दोस्त आपका उत्तर चेक कर रहा है...</div>
-      </div>
-
-    </div>
-
-    <!-- ─────────────────────────────────────────
-         SCREEN 4: DEDICATED CHAT & PHOTO SECTION (TAB 2)
-         ───────────────────────────────────────── -->
-    <div id="viewChat">
-      <!-- Live Message Stream -->
-      <div class="chat-messages-container" id="chatMsgContainer">
-        <!-- Chat bubbles rendered here -->
-      </div>
-
-      <!-- Chat Input Controls -->
-      <div class="chat-input-bar">
-        <!-- Hidden Photo File Input -->
-        <input type="file" id="chatPhotoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)" />
-        <button class="btn-photo-pick" onclick="document.getElementById('chatPhotoInput').click()" title="Send Photo">
-          📷
-        </button>
-
-        <input type="text" class="form-input" id="chatTextInput" placeholder="मैसेज लिखें..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter') sendChatMessage()" />
-        
-        <button class="btn-send-msg" onclick="sendChatMessage()">
-          ➤
-        </button>
+      <div id="draftWaitingNotice" style="display: none; text-align: center; padding: 14px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; margin-top: 10px; font-weight: 800; font-size: 0.85rem; color: #92400e;">
+        ⏳ आपने सवाल सबमिट कर दिए! दोस्त के सवाल पूरे होने का इंतज़ार...
       </div>
     </div>
 
     <!-- ─────────────────────────────────────────
-         SCREEN 5: MATCH VICTORY RESULT
+         SCREEN 4: 30-SECOND ANSWERING ARENA
          ───────────────────────────────────────── -->
-    <div id="viewResult" class="card victory-box" style="display: none;">
+    <div id="viewAnswerArena" class="card" style="display: none;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <span style="font-weight: 900; font-size: 0.9rem; color: #4338ca;" id="ansRoundLabel">Question 1 of 5</span>
+        <div class="timer-badge-big" id="timerBadge">
+          <span>⏱️</span> <span id="timerDigits">30</span>s
+        </div>
+      </div>
+
+      <div style="background: #eef2ff; border: 2px solid #818cf8; border-radius: var(--radius-md); padding: 18px 16px; margin-bottom: 14px;">
+        <div style="font-size: 0.75rem; font-weight: 800; color: #6366f1; margin-bottom: 4px;">दोस्त का सवाल:</div>
+        <div style="font-size: 1.2rem; font-weight: 900; color: #0f172a;" id="displayOpponentQuestion">...</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">तुम्हारा उत्तर (Type your Answer):</label>
+        <textarea class="form-input" id="currentAnswerInput" rows="3" placeholder="यहाँ उत्तर लिखें..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitSingleAnswer()">
+        <span>➡️</span> उत्तर सबमिट करो / अगला सवाल
+      </button>
+    </div>
+
+    <!-- Screen 4B: Waiting for opponent to finish all answers -->
+    <div id="viewAnswerWait" class="card" style="display: none; text-align: center; padding: 36px 18px;">
+      <div style="font-size: 3rem; margin-bottom: 8px;">⏳</div>
+      <h3 style="font-size: 1.2rem; font-weight: 900; color: #1e1b4b;">आपने सभी उत्तर दे दिए!</h3>
+      <p style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">
+        दोस्त के सभी उत्तर पूरे होने का इंतज़ार हो रहा है...<br>दोनों पूरा करेंगे तभी एक साथ चेकिंग शुरू होगी!
+      </p>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         SCREEN 5: EVALUATION PHASE (CHECK BOTH SIDES)
+         ───────────────────────────────────────── -->
+    <div id="viewEvaluation" class="card" style="display: none;">
+      <h3 style="font-size: 1.2rem; font-weight: 900; margin-bottom: 4px;">🔎 दोस्त के उत्तर चेक करें</h3>
+      <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">
+        आपने जो सवाल पूछे थे, दोस्त ने उनके ये उत्तर दिए हैं। सही या गलत मार्क करें:
+      </p>
+
+      <div id="evalListContainer">
+        <!-- Rendered list of questions asked by me and friend's answers -->
+      </div>
+
+      <button class="btn btn-success" id="btnSubmitEval" onclick="submitEvaluationScores()">
+        <span>🏁</span> चेकिंग पूरी हुई (Submit Scores)
+      </button>
+
+      <div id="evalWaitingNotice" style="display: none; text-align: center; padding: 14px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; margin-top: 10px; font-weight: 800; font-size: 0.85rem; color: #92400e;">
+        ⏳ आपने चेक कर लिया! दोस्त द्वारा आपके उत्तर चेक करने का इंतज़ार...
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         SCREEN 6: FINAL RESULT WITH NAMES & SCORES
+         ───────────────────────────────────────── -->
+    <div id="viewResult" class="card" style="display: none; text-align: center; padding: 30px 18px;">
       <div style="font-size: 4rem; margin-bottom: 8px;">🏆</div>
-      <h2 style="font-size: 1.8rem; font-weight: 900; color: #1e1b4b; margin-bottom: 4px;" id="winnerWinnerText">Rahul Won!</h2>
-      <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 20px;">मुकाबला समाप्त! यहाँ अंतिम स्कोरकार्ड है:</p>
+      <h2 style="font-size: 1.8rem; font-weight: 900; color: #1e1b4b; margin-bottom: 4px;" id="winnerNameText">Rahul Won!</h2>
+      <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 20px;">दोनों की निष्पक्ष चेकिंग के बाद अंतिम स्कोरकार्ड:</p>
 
       <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
         <div style="display:flex; justify-content:space-around; align-items:center;">
           <div>
-            <div style="font-size:0.9rem; font-weight:900; color:#4f46e5;" id="finalNameP1">Player 1</div>
-            <div style="font-size:2.4rem; font-weight:900; color:#1e1b4b;" id="finalScoreP1">0</div>
+            <div style="font-size:0.95rem; font-weight:900; color:#4f46e5;" id="finalP1Name">Player 1</div>
+            <div style="font-size:2.4rem; font-weight:900; color:#1e1b4b;" id="finalP1Score">0</div>
+            <div style="font-size:0.75rem; color:#64748b;" id="finalP1Cheat">0 Warnings</div>
           </div>
           <div style="font-size:1.5rem; font-weight:900; color:#cbd5e1;">VS</div>
           <div>
-            <div style="font-size:0.9rem; font-weight:900; color:#db2777;" id="finalNameP2">Player 2</div>
-            <div style="font-size:2.4rem; font-weight:900; color:#1e1b4b;" id="finalScoreP2">0</div>
+            <div style="font-size:0.95rem; font-weight:900; color:#db2777;" id="finalP2Name">Player 2</div>
+            <div style="font-size:2.4rem; font-weight:900; color:#1e1b4b;" id="finalP2Score">0</div>
+            <div style="font-size:0.75rem; color:#64748b;" id="finalP2Cheat">0 Warnings</div>
           </div>
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="rematchDuel()">
-        <span>🔄</span> दोबारा खेलो (Play Rematch)
+      <button class="btn btn-primary" onclick="rematchGame()">
+        <span>🔄</span> नया मैच खेलो (Rematch)
       </button>
     </div>
 
   </div>
-
-  <!-- Bottom Navigation Bar (Arena vs Chat) -->
-  <nav class="bottom-nav" id="bottomNav">
-    <button class="nav-btn active" id="navBtnArena" onclick="switchTab('arena')">
-      <span style="font-size: 1.3rem;">⚔️</span>
-      <span>Arena</span>
-    </button>
-    <button class="nav-btn" id="navBtnChat" onclick="switchTab('chat')">
-      <span class="nav-badge-dot" id="chatBadgeDot"></span>
-      <span style="font-size: 1.3rem;">💬</span>
-      <span>Chat & Photos</span>
-    </button>
-  </nav>
 
   <!-- ─────────────────────────────────────────────────────────
        JAVASCRIPT APPLICATION ENGINE
@@ -849,46 +544,27 @@
        1. FIREBASE CONFIGURATION (यहाँ अपनी KEYS डालें)
        ========================================================= */
     const firebaseConfig = {
-      apiKey: "AIzaSyDcui9ytFw89YDZdAK4Wi8FsjczmRNyNuQ",
-      authDomain: "live-test-bccec.firebaseapp.com",
-      databaseURL: "https://live-test-bccec-default-rtdb.firebaseio.com/",
-      projectId: "live-test-bccec",
-      storageBucket: "live-test-bccec.firebasestorage.app",
-      messagingSenderId: "610663268459",
-      appId: "1:610663268459:web:54d8620491856dfa47312e"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
-    // Firebase Initialize
     let db = null;
     try {
       if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
-        setupPresenceMonitor();
       }
     } catch(e) {
-      console.error("Firebase Init Error:", e);
+      console.error("Firebase init error:", e);
     }
 
     /* =========================================================
-       2. RECONNECTING PRESENCE MONITOR
-       ========================================================= */
-    function setupPresenceMonitor() {
-      const connectedRef = db.ref('.info/connected');
-      connectedRef.on('value', snap => {
-        const isConnected = snap.val() === true;
-        const rebar = document.getElementById('reconnectingBar');
-        if (!isConnected && currentRoomPin) {
-          rebar.style.display = 'flex';
-          setOnlineStatus(false, 'Reconnecting...', true);
-        } else {
-          rebar.style.display = 'none';
-        }
-      });
-    }
-
-    /* =========================================================
-       3. WEB AUDIO SYNTHESIZER
+       2. WEB AUDIO SYNTHESIZER
        ========================================================= */
     class DuelAudio {
       constructor() { this.ctx = null; }
@@ -915,24 +591,10 @@
           osc.stop(this.ctx.currentTime + delay + dur);
         } catch(e) {}
       }
-      playSmsPing() {
-        this.playTone(880, 0.12, 'sine', 0, 0.25);
-        this.playTone(1318.5, 0.25, 'sine', 0.1, 0.25);
-      }
-      playChatPing() {
-        this.playTone(1046.5, 0.08, 'sine', 0, 0.2);
-      }
-      playCountdownBeep() { this.playTone(440, 0.1, 'triangle', 0, 0.2); }
-      playCountdownGo() { this.playTone(880, 0.4, 'triangle', 0, 0.3); }
-      playRightSound() {
-        this.playTone(523.25, 0.15, 'triangle', 0);
-        this.playTone(659.25, 0.15, 'triangle', 0.1);
-        this.playTone(783.99, 0.3, 'triangle', 0.2);
-      }
-      playWrongSound() {
-        this.playTone(220, 0.2, 'sawtooth', 0, 0.25);
-        this.playTone(180, 0.3, 'sawtooth', 0.15, 0.25);
-      }
+      playSms() { this.playTone(880, 0.12, 'sine', 0); this.playTone(1318.5, 0.25, 'sine', 0.1); }
+      playBeep() { this.playTone(440, 0.1, 'triangle', 0); }
+      playGo() { this.playTone(880, 0.4, 'triangle', 0); }
+      playCheat() { this.playTone(180, 0.3, 'sawtooth', 0, 0.4); this.playTone(140, 0.4, 'sawtooth', 0.1, 0.4); }
       playVictory() {
         this.playTone(523.25, 0.15, 'triangle', 0);
         this.playTone(659.25, 0.15, 'triangle', 0.12);
@@ -943,53 +605,96 @@
     const sound = new DuelAudio();
 
     /* =========================================================
-       4. STATE MANAGEMENT & LISTENERS
+       3. STATE MANAGEMENT
        ========================================================= */
+    const RESUME_KEY = 'duel_master_session_v3';
+
     let currentRoomPin = '';
-    let myRole = '';
+    let myRole = ''; // 'host' or 'guest'
     let myName = '';
     let roomRef = null;
     let roomData = null;
-    let currentTab = 'arena'; // 'arena' or 'chat'
-    let timerInterval = null;
-    let timerRemaining = 30;
 
-    function setOnlineStatus(isOnline, label, isReconnecting = false) {
-      const badge = document.getElementById('onlineStatusBadge');
-      const text = document.getElementById('onlineStatusText');
-      badge.classList.remove('online', 'reconnecting');
+    // Answering & Answering Timer State
+    let myCurrentAnsIndex = 0;
+    let myAnswersArray = [];
+    let myTimerInterval = null;
+    let secondsLeft = 30;
 
-      if (isReconnecting) {
-        badge.classList.add('reconnecting');
-        text.textContent = label || 'Reconnecting...';
-      } else if (isOnline) {
-        badge.classList.add('online');
-        text.textContent = label || 'Online';
+    // Evaluation State (array of 5 or 0)
+    let myEvaluationScores = [];
+
+    // Cheat Strikes Count
+    let myCheatCount = 0;
+
+    function saveSession() {
+      const s = { roomPin: currentRoomPin, myRole, myName, myCheatCount };
+      localStorage.setItem(RESUME_KEY, JSON.stringify(s));
+    }
+
+    function triggerTopSms(text) {
+      sound.playSms();
+      const banner = document.getElementById('topSmsBanner');
+      document.getElementById('topSmsText').textContent = text;
+      banner.classList.add('show');
+      setTimeout(() => banner.classList.remove('show'), 3500);
+    }
+
+    function setOnlineStatus(online, label) {
+      const b = document.getElementById('onlineStatusBadge');
+      const t = document.getElementById('onlineStatusText');
+      if (online) {
+        b.classList.add('online');
+        t.textContent = label || 'Online';
       } else {
-        text.textContent = label || 'Offline';
+        b.classList.remove('online');
+        t.textContent = label || 'Offline';
       }
     }
 
-    function showSmsToast(msg) {
-      sound.playSmsPing();
-      const toast = document.getElementById('smsToast');
-      document.getElementById('smsToastText').textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2800);
+    /* =========================================================
+       4. ANTI-CHEAT / TAB SWITCH / SPLIT-SCREEN DETECTION
+       ========================================================= */
+    function setupAntiCheat() {
+      const handleCheating = () => {
+        // Only active during answering
+        if (roomData && roomData.status === 'answering') {
+          myCheatCount++;
+          sound.playCheat();
+          
+          const toast = document.getElementById('cheatToast');
+          toast.style.display = 'flex';
+          setTimeout(() => toast.style.display = 'none', 3000);
+
+          if (roomRef) {
+            roomRef.child(`${myRole}/cheats`).set(myCheatCount);
+          }
+          saveSession();
+        }
+      };
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') handleCheating();
+      });
+      window.addEventListener('blur', () => {
+        handleCheating();
+      });
     }
 
-    function checkFirebaseReady() {
+    /* =========================================================
+       5. ROOM CREATION & CONNECTION
+       ========================================================= */
+    function checkDb() {
       if (!db) {
-        alert("⚠️ कृपया कोड के अंदर अपनी Firebase Keys (firebaseConfig) डालें!");
+        alert("⚠️ कृपया कोड में अपनी Firebase Config Keys डालें!");
         return false;
       }
       return true;
     }
 
-    /* Create Room */
     function createRoom() {
       sound.init();
-      if (!checkFirebaseReady()) return;
+      if (!checkDb()) return;
 
       const name = document.getElementById('myNameInput').value.trim();
       if (!name) { alert("कृपया अपना नाम लिखें!"); return; }
@@ -997,44 +702,32 @@
       myRole = 'host';
 
       currentRoomPin = String(Math.floor(1000 + Math.random() * 9000));
-      roomRef = db.ref('duel_rooms/' + currentRoomPin);
+      roomRef = db.ref('study_duels/' + currentRoomPin);
 
-      const initialRoom = {
+      const initial = {
         pin: currentRoomPin,
-        status: 'waiting',
-        host: { name: myName, online: true, score: 0 },
+        status: 'lobby',
+        host: { name: myName, online: true, cheats: 0, ready: false },
         guest: null,
-        config: {
-          subjects: ['Biology', 'Chemistry', 'Physics', 'English', 'Hindi'],
-          qPerPlayer: 10,
-          totalQuestions: 20
-        },
-        gameState: {
-          round: 1,
-          currentAsker: 'host',
-          phase: 'writing',
-          subject: 'Biology',
-          question: '',
-          answer: '',
-          lastCorrect: null
-        }
+        config: { qCount: 5 },
+        drafts: { host: [], guest: [] },
+        answers: { host: [], guest: [] },
+        evaluations: { host: [], guest: [] }
       };
 
-      roomRef.set(initialRoom).then(() => {
+      roomRef.set(initial).then(() => {
         document.getElementById('displayRoomCode').textContent = currentRoomPin;
         document.getElementById('roomWaitCard').style.display = 'block';
         setOnlineStatus(false, 'Waiting for friend...');
-
         roomRef.child('host/online').onDisconnect().set(false);
+        saveSession();
         attachRoomListener();
-        attachChatListener();
       });
     }
 
-    /* Join Room */
     function joinRoom() {
       sound.init();
-      if (!checkFirebaseReady()) return;
+      if (!checkDb()) return;
 
       const name = document.getElementById('myNameInput').value.trim();
       const pin = document.getElementById('joinRoomPinInput').value.trim();
@@ -1044,54 +737,61 @@
       myName = name;
       myRole = 'guest';
       currentRoomPin = pin;
-      roomRef = db.ref('duel_rooms/' + currentRoomPin);
+      roomRef = db.ref('study_duels/' + currentRoomPin);
 
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) {
+      roomRef.once('value').then(snap => {
+        if (!snap.exists()) {
           alert("कमरा नहीं मिला! कोड चेक करें।");
           return;
         }
 
-        roomRef.child('guest').set({ name: myName, online: true, score: 0 });
+        roomRef.child('guest').set({ name: myName, online: true, cheats: 0, ready: false });
         roomRef.child('status').set('config');
         roomRef.child('guest/online').onDisconnect().set(false);
 
+        saveSession();
         attachRoomListener();
-        attachChatListener();
       });
     }
 
     function shareOnWhatsApp() {
-      const currentUrl = window.location.origin + window.location.pathname;
-      const smartLink = `${currentUrl}?room=${currentRoomPin}`;
-      const text = `आ जाओ 1v1 लाइव सब्जेक्ट Q&A मुकाबला + चैट करते हैं! ⚔️\n\nRoom Code: *${currentRoomPin}*\nयहाँ क्लिक करके जुड़ो: ${smartLink}`;
+      const url = window.location.origin + window.location.pathname;
+      const text = `आ जाओ 1v1 लाइव सवाल-जवाब मुकाबला करते हैं! ⚔️\n\nRoom Code: *${currentRoomPin}*\nयहाँ क्लिक करो: ${url}?room=${currentRoomPin}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    /* Realtime Firebase Listeners */
     function attachRoomListener() {
-      document.getElementById('bottomNav').style.display = 'flex'; // show tabs once connected
-
       roomRef.on('value', snapshot => {
         if (!snapshot.exists()) return;
-        const prevData = roomData;
+        const prev = roomData;
         roomData = snapshot.val();
 
-        // Update Online status
-        const friendRole = myRole === 'host' ? 'guest' : 'host';
-        const friendOnline = roomData[friendRole] && roomData[friendRole].online;
-        setOnlineStatus(friendOnline, friendOnline ? 'Online 🟢' : 'Offline 🔴');
+        // Online presence
+        const friend = myRole === 'host' ? 'guest' : 'host';
+        const isFriendOnline = roomData[friend] && roomData[friend].online;
+        setOnlineStatus(isFriendOnline, isFriendOnline ? 'Online 🟢' : 'Offline 🔴');
 
-        renderScreenState(prevData, roomData);
+        handleGameFlow(prev, roomData);
       });
     }
 
     /* =========================================================
-       5. SCREEN STATE ROUTER
+       6. GAME FLOW ROUTING (ALL PHASES)
        ========================================================= */
-    function renderScreenState(prev, curr) {
+    function hideAllViews() {
+      document.getElementById('viewLobby').style.display = 'none';
+      document.getElementById('viewConfig').style.display = 'none';
+      document.getElementById('viewDraft').style.display = 'none';
+      document.getElementById('viewAnswerArena').style.display = 'none';
+      document.getElementById('viewAnswerWait').style.display = 'none';
+      document.getElementById('viewEvaluation').style.display = 'none';
+      document.getElementById('viewResult').style.display = 'none';
+    }
+
+    function handleGameFlow(prev, curr) {
+      // 1. CONFIG
       if (curr.status === 'config') {
-        document.getElementById('viewLobby').style.display = 'none';
+        hideAllViews();
         document.getElementById('viewConfig').style.display = 'block';
 
         if (myRole === 'host') {
@@ -1103,434 +803,361 @@
         }
       }
 
-      if (curr.status === 'countdown' && (!prev || prev.status !== 'countdown')) {
-        document.getElementById('viewConfig').style.display = 'none';
-        runCountdown321();
-      }
-
-      if (curr.status === 'battle') {
-        document.getElementById('viewLobby').style.display = 'none';
-        document.getElementById('viewConfig').style.display = 'none';
-        document.getElementById('viewResult').style.display = 'none';
-
-        if (currentTab === 'arena') {
-          document.getElementById('viewBattle').style.display = 'block';
+      // 2. DRAFTING (WRITE ALL QUESTIONS UPFRONT)
+      if (curr.status === 'drafting') {
+        if (!prev || prev.status !== 'drafting') {
+          hideAllViews();
+          document.getElementById('viewDraft').style.display = 'block';
+          renderDraftInputs(curr.config.qCount);
+          triggerTopSms("अपने सवाल लिखें! शांति से टाइप करें ✍️");
         }
 
-        updateScoreboardAndRound(curr);
-        renderBattlePhase(prev, curr);
+        // Check if both finished drafting
+        if (curr.host.ready && curr.guest && curr.guest.ready) {
+          if (myRole === 'host') {
+            roomRef.child('status').set('countdown');
+          }
+        }
       }
 
+      // 3. COUNTDOWN
+      if (curr.status === 'countdown' && (!prev || prev.status !== 'countdown')) {
+        hideAllViews();
+        startCountdownOverlay();
+      }
+
+      // 4. ANSWERING PHASE (30s TIMER)
+      if (curr.status === 'answering' && (!prev || prev.status !== 'answering')) {
+        hideAllViews();
+        startMyAnsweringSequence();
+      }
+
+      // Check if both submitted answers -> Move to Evaluating
+      if (curr.status === 'answering') {
+        const hostDone = curr.answers && curr.answers.host && curr.answers.host.length >= curr.config.qCount;
+        const guestDone = curr.answers && curr.answers.guest && curr.answers.guest.length >= curr.config.qCount;
+
+        if (hostDone && guestDone) {
+          if (myRole === 'host') {
+            roomRef.child('status').set('evaluating');
+          }
+        }
+      }
+
+      // 5. EVALUATION PHASE (MUTUAL CHECKING)
+      if (curr.status === 'evaluating') {
+        if (!prev || prev.status !== 'evaluating') {
+          hideAllViews();
+          document.getElementById('viewEvaluation').style.display = 'block';
+          renderEvaluationCards();
+          triggerTopSms("दोस्त के उत्तर आ गए! चेक करें 🔎");
+        }
+
+        // Check if both submitted evaluations -> Move to Result
+        const hostEvalDone = curr.evaluations && curr.evaluations.host && curr.evaluations.host.length >= curr.config.qCount;
+        const guestEvalDone = curr.evaluations && curr.evaluations.guest && curr.evaluations.guest.length >= curr.config.qCount;
+
+        if (hostEvalDone && guestEvalDone) {
+          if (myRole === 'host') {
+            roomRef.child('status').set('result');
+          }
+        }
+      }
+
+      // 6. RESULT
       if (curr.status === 'result') {
-        document.getElementById('viewBattle').style.display = 'none';
+        hideAllViews();
         document.getElementById('viewResult').style.display = 'block';
-        showFinalResult(curr);
+        renderFinalResult();
       }
     }
 
-    function toggleSubjectSelect(el, sub) {
-      if (myRole !== 'host' || !roomRef) return;
-      el.classList.toggle('selected');
-      const selected = Array.from(document.querySelectorAll('#subjectChipsContainer .subject-chip.selected'))
-                            .map(c => c.textContent.replace(/[^a-zA-Z]/g, '').trim());
-      roomRef.child('config/subjects').set(selected.length > 0 ? selected : ['Biology']);
+    /* ─── PHASE 1: CONFIG ─── */
+    function confirmQuestionCount() {
+      const count = parseInt(document.getElementById('qCountSelect').value) || 5;
+      roomRef.child('config').set({ qCount: count });
+      roomRef.child('status').set('drafting');
     }
 
-    function updateQuestionCount() {
-      if (myRole !== 'host' || !roomRef) return;
-      const qVal = parseInt(document.getElementById('qCountSelect').value) || 10;
-      roomRef.child('config').update({
-        qPerPlayer: qVal,
-        totalQuestions: qVal * 2
-      });
+    /* ─── PHASE 2: DRAFTING ─── */
+    function renderDraftInputs(qCount) {
+      const container = document.getElementById('draftQuestionsList');
+      let html = '';
+      for (let i = 1; i <= qCount; i++) {
+        html += `
+          <div class="draft-q-box">
+            <div style="font-weight:900; font-size:0.85rem; color:#4f46e5; margin-bottom:6px;">सवाल ${i}:</div>
+            <textarea class="form-input draft-q-input" rows="2" placeholder="यहाँ सवाल लिखें..."></textarea>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
     }
 
-    function launchMatch() {
-      if (!roomRef) return;
-      roomRef.child('status').set('countdown');
+    function submitDraftQuestions() {
+      const inputs = document.querySelectorAll('.draft-q-input');
+      const questions = [];
+      for (let input of inputs) {
+        const val = input.value.trim();
+        if (!val) {
+          alert("कृपया अपने सभी सवाल पूरे लिखें!");
+          return;
+        }
+        questions.push(val);
+      }
+
+      document.getElementById('btnSubmitDraft').style.display = 'none';
+      document.getElementById('draftWaitingNotice').style.display = 'block';
+
+      // Push to Firebase
+      roomRef.child(`drafts/${myRole}`).set(questions);
+      roomRef.child(`${myRole}/ready`).set(true);
+
+      triggerTopSms("आपने सवाल सबमिट कर दिए! दोस्त का इंतज़ार...");
     }
 
-    function runCountdown321() {
+    /* ─── PHASE 3: COUNTDOWN ─── */
+    function startCountdownOverlay() {
       const overlay = document.getElementById('countdownOverlay');
       const num = document.getElementById('countdownNumber');
       overlay.style.display = 'flex';
 
       let count = 3;
       num.textContent = count;
-      sound.playCountdownBeep();
+      sound.playBeep();
 
       const timer = setInterval(() => {
         count--;
         if (count > 0) {
           num.textContent = count;
-          sound.playCountdownBeep();
+          sound.playBeep();
         } else if (count === 0) {
           num.textContent = "GO!";
-          sound.playCountdownGo();
+          sound.playGo();
         } else {
           clearInterval(timer);
           overlay.style.display = 'none';
           if (myRole === 'host') {
-            roomRef.child('status').set('battle');
+            roomRef.child('status').set('answering');
           }
         }
       }, 900);
     }
 
-    /* =========================================================
-       6. BATTLE ROUNDS & 30-SEC TIMER
-       ========================================================= */
-    function updateScoreboardAndRound(curr) {
-      document.getElementById('sbNameP1').textContent = curr.host.name;
-      document.getElementById('sbScoreP1').textContent = curr.host.score;
-      document.getElementById('sbNameP2').textContent = curr.guest.name;
-      document.getElementById('sbScoreP2').textContent = curr.guest.score;
-
-      document.getElementById('roundCounterText').textContent = 
-        `Question ${curr.gameState.round} of ${curr.config.totalQuestions}`;
+    /* ─── PHASE 4: 30-SEC ANSWERING SEQUENCE ─── */
+    function startMyAnsweringSequence() {
+      myCurrentAnsIndex = 0;
+      myAnswersArray = [];
+      document.getElementById('viewAnswerArena').style.display = 'block';
+      loadCurrentQuestionToAnswer();
     }
 
-    function hideAllPhases() {
-      document.getElementById('phaseWriteQuestion').style.display = 'none';
-      document.getElementById('phaseWaitQuestion').style.display = 'none';
-      document.getElementById('phaseAnswerQuestion').style.display = 'none';
-      document.getElementById('phaseEvaluateAnswer').style.display = 'none';
-      document.getElementById('phaseWaitEval').style.display = 'none';
-    }
+    function loadCurrentQuestionToAnswer() {
+      clearInterval(myTimerInterval);
 
-    function renderBattlePhase(prev, curr) {
-      const gs = curr.gameState;
-      const iAmAsker = (myRole === gs.currentAsker);
+      const opponentRole = myRole === 'host' ? 'guest' : 'host';
+      const opponentQuestions = roomData.drafts[opponentRole] || [];
 
-      hideAllPhases();
-
-      // Phase 1: WRITING QUESTION
-      if (gs.phase === 'writing') {
-        clearInterval(timerInterval);
-        resetTimerBadge(30);
-
-        if (iAmAsker) {
-          document.getElementById('phaseWriteQuestion').style.display = 'block';
-          const sel = document.getElementById('currentWriteSubject');
-          sel.innerHTML = curr.config.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-          document.getElementById('questionTextInput').value = '';
-        } else {
-          document.getElementById('phaseWaitQuestion').style.display = 'block';
-          const askerName = gs.currentAsker === 'host' ? curr.host.name : curr.guest.name;
-          document.getElementById('waitAskerNameText').textContent = `${askerName} सवाल लिख रहा है... ⏳`;
-        }
+      if (myCurrentAnsIndex >= opponentQuestions.length) {
+        // Finished all questions! Wait for opponent
+        document.getElementById('viewAnswerArena').style.display = 'none';
+        document.getElementById('viewAnswerWait').style.display = 'block';
+        return;
       }
 
-      // Phase 2: ANSWERING QUESTION
-      if (gs.phase === 'answering') {
-        if (!iAmAsker) {
-          document.getElementById('phaseAnswerQuestion').style.display = 'block';
-          document.getElementById('ansQuestionSubject').textContent = gs.subject;
-          document.getElementById('ansQuestionText').textContent = gs.question;
-          document.getElementById('answerTextInput').value = '';
-          document.getElementById('answerTextInput').focus();
-        } else {
-          document.getElementById('phaseWaitQuestion').style.display = 'block';
-          const ansName = gs.currentAsker === 'host' ? curr.guest.name : curr.host.name;
-          document.getElementById('waitAskerNameText').textContent = `सवाल भेज दिया! ${ansName} 30s में उत्तर दे रहा है... ⏱️`;
+      document.getElementById('ansRoundLabel').textContent = 
+        `Question ${myCurrentAnsIndex + 1} of ${opponentQuestions.length}`;
+      document.getElementById('displayOpponentQuestion').textContent = 
+        opponentQuestions[myCurrentAnsIndex];
+      document.getElementById('currentAnswerInput').value = '';
+      document.getElementById('currentAnswerInput').focus();
+
+      // Start 30s countdown
+      secondsLeft = 30;
+      updateTimerDisplay(30);
+
+      myTimerInterval = setInterval(() => {
+        secondsLeft--;
+        updateTimerDisplay(secondsLeft);
+
+        if (secondsLeft <= 5 && secondsLeft > 0) {
+          sound.playBeep();
         }
 
-        if (!prev || prev.gameState.phase !== 'answering') {
-          showSmsToast("नया सवाल आया! 30s शुरू ⏰");
-          start30SecTimer(!iAmAsker);
-        }
-      }
-
-      // Phase 3: EVALUATING ANSWER
-      if (gs.phase === 'evaluating') {
-        clearInterval(timerInterval);
-
-        if (iAmAsker) {
-          document.getElementById('phaseEvaluateAnswer').style.display = 'block';
-          document.getElementById('evalQuestionText').textContent = gs.question;
-          document.getElementById('evalAnswerGivenText').textContent = gs.answer || 'कोई उत्तर नहीं';
-        } else {
-          document.getElementById('phaseWaitEval').style.display = 'block';
-        }
-
-        if (!prev || prev.gameState.phase !== 'evaluating') {
-          if (iAmAsker) showSmsToast("दोस्त का उत्तर आया! चेक करें ✅");
-        }
-      }
-    }
-
-    function submitQuestion() {
-      const sub = document.getElementById('currentWriteSubject').value;
-      const q = document.getElementById('questionTextInput').value.trim();
-      if (!q) { alert("कृपया सवाल लिखें!"); return; }
-
-      roomRef.child('gameState').update({
-        phase: 'answering',
-        subject: sub,
-        question: q
-      });
-    }
-
-    function resetTimerBadge(sec) {
-      timerRemaining = sec;
-      const badge = document.getElementById('liveTimerBadge');
-      const text = document.getElementById('timerSecondsText');
-      badge.classList.remove('urgent');
-      text.textContent = sec;
-    }
-
-    function start30SecTimer(isAnswerer) {
-      clearInterval(timerInterval);
-      resetTimerBadge(30);
-
-      timerInterval = setInterval(() => {
-        timerRemaining--;
-        const badge = document.getElementById('liveTimerBadge');
-        const text = document.getElementById('timerSecondsText');
-        text.textContent = timerRemaining;
-
-        if (timerRemaining <= 5 && timerRemaining > 0) {
-          badge.classList.add('urgent');
-          sound.playCountdownBeep();
-        }
-
-        if (timerRemaining <= 0) {
-          clearInterval(timerInterval);
-          if (isAnswerer) {
-            submitAnswer("समय समाप्त (No Answer in 30s)");
-          }
+        if (secondsLeft <= 0) {
+          clearInterval(myTimerInterval);
+          submitSingleAnswer(true); // Auto-advance on timeout
         }
       }, 1000);
     }
 
-    function submitAnswer(forced) {
-      clearInterval(timerInterval);
-      const ans = forced || document.getElementById('answerTextInput').value.trim() || 'कोई उत्तर नहीं';
-      roomRef.child('gameState').update({
-        phase: 'evaluating',
-        answer: ans
-      });
+    function updateTimerDisplay(sec) {
+      const badge = document.getElementById('timerBadge');
+      const text = document.getElementById('timerDigits');
+      text.textContent = sec;
+      if (sec <= 5) badge.classList.add('danger');
+      else badge.classList.remove('danger');
     }
 
-    function evaluateAnswer(isRight) {
-      const curr = roomData;
-      const gs = curr.gameState;
-      const answererRole = gs.currentAsker === 'host' ? 'guest' : 'host';
+    function submitSingleAnswer(isTimeout = false) {
+      clearInterval(myTimerInterval);
+      let ans = document.getElementById('currentAnswerInput').value.trim();
+      if (isTimeout && !ans) ans = "समय समाप्त (No Answer in 30s)";
+      if (!ans) ans = "कोई उत्तर नहीं दिया";
 
-      let newScore = curr[answererRole].score;
-      if (isRight) {
-        newScore += 5;
-        sound.playRightSound();
-      } else {
-        sound.playWrongSound();
-      }
+      myAnswersArray.push(ans);
+      myCurrentAnsIndex++;
 
-      const nextRound = gs.round + 1;
-      const nextAsker = gs.currentAsker === 'host' ? 'guest' : 'host';
+      // Save partial answers to Firebase
+      roomRef.child(`answers/${myRole}`).set(myAnswersArray);
 
-      const updates = {};
-      updates[`${answererRole}/score`] = newScore;
-
-      if (nextRound > curr.config.totalQuestions) {
-        updates['status'] = 'result';
-      } else {
-        updates['gameState'] = {
-          round: nextRound,
-          currentAsker: nextAsker,
-          phase: 'writing',
-          subject: 'Biology',
-          question: '',
-          answer: '',
-          lastCorrect: isRight
-        };
-      }
-
-      roomRef.update(updates);
+      loadCurrentQuestionToAnswer();
     }
 
-    function showFinalResult(curr) {
-      clearInterval(timerInterval);
+    /* ─── PHASE 5: MUTUAL EVALUATION (RIGHT / WRONG) ─── */
+    function renderEvaluationCards() {
+      const container = document.getElementById('evalListContainer');
+      const myQuestions = roomData.drafts[myRole] || [];
+      const opponentRole = myRole === 'host' ? 'guest' : 'host';
+      const opponentAnswers = roomData.answers[opponentRole] || [];
+
+      myEvaluationScores = new Array(myQuestions.length).fill(null);
+
+      let html = '';
+      for (let i = 0; i < myQuestions.length; i++) {
+        html += `
+          <div class="eval-card-item">
+            <div style="font-size:0.75rem; font-weight:800; color:#4f46e5;">आपका सवाल ${i+1}:</div>
+            <div style="font-weight:900; font-size:1rem; margin-bottom:8px;">${escapeHtml(myQuestions[i])}</div>
+            
+            <div style="font-size:0.75rem; font-weight:800; color:#16a34a;">दोस्त का उत्तर:</div>
+            <div style="background:#eef2ff; border:1px solid #c7d2fe; padding:8px 12px; border-radius:8px; font-weight:900; font-size:1.05rem; color:#1e1b4b;">
+              ${escapeHtml(opponentAnswers[i] || 'कोई उत्तर नहीं')}
+            </div>
+
+            <div class="eval-choice-row">
+              <button class="btn-choice" id="choiceRight_${i}" onclick="selectEvalChoice(${i}, 5)">
+                ✅ सही (+5 अंक)
+              </button>
+              <button class="btn-choice" id="choiceWrong_${i}" onclick="selectEvalChoice(${i}, 0)">
+                ❌ गलत (0 अंक)
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    function selectEvalChoice(index, score) {
+      myEvaluationScores[index] = score;
+
+      const rBtn = document.getElementById(`choiceRight_${index}`);
+      const wBtn = document.getElementById(`choiceWrong_${index}`);
+
+      if (score === 5) {
+        rBtn.classList.add('selected-right');
+        wBtn.classList.remove('selected-wrong');
+      } else {
+        wBtn.classList.add('selected-wrong');
+        rBtn.classList.remove('selected-right');
+      }
+    }
+
+    function submitEvaluationScores() {
+      for (let i = 0; i < myEvaluationScores.length; i++) {
+        if (myEvaluationScores[i] === null) {
+          alert(`कृपया सवाल ${i+1} को सही या गलत मार्क करें!`);
+          return;
+        }
+      }
+
+      document.getElementById('btnSubmitEval').style.display = 'none';
+      document.getElementById('evalWaitingNotice').style.display = 'block';
+
+      // Push evaluation scores (these are points given TO opponent)
+      roomRef.child(`evaluations/${myRole}`).set(myEvaluationScores);
+      triggerTopSms("चेकिंग सबमिट हो गई! दोस्त का इंतज़ार...");
+    }
+
+    /* ─── PHASE 6: FINAL RESULT WITH NAMES & ACCURACY ─── */
+    function renderFinalResult() {
       sound.playVictory();
 
-      document.getElementById('viewBattle').style.display = 'none';
-      document.getElementById('viewResult').style.display = 'block';
+      // P1 score = points awarded by P2 (guest)
+      const p1GivenScores = roomData.evaluations.guest || [];
+      const p1TotalScore = p1GivenScores.reduce((a, b) => a + b, 0);
 
-      const p1 = curr.host.name;
-      const p2 = curr.guest.name;
-      const s1 = curr.host.score;
-      const s2 = curr.guest.score;
+      // P2 score = points awarded by P1 (host)
+      const p2GivenScores = roomData.evaluations.host || [];
+      const p2TotalScore = p2GivenScores.reduce((a, b) => a + b, 0);
 
-      document.getElementById('finalNameP1').textContent = p1;
-      document.getElementById('finalScoreP1').textContent = s1;
-      document.getElementById('finalNameP2').textContent = p2;
-      document.getElementById('finalScoreP2').textContent = s2;
+      const p1Name = roomData.host.name;
+      const p2Name = roomData.guest.name;
 
-      const title = document.getElementById('winnerWinnerText');
-      if (s1 > s2) title.textContent = `👑 ${p1} विजयी हुआ!`;
-      else if (s2 > s1) title.textContent = `👑 ${p2} विजयी हुआ!`;
-      else title.textContent = `🤝 रोमांचक टाई (Draw)!`;
-    }
+      document.getElementById('finalP1Name').textContent = p1Name;
+      document.getElementById('finalP1Score').textContent = `${p1TotalScore} Pts`;
+      document.getElementById('finalP1Cheat').textContent = `🚨 ${roomData.host.cheats || 0} Warnings`;
 
-    function rematchDuel() {
-      if (!roomRef) return;
-      roomRef.update({
-        status: 'config',
-        'host/score': 0,
-        'guest/score': 0,
-        gameState: {
-          round: 1,
-          currentAsker: 'host',
-          phase: 'writing',
-          subject: 'Biology',
-          question: '',
-          answer: ''
-        }
-      });
-    }
+      document.getElementById('finalP2Name').textContent = p2Name;
+      document.getElementById('finalP2Score').textContent = `${p2TotalScore} Pts`;
+      document.getElementById('finalP2Cheat').textContent = `🚨 ${roomData.guest.cheats || 0} Warnings`;
 
-    /* =========================================================
-       7. DEDICATED CHAT & PHOTO SHARING SYSTEM
-       ========================================================= */
-    function switchTab(tab) {
-      currentTab = tab;
-      document.getElementById('navBtnArena').classList.toggle('active', tab === 'arena');
-      document.getElementById('navBtnChat').classList.toggle('active', tab === 'chat');
-
-      if (tab === 'arena') {
-        document.getElementById('viewChat').style.display = 'none';
-        if (roomData && roomData.status === 'battle') {
-          document.getElementById('viewBattle').style.display = 'block';
-        } else if (roomData && roomData.status === 'config') {
-          document.getElementById('viewConfig').style.display = 'block';
-        }
+      const title = document.getElementById('winnerNameText');
+      if (p1TotalScore > p2TotalScore) {
+        title.textContent = `👑 ${p1Name} विजयी हुआ!`;
+      } else if (p2TotalScore > p1TotalScore) {
+        title.textContent = `👑 ${p2Name} विजयी हुआ!`;
       } else {
-        // Chat tab
-        document.getElementById('viewBattle').style.display = 'none';
-        document.getElementById('viewConfig').style.display = 'none';
-        document.getElementById('viewChat').style.display = 'flex';
-        document.getElementById('chatBadgeDot').style.display = 'none'; // clear unread badge
-
-        // Scroll chat to bottom
-        const container = document.getElementById('chatMsgContainer');
-        container.scrollTop = container.scrollHeight;
+        title.textContent = `🤝 रोमांचक टाई (Draw)!`;
       }
     }
 
-    function attachChatListener() {
-      const messagesRef = roomRef.child('chat_messages');
-      messagesRef.on('child_added', snapshot => {
-        const msg = snapshot.val();
-        renderChatBubble(msg);
-
-        // If user is currently in Arena tab, notify them!
-        if (currentTab !== 'chat') {
-          document.getElementById('chatBadgeDot').style.display = 'block';
-          sound.playChatPing();
-        }
+    function rematchGame() {
+      if (!roomRef) return;
+      roomRef.set({
+        pin: currentRoomPin,
+        status: 'config',
+        host: { name: roomData.host.name, online: true, cheats: 0, ready: false },
+        guest: { name: roomData.guest.name, online: true, cheats: 0, ready: false },
+        config: { qCount: 5 },
+        drafts: { host: [], guest: [] },
+        answers: { host: [], guest: [] },
+        evaluations: { host: [], guest: [] }
       });
     }
 
-    function renderChatBubble(msg) {
-      const container = document.getElementById('chatMsgContainer');
-      const isMine = (msg.senderRole === myRole);
-
-      const bubble = document.createElement('div');
-      bubble.className = `chat-bubble ${isMine ? 'mine' : 'theirs'}`;
-
-      let contentHtml = `<span class="chat-sender-name">${escapeHtml(msg.senderName)}</span>`;
-      if (msg.text) {
-        contentHtml += `<div>${escapeHtml(msg.text)}</div>`;
-      }
-      if (msg.image) {
-        contentHtml += `<img src="${msg.image}" class="chat-img-thumb" onclick="openImgModal('${msg.image}')" />`;
-      }
-
-      bubble.innerHTML = contentHtml;
-      container.appendChild(bubble);
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function sendChatMessage() {
-      const input = document.getElementById('chatTextInput');
-      const text = input.value.trim();
-      if (!text || !roomRef) return;
-
-      roomRef.child('chat_messages').push({
-        senderName: myName,
-        senderRole: myRole,
-        text: text,
-        timestamp: Date.now()
-      });
-
-      input.value = '';
-    }
-
-    /* Client-side Auto Image Compression to ~40KB (Zero Firebase Storage bill needed!) */
-    function handlePhotoUpload(event) {
-      const file = event.target.files[0];
-      if (!file || !roomRef) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const maxDim = 500;
-
-          if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Compress to JPEG 0.65
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
-
-          roomRef.child('chat_messages').push({
-            senderName: myName,
-            senderRole: myRole,
-            text: '',
-            image: compressedDataUrl,
-            timestamp: Date.now()
-          });
-
-          event.target.value = ''; // reset
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function openImgModal(src) {
-      document.getElementById('imgModalTarget').src = src;
-      document.getElementById('imgModal').style.display = 'flex';
-    }
-
-    function closeImgModal() {
-      document.getElementById('imgModal').style.display = 'none';
-    }
-
+    /* Helper */
     function escapeHtml(str) {
       if (!str) return '';
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    /* Auto-fill room from URL */
+    /* Startup & Auto-Resume */
     window.addEventListener('DOMContentLoaded', () => {
+      setupAntiCheat();
+
+      // Check URL param for Room Code
       const urlParams = new URLSearchParams(window.location.search);
       const urlRoom = urlParams.get('room');
       if (urlRoom) {
         document.getElementById('joinRoomPinInput').value = urlRoom;
-        showSmsToast(`रूम कोड ${urlRoom} दर्ज हो गया!`);
+      }
+
+      // Check LocalStorage Session Auto-Resume
+      const raw = localStorage.getItem(RESUME_KEY);
+      if (raw && db) {
+        try {
+          const s = JSON.parse(raw);
+          if (s.roomPin && s.myRole) {
+            currentRoomPin = s.roomPin;
+            myRole = s.myRole;
+            myName = s.myName;
+            myCheatCount = s.myCheatCount || 0;
+            roomRef = db.ref('study_duels/' + currentRoomPin);
+            attachRoomListener();
+          }
+        } catch(e) {}
       }
     });
   </script>
